@@ -1,0 +1,494 @@
+{
+  "$schema": "GrammarRules/v1.0",
+  "meta": {
+    "version": "1.0.0",
+    "description": "Decision tables for Subject-Verb Agreement in English",
+    "language": "en-US"
+  },
+
+  "input_variables": {
+    "subject": {
+      "person": {
+        "values": [1, 2, 3],
+        "description": "1=First (I/We), 2=Second (You), 3=Third (He/She/It/They)"
+      },
+      "number": {
+        "values": ["singular", "plural"],
+        "description": "Grammatical number of the subject"
+      }
+    },
+    "verb": {
+      "tense": {
+        "values": ["present", "past", "future", "present_progressive", "past_progressive"],
+        "description": "Temporal reference of the action"
+      },
+      "base_form": {
+        "description": "The infinitive form without 'to' (e.g., 'walk', 'eat', 'go')"
+      }
+    }
+  },
+
+  "output_requirements": {
+    "verb_form": {
+      "values": ["base", "s_form", "past", "past_participle", "present_participle"],
+      "description": "Which form of the verb to use"
+    },
+    "suffix": {
+      "values": [null, "-s", "-es", "-ed", "-ing"],
+      "description": "Suffix to apply to base form (null = no change)"
+    },
+    "auxiliary": {
+      "values": [null, "will", "am", "is", "are", "was", "were", "do", "does", "did"],
+      "description": "Helper verb required before main verb"
+    }
+  },
+
+  "agreement_rules": {
+    "present_tense": {
+      "description": "Simple Present: Subject performs habitual or general action",
+      "truth_table": [
+        {
+          "id": "PRES_1S",
+          "condition": { "person": 1, "number": "singular" },
+          "subject_examples": ["I"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": null
+          },
+          "example": "I walk"
+        },
+        {
+          "id": "PRES_2S",
+          "condition": { "person": 2, "number": "singular" },
+          "subject_examples": ["You"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": null
+          },
+          "example": "You walk"
+        },
+        {
+          "id": "PRES_3S",
+          "condition": { "person": 3, "number": "singular" },
+          "subject_examples": ["He", "She", "It"],
+          "output": {
+            "verb_form": "s_form",
+            "suffix": "-s",
+            "auxiliary": null
+          },
+          "example": "He walks",
+          "special_rules": [
+            { "pattern": "ends_with_s_x_z_ch_sh", "suffix": "-es", "example": "He watches" },
+            { "pattern": "ends_with_consonant_y", "suffix": "-ies", "example": "He flies" },
+            { "pattern": "irregular_have", "form": "has", "example": "She has" },
+            { "pattern": "irregular_be", "form": "is", "example": "He is" },
+            { "pattern": "irregular_do", "form": "does", "example": "She does" }
+          ]
+        },
+        {
+          "id": "PRES_1P",
+          "condition": { "person": 1, "number": "plural" },
+          "subject_examples": ["We"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": null
+          },
+          "example": "We walk"
+        },
+        {
+          "id": "PRES_2P",
+          "condition": { "person": 2, "number": "plural" },
+          "subject_examples": ["You (plural)"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": null
+          },
+          "example": "You walk"
+        },
+        {
+          "id": "PRES_3P",
+          "condition": { "person": 3, "number": "plural" },
+          "subject_examples": ["They"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": null
+          },
+          "example": "They walk"
+        }
+      ]
+    },
+
+    "past_tense": {
+      "description": "Simple Past: Action completed in the past",
+      "truth_table": [
+        {
+          "id": "PAST_ALL",
+          "condition": { "person": "*", "number": "*" },
+          "subject_examples": ["I", "You", "He", "She", "It", "We", "They"],
+          "output": {
+            "verb_form": "past",
+            "suffix": "-ed",
+            "auxiliary": null
+          },
+          "example": "I/You/He/We/They walked",
+          "special_rules": [
+            { "pattern": "irregular_verb", "suffix": null, "note": "Use irregular past form", "example": "I went, He ate" },
+            { "pattern": "ends_with_e", "suffix": "-d", "example": "lived" },
+            { "pattern": "ends_with_consonant_y", "suffix": "-ied", "example": "tried" },
+            { "pattern": "cvc_double", "suffix": "-ed", "note": "Double final consonant", "example": "stopped" }
+          ]
+        }
+      ]
+    },
+
+    "future_tense": {
+      "description": "Simple Future: Action will occur",
+      "truth_table": [
+        {
+          "id": "FUT_ALL",
+          "condition": { "person": "*", "number": "*" },
+          "subject_examples": ["I", "You", "He", "She", "It", "We", "They"],
+          "output": {
+            "verb_form": "base",
+            "suffix": null,
+            "auxiliary": "will"
+          },
+          "example": "I/You/He/We/They will walk"
+        }
+      ]
+    },
+
+    "present_progressive": {
+      "description": "Present Progressive: Action happening now",
+      "truth_table": [
+        {
+          "id": "PROG_PRES_1S",
+          "condition": { "person": 1, "number": "singular" },
+          "subject_examples": ["I"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "am"
+          },
+          "example": "I am walking"
+        },
+        {
+          "id": "PROG_PRES_2S",
+          "condition": { "person": 2, "number": "singular" },
+          "subject_examples": ["You"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "are"
+          },
+          "example": "You are walking"
+        },
+        {
+          "id": "PROG_PRES_3S",
+          "condition": { "person": 3, "number": "singular" },
+          "subject_examples": ["He", "She", "It"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "is"
+          },
+          "example": "He is walking"
+        },
+        {
+          "id": "PROG_PRES_1P",
+          "condition": { "person": 1, "number": "plural" },
+          "subject_examples": ["We"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "are"
+          },
+          "example": "We are walking"
+        },
+        {
+          "id": "PROG_PRES_2P",
+          "condition": { "person": 2, "number": "plural" },
+          "subject_examples": ["You (plural)"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "are"
+          },
+          "example": "You are walking"
+        },
+        {
+          "id": "PROG_PRES_3P",
+          "condition": { "person": 3, "number": "plural" },
+          "subject_examples": ["They"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "are"
+          },
+          "example": "They are walking"
+        }
+      ]
+    },
+
+    "past_progressive": {
+      "description": "Past Progressive: Action was happening",
+      "truth_table": [
+        {
+          "id": "PROG_PAST_1S",
+          "condition": { "person": 1, "number": "singular" },
+          "subject_examples": ["I"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "was"
+          },
+          "example": "I was walking"
+        },
+        {
+          "id": "PROG_PAST_2S",
+          "condition": { "person": 2, "number": "singular" },
+          "subject_examples": ["You"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "were"
+          },
+          "example": "You were walking"
+        },
+        {
+          "id": "PROG_PAST_3S",
+          "condition": { "person": 3, "number": "singular" },
+          "subject_examples": ["He", "She", "It"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "was"
+          },
+          "example": "He was walking"
+        },
+        {
+          "id": "PROG_PAST_1P",
+          "condition": { "person": 1, "number": "plural" },
+          "subject_examples": ["We"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "were"
+          },
+          "example": "We were walking"
+        },
+        {
+          "id": "PROG_PAST_2P",
+          "condition": { "person": 2, "number": "plural" },
+          "subject_examples": ["You (plural)"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "were"
+          },
+          "example": "You were walking"
+        },
+        {
+          "id": "PROG_PAST_3P",
+          "condition": { "person": 3, "number": "plural" },
+          "subject_examples": ["They"],
+          "output": {
+            "verb_form": "present_participle",
+            "suffix": "-ing",
+            "auxiliary": "were"
+          },
+          "example": "They were walking"
+        }
+      ]
+    }
+  },
+
+  "condensed_decision_matrix": {
+    "description": "Flattened lookup table: [person][number][tense] -> output",
+    "matrix": {
+      "1": {
+        "singular": {
+          "present":             { "form": "base",    "aux": null,   "example": "I walk" },
+          "past":                { "form": "past",    "aux": null,   "example": "I walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "I will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "am",   "example": "I am walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "was",  "example": "I was walking" }
+        },
+        "plural": {
+          "present":             { "form": "base",    "aux": null,   "example": "We walk" },
+          "past":                { "form": "past",    "aux": null,   "example": "We walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "We will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "are",  "example": "We are walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "were", "example": "We were walking" }
+        }
+      },
+      "2": {
+        "singular": {
+          "present":             { "form": "base",    "aux": null,   "example": "You walk" },
+          "past":                { "form": "past",    "aux": null,   "example": "You walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "You will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "are",  "example": "You are walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "were", "example": "You were walking" }
+        },
+        "plural": {
+          "present":             { "form": "base",    "aux": null,   "example": "You walk" },
+          "past":                { "form": "past",    "aux": null,   "example": "You walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "You will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "are",  "example": "You are walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "were", "example": "You were walking" }
+        }
+      },
+      "3": {
+        "singular": {
+          "present":             { "form": "s_form",  "aux": null,   "example": "He walks" },
+          "past":                { "form": "past",    "aux": null,   "example": "He walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "He will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "is",   "example": "He is walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "was",  "example": "He was walking" }
+        },
+        "plural": {
+          "present":             { "form": "base",    "aux": null,   "example": "They walk" },
+          "past":                { "form": "past",    "aux": null,   "example": "They walked" },
+          "future":              { "form": "base",    "aux": "will", "example": "They will walk" },
+          "present_progressive": { "form": "-ing",    "aux": "are",  "example": "They are walking" },
+          "past_progressive":    { "form": "-ing",    "aux": "were", "example": "They were walking" }
+        }
+      }
+    }
+  },
+
+  "negation_rules": {
+    "description": "How to form negative sentences",
+    "truth_table": [
+      {
+        "tense": "present",
+        "condition": { "person": 3, "number": "singular" },
+        "output": { "auxiliary": "does", "negation": "not", "verb_form": "base" },
+        "example": "He does not walk"
+      },
+      {
+        "tense": "present",
+        "condition": { "person": "*", "number": "*", "except": { "person": 3, "number": "singular" } },
+        "output": { "auxiliary": "do", "negation": "not", "verb_form": "base" },
+        "example": "I do not walk / They do not walk"
+      },
+      {
+        "tense": "past",
+        "condition": { "person": "*", "number": "*" },
+        "output": { "auxiliary": "did", "negation": "not", "verb_form": "base" },
+        "example": "He did not walk"
+      },
+      {
+        "tense": "future",
+        "condition": { "person": "*", "number": "*" },
+        "output": { "auxiliary": "will", "negation": "not", "verb_form": "base" },
+        "example": "He will not walk"
+      }
+    ]
+  },
+
+  "question_rules": {
+    "description": "How to form interrogative sentences",
+    "truth_table": [
+      {
+        "tense": "present",
+        "condition": { "person": 3, "number": "singular" },
+        "output": { "auxiliary": "does", "position": "start", "verb_form": "base" },
+        "example": "Does he walk?"
+      },
+      {
+        "tense": "present",
+        "condition": { "person": "*", "number": "*", "except": { "person": 3, "number": "singular" } },
+        "output": { "auxiliary": "do", "position": "start", "verb_form": "base" },
+        "example": "Do they walk?"
+      },
+      {
+        "tense": "past",
+        "condition": { "person": "*", "number": "*" },
+        "output": { "auxiliary": "did", "position": "start", "verb_form": "base" },
+        "example": "Did he walk?"
+      }
+    ]
+  },
+
+  "irregular_verbs": {
+    "description": "Common irregular verbs with their forms",
+    "verbs": {
+      "be": {
+        "base": "be",
+        "present": { "1s": "am", "2s": "are", "3s": "is", "1p": "are", "2p": "are", "3p": "are" },
+        "past": { "1s": "was", "2s": "were", "3s": "was", "1p": "were", "2p": "were", "3p": "were" },
+        "past_participle": "been",
+        "present_participle": "being"
+      },
+      "have": {
+        "base": "have",
+        "present": { "1s": "have", "2s": "have", "3s": "has", "1p": "have", "2p": "have", "3p": "have" },
+        "past": { "*": "had" },
+        "past_participle": "had",
+        "present_participle": "having"
+      },
+      "do": {
+        "base": "do",
+        "present": { "1s": "do", "2s": "do", "3s": "does", "1p": "do", "2p": "do", "3p": "do" },
+        "past": { "*": "did" },
+        "past_participle": "done",
+        "present_participle": "doing"
+      },
+      "go": {
+        "base": "go",
+        "s_form": "goes",
+        "past": "went",
+        "past_participle": "gone",
+        "present_participle": "going"
+      },
+      "eat": {
+        "base": "eat",
+        "s_form": "eats",
+        "past": "ate",
+        "past_participle": "eaten",
+        "present_participle": "eating"
+      },
+      "get": {
+        "base": "get",
+        "s_form": "gets",
+        "past": "got",
+        "past_participle": "gotten",
+        "present_participle": "getting"
+      }
+    }
+  },
+
+  "implementation_logic": {
+    "pseudocode": [
+      "function getVerbForm(subject, verb, tense):",
+      "  1. Extract person and number from subject",
+      "  2. Lookup rule in condensed_decision_matrix[person][number][tense]",
+      "  3. If rule.form === 's_form':",
+      "       - Check if verb is irregular -> use irregular.s_form",
+      "       - Else apply suffix rules (-s, -es, -ies)",
+      "  4. If rule.form === 'past':",
+      "       - Check if verb is irregular -> use irregular.past",
+      "       - Else apply suffix rules (-ed, -d, -ied)",
+      "  5. If rule.aux is not null:",
+      "       - Prepend auxiliary verb",
+      "  6. Return { auxiliary, verb_form }"
+    ],
+    "validation_pseudocode": [
+      "function validateAgreement(subject, verb):",
+      "  1. Get subject.person and subject.number",
+      "  2. Get expected form from decision_matrix",
+      "  3. Check if verb.requires_s_form matches expected:",
+      "       - If subject is 3rd person singular AND present tense:",
+      "           - verb MUST have requires_s_form === true",
+      "       - Else:",
+      "           - verb MUST have requires_s_form === false",
+      "  4. Return { isValid, error_message }"
+    ]
+  }
+}

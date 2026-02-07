@@ -1,0 +1,472 @@
+{
+  "$schema": "SentenceFSM/v1.0",
+  "meta": {
+    "version": "1.0.0",
+    "description": "Finite State Machine for SVO Sentence Construction",
+    "grammar_model": "Subject-Verb-Object (SVO)"
+  },
+
+  "states": {
+    "STATE_EMPTY": {
+      "id": "S0",
+      "name": "STATE_EMPTY",
+      "description": "Initial state - no words in sentence",
+      "is_start": true,
+      "is_accepting": false,
+      "ui_hint": "Start with a Subject (I, You, He, She, We, They)"
+    },
+    "STATE_SUBJECT_LOCKED": {
+      "id": "S1",
+      "name": "STATE_SUBJECT_LOCKED",
+      "description": "Subject has been added, awaiting verb",
+      "is_start": false,
+      "is_accepting": false,
+      "ui_hint": "Add a Verb (grab, go, eat, stop...)"
+    },
+    "STATE_VERB_LOCKED_TRANS": {
+      "id": "S2a",
+      "name": "STATE_VERB_LOCKED_TRANS",
+      "description": "Transitive verb added, requires object",
+      "is_start": false,
+      "is_accepting": false,
+      "ui_hint": "Add an Object (apple, ball, food...)"
+    },
+    "STATE_VERB_LOCKED_INTRANS": {
+      "id": "S2b",
+      "name": "STATE_VERB_LOCKED_INTRANS",
+      "description": "Intransitive verb added, sentence complete",
+      "is_start": false,
+      "is_accepting": true,
+      "ui_hint": "Sentence complete! (Clear to start new)"
+    },
+    "STATE_OBJECT_LOCKED": {
+      "id": "S3",
+      "name": "STATE_OBJECT_LOCKED",
+      "description": "Object added after transitive verb, sentence complete",
+      "is_start": false,
+      "is_accepting": true,
+      "ui_hint": "Sentence complete! (Clear to start new)"
+    },
+    "STATE_ERROR": {
+      "id": "ERR",
+      "name": "STATE_ERROR",
+      "description": "Invalid input received",
+      "is_start": false,
+      "is_accepting": false,
+      "ui_hint": "Invalid input - see error message"
+    }
+  },
+
+  "input_alphabet": {
+    "SUBJECT": {
+      "description": "Pronouns and noun phrases that perform action",
+      "examples": ["I", "You", "He", "She", "We", "They"],
+      "gesture_ids": ["GST_FIST", "GST_POINT", "GST_THREE_FINGERS"]
+    },
+    "VERB_TRANSITIVE": {
+      "description": "Action words that require an object",
+      "examples": ["grab", "eat", "want", "take"],
+      "gesture_ids": ["GST_PINCH"]
+    },
+    "VERB_INTRANSITIVE": {
+      "description": "Action words that don't take an object",
+      "examples": ["go", "stop", "sleep", "arrive"],
+      "gesture_ids": ["GST_OPEN_PALM"]
+    },
+    "OBJECT": {
+      "description": "Nouns that receive the action",
+      "examples": ["apple", "ball", "water", "food"],
+      "gesture_ids": ["GST_FLAT_HAND_DOWN"]
+    },
+    "MODIFIER": {
+      "description": "Words that modify other elements",
+      "examples": ["plural", "quickly", "very"],
+      "gesture_ids": ["GST_TWO_FINGERS"]
+    },
+    "CLEAR": {
+      "description": "Reset sentence and return to start",
+      "examples": ["[clear button]"],
+      "gesture_ids": []
+    }
+  },
+
+  "transition_table": {
+    "description": "δ(current_state, input) → next_state",
+    "format": "{ from_state, input, to_state, action, condition }",
+    "transitions": [
+      {
+        "id": "T01",
+        "from": "STATE_EMPTY",
+        "input": "SUBJECT",
+        "to": "STATE_SUBJECT_LOCKED",
+        "action": "APPEND_WORD",
+        "condition": null,
+        "description": "Add subject to empty sentence"
+      },
+      {
+        "id": "T02",
+        "from": "STATE_EMPTY",
+        "input": "VERB_TRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_VERB_BEFORE_SUBJECT",
+        "description": "Cannot start sentence with verb"
+      },
+      {
+        "id": "T03",
+        "from": "STATE_EMPTY",
+        "input": "VERB_INTRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_VERB_BEFORE_SUBJECT",
+        "description": "Cannot start sentence with verb"
+      },
+      {
+        "id": "T04",
+        "from": "STATE_EMPTY",
+        "input": "OBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_OBJECT_BEFORE_SUBJECT",
+        "description": "Cannot start sentence with object"
+      },
+      {
+        "id": "T05",
+        "from": "STATE_EMPTY",
+        "input": "MODIFIER",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_MODIFIER_NO_TARGET",
+        "description": "Modifier needs something to modify"
+      },
+      {
+        "id": "T10",
+        "from": "STATE_SUBJECT_LOCKED",
+        "input": "VERB_TRANSITIVE",
+        "to": "STATE_VERB_LOCKED_TRANS",
+        "action": "APPEND_WORD",
+        "condition": "VALIDATE_AGREEMENT",
+        "description": "Add transitive verb after subject"
+      },
+      {
+        "id": "T11",
+        "from": "STATE_SUBJECT_LOCKED",
+        "input": "VERB_INTRANSITIVE",
+        "to": "STATE_VERB_LOCKED_INTRANS",
+        "action": "APPEND_WORD",
+        "condition": "VALIDATE_AGREEMENT",
+        "description": "Add intransitive verb after subject (sentence complete)"
+      },
+      {
+        "id": "T12",
+        "from": "STATE_SUBJECT_LOCKED",
+        "input": "SUBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_DUPLICATE_SUBJECT",
+        "description": "Cannot have two subjects"
+      },
+      {
+        "id": "T13",
+        "from": "STATE_SUBJECT_LOCKED",
+        "input": "OBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_OBJECT_BEFORE_VERB",
+        "description": "Object must come after verb"
+      },
+      {
+        "id": "T14",
+        "from": "STATE_SUBJECT_LOCKED",
+        "input": "MODIFIER",
+        "to": "STATE_SUBJECT_LOCKED",
+        "action": "APPEND_WORD",
+        "condition": "MODIFIER_APPLIES_TO_SUBJECT",
+        "description": "Modifier can describe subject (e.g., 'They [plural]')"
+      },
+      {
+        "id": "T20",
+        "from": "STATE_VERB_LOCKED_TRANS",
+        "input": "OBJECT",
+        "to": "STATE_OBJECT_LOCKED",
+        "action": "APPEND_WORD",
+        "condition": null,
+        "description": "Add object after transitive verb (sentence complete)"
+      },
+      {
+        "id": "T21",
+        "from": "STATE_VERB_LOCKED_TRANS",
+        "input": "SUBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SUBJECT_AFTER_VERB",
+        "description": "Subject cannot come after verb"
+      },
+      {
+        "id": "T22",
+        "from": "STATE_VERB_LOCKED_TRANS",
+        "input": "VERB_TRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_DUPLICATE_VERB",
+        "description": "Cannot have two main verbs"
+      },
+      {
+        "id": "T23",
+        "from": "STATE_VERB_LOCKED_TRANS",
+        "input": "VERB_INTRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_DUPLICATE_VERB",
+        "description": "Cannot have two main verbs"
+      },
+      {
+        "id": "T24",
+        "from": "STATE_VERB_LOCKED_TRANS",
+        "input": "MODIFIER",
+        "to": "STATE_VERB_LOCKED_TRANS",
+        "action": "APPEND_WORD",
+        "condition": "MODIFIER_APPLIES_TO_VERB",
+        "description": "Adverb can modify verb"
+      },
+      {
+        "id": "T30",
+        "from": "STATE_VERB_LOCKED_INTRANS",
+        "input": "OBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_OBJECT_AFTER_INTRANSITIVE",
+        "description": "Intransitive verb cannot take object"
+      },
+      {
+        "id": "T31",
+        "from": "STATE_VERB_LOCKED_INTRANS",
+        "input": "SUBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T32",
+        "from": "STATE_VERB_LOCKED_INTRANS",
+        "input": "VERB_TRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T33",
+        "from": "STATE_VERB_LOCKED_INTRANS",
+        "input": "VERB_INTRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T40",
+        "from": "STATE_OBJECT_LOCKED",
+        "input": "SUBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T41",
+        "from": "STATE_OBJECT_LOCKED",
+        "input": "VERB_TRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T42",
+        "from": "STATE_OBJECT_LOCKED",
+        "input": "VERB_INTRANSITIVE",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T43",
+        "from": "STATE_OBJECT_LOCKED",
+        "input": "OBJECT",
+        "to": "STATE_ERROR",
+        "action": "REJECT",
+        "error_code": "ERR_SENTENCE_COMPLETE",
+        "description": "Sentence is complete"
+      },
+      {
+        "id": "T44",
+        "from": "STATE_OBJECT_LOCKED",
+        "input": "MODIFIER",
+        "to": "STATE_OBJECT_LOCKED",
+        "action": "APPEND_WORD",
+        "condition": "MODIFIER_APPLIES_TO_OBJECT",
+        "description": "Modifier can describe object"
+      },
+      {
+        "id": "T_CLEAR_ANY",
+        "from": "*",
+        "input": "CLEAR",
+        "to": "STATE_EMPTY",
+        "action": "RESET",
+        "condition": null,
+        "description": "Clear resets to empty state from anywhere"
+      }
+    ]
+  },
+
+  "error_codes": {
+    "ERR_VERB_BEFORE_SUBJECT": {
+      "code": "E001",
+      "message": "Sentence must start with a Subject",
+      "suggestion": "Add a Subject first (I, You, He, She, We, They)",
+      "severity": "BLOCKING"
+    },
+    "ERR_OBJECT_BEFORE_SUBJECT": {
+      "code": "E002",
+      "message": "Cannot start sentence with an Object",
+      "suggestion": "Add a Subject first, then Verb, then Object",
+      "severity": "BLOCKING"
+    },
+    "ERR_OBJECT_BEFORE_VERB": {
+      "code": "E003",
+      "message": "Object must come after a Verb",
+      "suggestion": "Add a Verb first (grab, eat, want...)",
+      "severity": "BLOCKING"
+    },
+    "ERR_DUPLICATE_SUBJECT": {
+      "code": "E004",
+      "message": "Sentence already has a Subject",
+      "suggestion": "Add a Verb next, not another Subject",
+      "severity": "BLOCKING"
+    },
+    "ERR_DUPLICATE_VERB": {
+      "code": "E005",
+      "message": "Sentence already has a Verb",
+      "suggestion": "Add an Object (if needed) or clear to start over",
+      "severity": "BLOCKING"
+    },
+    "ERR_SUBJECT_AFTER_VERB": {
+      "code": "E006",
+      "message": "Cannot add Subject after Verb",
+      "suggestion": "Add an Object instead, or clear to start over",
+      "severity": "BLOCKING"
+    },
+    "ERR_OBJECT_AFTER_INTRANSITIVE": {
+      "code": "E007",
+      "message": "This verb doesn't take an Object",
+      "suggestion": "Sentence is complete. Clear to start a new one.",
+      "severity": "BLOCKING"
+    },
+    "ERR_MODIFIER_NO_TARGET": {
+      "code": "E008",
+      "message": "Modifier needs something to modify",
+      "suggestion": "Add a Subject first, then you can modify it",
+      "severity": "BLOCKING"
+    },
+    "ERR_SENTENCE_COMPLETE": {
+      "code": "E009",
+      "message": "Sentence is already complete",
+      "suggestion": "Clear to start a new sentence",
+      "severity": "INFO"
+    },
+    "ERR_AGREEMENT_VIOLATION": {
+      "code": "E010",
+      "message": "Subject-Verb agreement error",
+      "suggestion": "Use the correct verb form for this subject",
+      "severity": "BLOCKING"
+    }
+  },
+
+  "diagram_ascii": {
+    "description": "ASCII representation of the FSM",
+    "diagram": [
+      "                                    FINITE STATE MACHINE",
+      "                                   Sentence Construction",
+      "",
+      "     ┌─────────────────────────────────────────────────────────────────────────┐",
+      "     │                                                                         │",
+      "     │   ┌──────────────┐      SUBJECT      ┌───────────────────┐              │",
+      "     │   │              │ ─────────────────▶│                   │              │",
+      "     │   │ STATE_EMPTY  │                   │ STATE_SUBJECT_    │              │",
+      "     │   │     (S0)     │                   │    LOCKED (S1)    │              │",
+      "     │   │   [START]    │ ◀── CLEAR ───────│                   │              │",
+      "     │   └──────────────┘                   └───────────────────┘              │",
+      "     │          │                                    │                          │",
+      "     │          │ VERB/OBJECT                        │ VERB                     │",
+      "     │          ▼                                    ▼                          │",
+      "     │   ┌──────────────┐               ┌─────────────────────────┐            │",
+      "     │   │ STATE_ERROR  │               │   VERB_TRANSITIVE?      │            │",
+      "     │   │    (ERR)     │               │          │              │            │",
+      "     │   └──────────────┘               │    YES   │    NO        │            │",
+      "     │                                  │    ▼     │    ▼         │            │",
+      "     │                           ┌──────┴────┐  ┌──┴──────────┐   │            │",
+      "     │                           │ STATE_    │  │ STATE_VERB_ │   │            │",
+      "     │                           │ VERB_     │  │ LOCKED_     │   │            │",
+      "     │                           │ LOCKED_   │  │ INTRANS     │   │            │",
+      "     │                           │ TRANS     │  │ (S2b)       │   │            │",
+      "     │                           │ (S2a)     │  │ [ACCEPT]    │   │            │",
+      "     │                           └───────────┘  └─────────────┘   │            │",
+      "     │                                  │                         │            │",
+      "     │                                  │ OBJECT                  │            │",
+      "     │                                  ▼                         │            │",
+      "     │                           ┌─────────────┐                  │            │",
+      "     │                           │ STATE_      │                  │            │",
+      "     │                           │ OBJECT_     │◀── CLEAR ───────┘            │",
+      "     │                           │ LOCKED (S3) │                               │",
+      "     │                           │ [ACCEPT]    │                               │",
+      "     │                           └─────────────┘                               │",
+      "     │                                                                         │",
+      "     │   Legend: [START] = Initial State    [ACCEPT] = Valid Complete Sentence│",
+      "     └─────────────────────────────────────────────────────────────────────────┘"
+    ]
+  },
+
+  "condensed_transition_matrix": {
+    "description": "Quick lookup: matrix[state][input] → {next_state, error_code}",
+    "matrix": {
+      "STATE_EMPTY": {
+        "SUBJECT":          { "next": "STATE_SUBJECT_LOCKED",    "error": null },
+        "VERB_TRANSITIVE":  { "next": "STATE_ERROR",             "error": "ERR_VERB_BEFORE_SUBJECT" },
+        "VERB_INTRANSITIVE":{ "next": "STATE_ERROR",             "error": "ERR_VERB_BEFORE_SUBJECT" },
+        "OBJECT":           { "next": "STATE_ERROR",             "error": "ERR_OBJECT_BEFORE_SUBJECT" },
+        "MODIFIER":         { "next": "STATE_ERROR",             "error": "ERR_MODIFIER_NO_TARGET" }
+      },
+      "STATE_SUBJECT_LOCKED": {
+        "SUBJECT":          { "next": "STATE_ERROR",             "error": "ERR_DUPLICATE_SUBJECT" },
+        "VERB_TRANSITIVE":  { "next": "STATE_VERB_LOCKED_TRANS", "error": null, "validate": "AGREEMENT" },
+        "VERB_INTRANSITIVE":{ "next": "STATE_VERB_LOCKED_INTRANS","error": null, "validate": "AGREEMENT" },
+        "OBJECT":           { "next": "STATE_ERROR",             "error": "ERR_OBJECT_BEFORE_VERB" },
+        "MODIFIER":         { "next": "STATE_SUBJECT_LOCKED",    "error": null }
+      },
+      "STATE_VERB_LOCKED_TRANS": {
+        "SUBJECT":          { "next": "STATE_ERROR",             "error": "ERR_SUBJECT_AFTER_VERB" },
+        "VERB_TRANSITIVE":  { "next": "STATE_ERROR",             "error": "ERR_DUPLICATE_VERB" },
+        "VERB_INTRANSITIVE":{ "next": "STATE_ERROR",             "error": "ERR_DUPLICATE_VERB" },
+        "OBJECT":           { "next": "STATE_OBJECT_LOCKED",     "error": null },
+        "MODIFIER":         { "next": "STATE_VERB_LOCKED_TRANS", "error": null }
+      },
+      "STATE_VERB_LOCKED_INTRANS": {
+        "SUBJECT":          { "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "VERB_TRANSITIVE":  { "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "VERB_INTRANSITIVE":{ "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "OBJECT":           { "next": "STATE_ERROR",             "error": "ERR_OBJECT_AFTER_INTRANSITIVE" },
+        "MODIFIER":         { "next": "STATE_VERB_LOCKED_INTRANS","error": null }
+      },
+      "STATE_OBJECT_LOCKED": {
+        "SUBJECT":          { "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "VERB_TRANSITIVE":  { "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "VERB_INTRANSITIVE":{ "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "OBJECT":           { "next": "STATE_ERROR",             "error": "ERR_SENTENCE_COMPLETE" },
+        "MODIFIER":         { "next": "STATE_OBJECT_LOCKED",     "error": null }
+      }
+    }
+  }
+}

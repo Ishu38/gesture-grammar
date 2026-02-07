@@ -1,0 +1,500 @@
+{
+  "$schema": "GestureLexicon/v1.0",
+  "meta": {
+    "version": "1.0.0",
+    "description": "Physical-to-Abstract mapping for Gesture Grammar system",
+    "landmark_reference": {
+      "WRIST": 0,
+      "THUMB": { "CMC": 1, "MCP": 2, "IP": 3, "TIP": 4 },
+      "INDEX": { "MCP": 5, "PIP": 6, "DIP": 7, "TIP": 8 },
+      "MIDDLE": { "MCP": 9, "PIP": 10, "DIP": 11, "TIP": 12 },
+      "RING": { "MCP": 13, "PIP": 14, "DIP": 15, "TIP": 16 },
+      "PINKY": { "MCP": 17, "PIP": 18, "DIP": 19, "TIP": 20 }
+    },
+    "constraint_operators": {
+      "<": "less than (tip above joint in screen coords = extended)",
+      ">": "greater than (tip below joint in screen coords = curled)",
+      "distance <": "Euclidean distance between two points less than threshold",
+      "distance >": "Euclidean distance between two points greater than threshold",
+      "velocity >": "Movement speed exceeds threshold (for dynamic gestures)",
+      "direction": "Movement direction vector"
+    }
+  },
+
+  "gestures": [
+    {
+      "gesture_id": "GST_OPEN_PALM",
+      "human_description": "All five fingers fully extended, palm facing camera",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_extended": {
+            "landmark_a": "thumb_tip_y",
+            "operator": "<",
+            "landmark_b": "thumb_ip_y"
+          },
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_extended": {
+            "landmark_a": "ring_tip_y",
+            "operator": "<",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_extended": {
+            "landmark_a": "pinky_tip_y",
+            "operator": "<",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "STOP",
+        "concept": "NEGATION",
+        "type": "COMMAND",
+        "english_gloss": "Stop / No / Don't",
+        "usage_context": "Sentence terminator or negation marker"
+      },
+      "priority": 2,
+      "notes": "Universal 'stop' gesture recognized across cultures"
+    },
+
+    {
+      "gesture_id": "GST_FIST",
+      "human_description": "All fingers curled into palm, forming a closed fist",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "index_curled": {
+            "landmark_a": "index_tip_y",
+            "operator": ">",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_curled": {
+            "landmark_a": "middle_tip_y",
+            "operator": ">",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_I",
+        "concept": "FIRST_PERSON_SINGULAR",
+        "type": "SUBJECT",
+        "english_gloss": "I / Me / Self",
+        "usage_context": "First person singular pronoun",
+        "grammatical_properties": {
+          "person": 1,
+          "number": "singular"
+        }
+      },
+      "priority": 2,
+      "notes": "Fist pointing to self represents 'I' - the individual"
+    },
+
+    {
+      "gesture_id": "GST_TWO_FINGERS",
+      "human_description": "Index and Middle finger extended upward (peace/victory sign), Thumb, Ring and Pinky curled",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "PLURAL",
+        "concept": "PLURALITY",
+        "type": "MODIFIER",
+        "english_gloss": "Plural / Multiple / -s suffix",
+        "usage_context": "Modifies preceding noun to indicate plurality",
+        "grammatical_properties": {
+          "number": "plural",
+          "morphological_role": "suffix"
+        }
+      },
+      "priority": 3,
+      "notes": "Two fingers represent 'more than one' - a visual quantity marker"
+    },
+
+    {
+      "gesture_id": "GST_PINCH",
+      "human_description": "Thumb tip and Index finger tip touching or very close together, other fingers relaxed",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_index_proximity": {
+            "landmark_a": "thumb_tip",
+            "operator": "distance <",
+            "landmark_b": "index_tip",
+            "threshold": 0.05
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "GRAB",
+        "concept": "ACQUISITION",
+        "type": "VERB",
+        "english_gloss": "Grab / Take / Get",
+        "usage_context": "Transitive verb requiring an object",
+        "grammatical_properties": {
+          "transitivity": "transitive",
+          "requires_object": true
+        }
+      },
+      "priority": 1,
+      "notes": "Pinching motion mimics grabbing a small object"
+    },
+
+    {
+      "gesture_id": "GST_SWIPE_RIGHT",
+      "human_description": "Open hand moving horizontally from left to right with velocity",
+      "landmark_constraints": {
+        "type": "DYNAMIC",
+        "conditions": {
+          "hand_open": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "horizontal_movement": {
+            "landmark_a": "wrist_x",
+            "operator": "velocity >",
+            "threshold": 0.15,
+            "direction": "positive_x",
+            "time_window_ms": 300
+          }
+        },
+        "logical_join": "AND",
+        "temporal_requirements": {
+          "min_duration_ms": 100,
+          "max_duration_ms": 500
+        }
+      },
+      "semantic_mapping": {
+        "grammar_id": "ACTIVE_VOICE",
+        "concept": "VOICE_ACTIVE",
+        "type": "GRAMMATICAL_MARKER",
+        "english_gloss": "[Active Voice Marker]",
+        "usage_context": "Indicates Subject performs action (S does V to O)",
+        "grammatical_properties": {
+          "voice": "active",
+          "agent_position": "subject"
+        }
+      },
+      "priority": 4,
+      "notes": "Forward motion represents active agency - subject initiates action"
+    },
+
+    {
+      "gesture_id": "GST_SWIPE_LEFT",
+      "human_description": "Open hand moving horizontally from right to left with velocity",
+      "landmark_constraints": {
+        "type": "DYNAMIC",
+        "conditions": {
+          "hand_open": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "horizontal_movement": {
+            "landmark_a": "wrist_x",
+            "operator": "velocity >",
+            "threshold": 0.15,
+            "direction": "negative_x",
+            "time_window_ms": 300
+          }
+        },
+        "logical_join": "AND",
+        "temporal_requirements": {
+          "min_duration_ms": 100,
+          "max_duration_ms": 500
+        }
+      },
+      "semantic_mapping": {
+        "grammar_id": "PASSIVE_VOICE",
+        "concept": "VOICE_PASSIVE",
+        "type": "GRAMMATICAL_MARKER",
+        "english_gloss": "[Passive Voice Marker]",
+        "usage_context": "Indicates Subject receives action (S is V-ed by O)",
+        "grammatical_properties": {
+          "voice": "passive",
+          "agent_position": "object"
+        }
+      },
+      "priority": 4,
+      "notes": "Backward motion represents receiving action - subject is acted upon"
+    },
+
+    {
+      "gesture_id": "GST_POINT",
+      "human_description": "Index finger extended pointing forward, all other fingers curled",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "middle_curled": {
+            "landmark_a": "middle_tip_y",
+            "operator": ">",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_YOU",
+        "concept": "SECOND_PERSON_SINGULAR",
+        "type": "SUBJECT",
+        "english_gloss": "You",
+        "usage_context": "Second person singular pronoun - addressing another",
+        "grammatical_properties": {
+          "person": 2,
+          "number": "singular"
+        }
+      },
+      "priority": 3,
+      "notes": "Pointing gesture naturally indicates 'you' - the addressee"
+    },
+
+    {
+      "gesture_id": "GST_THREE_FINGERS",
+      "human_description": "Index, Middle, and Ring fingers extended, Thumb and Pinky curled",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_extended": {
+            "landmark_a": "ring_tip_y",
+            "operator": "<",
+            "landmark_b": "ring_pip_y"
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_HE",
+        "concept": "THIRD_PERSON_SINGULAR",
+        "type": "SUBJECT",
+        "english_gloss": "He / She / It",
+        "usage_context": "Third person singular pronoun",
+        "grammatical_properties": {
+          "person": 3,
+          "number": "singular"
+        }
+      },
+      "priority": 3,
+      "notes": "Three fingers = third person reference"
+    },
+
+    {
+      "gesture_id": "GST_THUMBS_UP",
+      "human_description": "Thumb extended upward, all other fingers curled into palm",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_extended_up": {
+            "landmark_a": "thumb_tip_y",
+            "operator": "<",
+            "landmark_b": "thumb_mcp_y"
+          },
+          "thumb_above_index": {
+            "landmark_a": "thumb_tip_y",
+            "operator": "<",
+            "landmark_b": "index_mcp_y"
+          },
+          "index_curled": {
+            "landmark_a": "index_tip_y",
+            "operator": ">",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_curled": {
+            "landmark_a": "middle_tip_y",
+            "operator": ">",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "AFFIRMATIVE",
+        "concept": "AFFIRMATION",
+        "type": "MODIFIER",
+        "english_gloss": "Yes / Agree / Confirm",
+        "usage_context": "Affirms or confirms preceding statement"
+      },
+      "priority": 3,
+      "notes": "Universal positive affirmation gesture"
+    },
+
+    {
+      "gesture_id": "GST_FLAT_HAND_DOWN",
+      "human_description": "Open palm facing down, fingers together, horizontal position",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "palm_down": {
+            "landmark_a": "middle_tip_z",
+            "operator": "<",
+            "landmark_b": "wrist_z"
+          },
+          "horizontal_hand": {
+            "landmark_a": "index_tip_y",
+            "operator": "~=",
+            "landmark_b": "pinky_tip_y",
+            "tolerance": 0.05
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "OBJECT_APPLE",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "Apple / Food item",
+        "usage_context": "Represents a concrete object (noun)",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": true
+        }
+      },
+      "priority": 4,
+      "notes": "Flat surface represents placing/presenting an object"
+    }
+  ],
+
+  "type_hierarchy": {
+    "SUBJECT": {
+      "description": "Noun phrases that perform the action",
+      "grammar_ids": ["SUBJECT_I", "SUBJECT_YOU", "SUBJECT_HE", "SUBJECT_SHE", "SUBJECT_WE", "SUBJECT_THEY"]
+    },
+    "VERB": {
+      "description": "Action words",
+      "grammar_ids": ["GRAB", "GO", "EAT", "WANT", "STOP"]
+    },
+    "OBJECT": {
+      "description": "Noun phrases that receive the action",
+      "grammar_ids": ["OBJECT_APPLE", "OBJECT_BALL", "OBJECT_WATER", "OBJECT_FOOD", "OBJECT_BOOK"]
+    },
+    "MODIFIER": {
+      "description": "Words that modify other elements",
+      "grammar_ids": ["PLURAL", "AFFIRMATIVE"]
+    },
+    "GRAMMATICAL_MARKER": {
+      "description": "Markers that indicate grammatical structure",
+      "grammar_ids": ["ACTIVE_VOICE", "PASSIVE_VOICE"]
+    },
+    "COMMAND": {
+      "description": "Imperative/control gestures",
+      "grammar_ids": ["STOP"]
+    }
+  },
+
+  "detection_notes": {
+    "priority_system": "Lower number = higher priority. Check pinch (1) before open palm (2) to avoid misclassification.",
+    "static_vs_dynamic": "STATIC gestures require pose to be held. DYNAMIC gestures require motion tracking over time.",
+    "threshold_units": "All distance thresholds are in normalized coordinates (0.0 - 1.0 of frame dimensions).",
+    "y_axis_convention": "In screen coordinates, Y increases downward. So tip_y < pip_y means finger is extended upward."
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "$schema": "CurriculumSchema/v1.0",
+  "meta": {
+    "version": "1.0.0",
+    "description": "Schema definition for Gesture Grammar curriculum lessons",
+    "author": "Gesture Grammar Team"
+  },
+
+  "schema_definition": {
+    "lesson": {
+      "type": "object",
+      "required": ["level_id", "title", "difficulty", "challenges"],
+      "properties": {
+        "level_id": {
+          "type": "string",
+          "pattern": "^LVL_[0-9]{2}_[A-Z_]+$",
+          "description": "Unique identifier (e.g., LVL_01_PRESENT_TENSE)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable lesson title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief overview of what the lesson teaches"
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "1=Beginner, 2=Elementary, 3=Intermediate, 4=Advanced, 5=Expert"
+        },
+        "estimated_time_minutes": {
+          "type": "integer",
+          "description": "Expected completion time"
+        },
+        "prerequisites": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Array of level_ids that should be completed first"
+        },
+        "learning_objectives": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "What the student will learn"
+        },
+        "grammar_concepts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Grammar rules covered in this lesson"
+        },
+        "challenges": {
+          "type": "array",
+          "items": { "$ref": "#/schema_definition/challenge" },
+          "description": "Array of exercise challenges"
+        },
+        "completion_criteria": {
+          "type": "object",
+          "properties": {
+            "min_score_percent": { "type": "integer" },
+            "max_errors": { "type": "integer" },
+            "time_limit_seconds": { "type": "integer" }
+          }
+        }
+      }
+    },
+
+    "challenge": {
+      "type": "object",
+      "required": ["challenge_id", "prompt_display", "target_concept", "required_sequence"],
+      "properties": {
+        "challenge_id": {
+          "type": "string",
+          "description": "Unique identifier within the lesson"
+        },
+        "challenge_type": {
+          "type": "string",
+          "enum": ["FILL_BLANK", "FULL_SENTENCE", "ERROR_CORRECTION", "TRANSLATION"],
+          "description": "Type of exercise"
+        },
+        "prompt_display": {
+          "type": "string",
+          "description": "The sentence/prompt shown to user with blanks"
+        },
+        "prompt_audio": {
+          "type": "string",
+          "description": "Optional audio file path for the prompt"
+        },
+        "context_image": {
+          "type": "string",
+          "description": "Optional image to provide context"
+        },
+        "target_concept": {
+          "type": "string",
+          "description": "The grammatical rule being tested"
+        },
+        "target_concept_explanation": {
+          "type": "string",
+          "description": "Explanation shown after completion"
+        },
+        "required_sequence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exact array of Grammar IDs for correct answer"
+        },
+        "acceptable_alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sequence": { "type": "array", "items": { "type": "string" } },
+              "note": { "type": "string" }
+            }
+          },
+          "description": "Alternative correct answers (for flexibility)"
+        },
+        "hints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Progressive hints if student is stuck"
+        },
+        "error_feedback_map": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "error_type": { "type": "string" },
+              "feedback": { "type": "string" },
+              "rule_reference": { "type": "string" }
+            }
+          },
+          "description": "Map of wrong answers to specific feedback"
+        },
+        "points": {
+          "type": "integer",
+          "description": "Points awarded for correct completion"
+        },
+        "time_bonus_threshold_seconds": {
+          "type": "integer",
+          "description": "Complete under this time for bonus points"
+        }
+      }
+    }
+  }
+}

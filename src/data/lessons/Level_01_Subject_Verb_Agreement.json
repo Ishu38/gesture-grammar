@@ -1,0 +1,229 @@
+{
+  "$schema": "../CurriculumSchema.json",
+
+  "level_id": "LVL_01_SV_AGREEMENT",
+  "title": "Subject-Verb Agreement",
+  "description": "Master the fundamental rule of matching subjects with their correct verb forms. Learn when to use base verbs vs. S-form verbs.",
+  "difficulty": 1,
+  "estimated_time_minutes": 10,
+  "prerequisites": [],
+
+  "learning_objectives": [
+    "Understand the concept of grammatical person (1st, 2nd, 3rd)",
+    "Recognize singular vs. plural subjects",
+    "Apply the Third-Person Singular rule (He/She + verb-s)",
+    "Construct grammatically correct S-V-O sentences"
+  ],
+
+  "grammar_concepts": [
+    "SUBJECT_VERB_AGREEMENT",
+    "THIRD_PERSON_SINGULAR",
+    "VERB_CONJUGATION_PRESENT"
+  ],
+
+  "intro_content": {
+    "title": "The Golden Rule of English Verbs",
+    "explanation": "In English, when the subject is 'He', 'She', or 'It' (3rd person singular), the verb gets an '-s' or '-es' ending in present tense. All other subjects (I, You, We, They) use the base form.",
+    "examples": [
+      { "correct": "He grabs the apple.", "rule": "3rd person singular → verb + s" },
+      { "correct": "They grab the apple.", "rule": "3rd person plural → base verb" },
+      { "incorrect": "He grab the apple.", "error": "Missing '-s' on verb" }
+    ],
+    "visual_diagram": "subject_verb_agreement_chart.png"
+  },
+
+  "challenges": [
+    {
+      "challenge_id": "CH_01_01",
+      "challenge_type": "FILL_BLANK",
+      "order": 1,
+
+      "prompt_display": "She ____ the apple.",
+      "prompt_spoken": "She [blank] the apple.",
+      "context_image": "woman_reaching_apple.png",
+      "context_description": "A woman reaching for an apple on a tree",
+
+      "target_concept": "Third-Person Singular Present Tense",
+      "target_concept_explanation": "When the subject is 'She' (3rd person singular), the verb must have the '-s' form. 'She' + 'grabs' = correct. 'She' + 'grab' = incorrect.",
+
+      "required_sequence": ["SUBJECT_SHE", "GRABS", "APPLE"],
+
+      "acceptable_alternatives": [
+        {
+          "sequence": ["SUBJECT_SHE", "WANTS", "APPLE"],
+          "note": "Also correct - different transitive verb"
+        },
+        {
+          "sequence": ["SUBJECT_SHE", "EATS", "APPLE"],
+          "note": "Also correct - different transitive verb"
+        }
+      ],
+
+      "hints": [
+        "What pronoun represents a female? (Think: 'She')",
+        "The subject is 3rd person singular. What happens to the verb?",
+        "Remember: He/She/It → verb + 's' (grabs, not grab)"
+      ],
+
+      "error_feedback_map": {
+        "SUBJECT_SHE|GRAB|APPLE": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "Almost! 'She' is 3rd person singular, so the verb needs an '-s'. Use 'grabs' instead of 'grab'.",
+          "rule_reference": "3rd person singular subjects (He/She/It) require S-form verbs in present tense.",
+          "gesture_hint": "Try the GRABS gesture instead of GRAB"
+        },
+        "SUBJECT_HE|GRABS|APPLE": {
+          "error_type": "WRONG_SUBJECT",
+          "feedback": "Check the prompt again - the subject should be 'She', not 'He'.",
+          "rule_reference": "Match your gesture to the subject shown in the prompt.",
+          "gesture_hint": "Use the SHE gesture (different from HE)"
+        },
+        "SUBJECT_I|GRAB|APPLE": {
+          "error_type": "WRONG_SUBJECT",
+          "feedback": "The prompt shows 'She', but you signed 'I'. Also, note that 'I' uses base form 'grab', not 'grabs'.",
+          "rule_reference": "Read the prompt carefully and match the subject.",
+          "gesture_hint": "The prompt specifies 'She' - use the appropriate gesture"
+        },
+        "SUBJECT_THEY|GRAB|APPLE": {
+          "error_type": "WRONG_SUBJECT",
+          "feedback": "'They' is plural, but the prompt shows 'She' (singular). Different subject!",
+          "rule_reference": "Singular subjects: I, You, He, She, It. Plural: We, They.",
+          "gesture_hint": "Use the gesture for 'She', not 'They'"
+        },
+        "SUBJECT_SHE|GRABS": {
+          "error_type": "INCOMPLETE_SENTENCE",
+          "feedback": "Good start! 'She grabs' is correct so far. But 'grabs' is transitive - it needs an object. What does she grab?",
+          "rule_reference": "Transitive verbs require a direct object to complete the sentence.",
+          "gesture_hint": "Add an object like APPLE to complete the sentence"
+        },
+        "GRABS|APPLE": {
+          "error_type": "MISSING_SUBJECT",
+          "feedback": "You started with a verb! Every sentence needs a subject first. Who is doing the grabbing?",
+          "rule_reference": "English sentences follow S-V-O order: Subject first, then Verb, then Object.",
+          "gesture_hint": "Start with SUBJECT_SHE, then add the verb"
+        }
+      },
+
+      "scoring": {
+        "points": 100,
+        "time_bonus_threshold_seconds": 15,
+        "time_bonus_points": 25,
+        "hint_penalty": 10,
+        "error_penalty": 5
+      }
+    },
+
+    {
+      "challenge_id": "CH_01_02",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 2,
+
+      "prompt_display": "They ____ the ball.",
+      "prompt_spoken": "They [blank] the ball.",
+      "context_image": "children_playing_ball.png",
+      "context_description": "Children playing with a ball in a park",
+
+      "target_concept": "Third-Person Plural Present Tense",
+      "target_concept_explanation": "When the subject is 'They' (3rd person PLURAL), the verb uses the BASE form without '-s'. 'They' + 'grab' = correct. 'They' + 'grabs' = incorrect.",
+
+      "required_sequence": ["SUBJECT_THEY", "GRAB", "BALL"],
+
+      "acceptable_alternatives": [
+        {
+          "sequence": ["SUBJECT_THEY", "WANT", "BALL"],
+          "note": "Also correct - different transitive verb"
+        }
+      ],
+
+      "hints": [
+        "'They' refers to multiple people. Is it singular or plural?",
+        "Plural subjects use the BASE form of the verb.",
+        "Base form means no '-s': grab, want, eat (not grabs, wants, eats)"
+      ],
+
+      "error_feedback_map": {
+        "SUBJECT_THEY|GRABS|BALL": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "Careful! 'They' is PLURAL, so you need the base form 'grab', NOT 'grabs'. The '-s' form is only for singular He/She/It.",
+          "rule_reference": "Only 3rd person SINGULAR (He/She/It) uses '-s'. Plural subjects (They/We) use base form.",
+          "gesture_hint": "Use GRAB gesture, not GRABS"
+        },
+        "SUBJECT_HE|GRABS|BALL": {
+          "error_type": "WRONG_SUBJECT",
+          "feedback": "The prompt says 'They' (plural), but you signed 'He' (singular). Different subject needed!",
+          "rule_reference": "Match your gestures to the prompt. 'They' ≠ 'He'.",
+          "gesture_hint": "Use the THEY gesture to represent multiple people"
+        },
+        "SUBJECT_THEY|GRAB": {
+          "error_type": "INCOMPLETE_SENTENCE",
+          "feedback": "Great job on 'They grab'! The verb form is correct. Now add an object - what do they grab?",
+          "rule_reference": "Transitive verbs like 'grab' require an object.",
+          "gesture_hint": "Add BALL to complete the sentence"
+        },
+        "SUBJECT_THEY|GOES": {
+          "error_type": "WRONG_VERB_FORM",
+          "feedback": "'Goes' is the S-form, but 'They' needs base form 'go'. Also, 'go' is intransitive - it can't take an object like 'ball'.",
+          "rule_reference": "1) They + base form. 2) 'Go' doesn't take objects.",
+          "gesture_hint": "Use GRAB (transitive, base form) for this sentence"
+        },
+        "SUBJECT_THEY|GO|BALL": {
+          "error_type": "TRANSITIVITY_ERROR",
+          "feedback": "'Go' is intransitive - it cannot take 'ball' as an object. Use a transitive verb like 'grab' or 'want'.",
+          "rule_reference": "Intransitive verbs (go, stop, sleep) don't take direct objects.",
+          "gesture_hint": "Replace GO with GRAB"
+        },
+        "GRAB|BALL": {
+          "error_type": "MISSING_SUBJECT",
+          "feedback": "You're missing the subject! Who grabs the ball? Start with 'They'.",
+          "rule_reference": "Every English sentence needs a subject.",
+          "gesture_hint": "Start with SUBJECT_THEY"
+        }
+      },
+
+      "scoring": {
+        "points": 100,
+        "time_bonus_threshold_seconds": 15,
+        "time_bonus_points": 25,
+        "hint_penalty": 10,
+        "error_penalty": 5
+      }
+    }
+  ],
+
+  "summary": {
+    "key_takeaways": [
+      "He/She/It (3rd person singular) → Verb + 's' (walks, grabs, eats)",
+      "I/You/We/They → Base verb (walk, grab, eat)",
+      "This rule only applies to PRESENT TENSE",
+      "Always build sentences in S-V-O order"
+    ],
+    "common_mistakes": [
+      "Using 'grabs' with 'They' (They grabs ✗)",
+      "Using 'grab' with 'He' (He grab ✗)",
+      "Forgetting the subject entirely",
+      "Putting the object before the verb"
+    ],
+    "next_lesson": "LVL_02_TRANSITIVE_VERBS"
+  },
+
+  "completion_criteria": {
+    "min_score_percent": 70,
+    "max_errors_per_challenge": 3,
+    "required_challenges_completed": 2
+  },
+
+  "achievements": [
+    {
+      "id": "ACH_PERFECT_AGREEMENT",
+      "title": "Grammar Guardian",
+      "description": "Complete all challenges without agreement errors",
+      "icon": "shield_grammar.png"
+    },
+    {
+      "id": "ACH_SPEED_DEMON",
+      "title": "Quick Thinker",
+      "description": "Complete both challenges under the time bonus threshold",
+      "icon": "lightning_bolt.png"
+    }
+  ]
+}

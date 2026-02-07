@@ -9,6 +9,9 @@ function App() {
         <p className="subtitle">Build sentences with hand gestures</p>
       </header>
       <SandboxMode />
+      <footer className="app-footer">
+        Designed &amp; Created by Neil Shankar Ray
+      </footer>
     </div>
   )
 }

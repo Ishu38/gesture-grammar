@@ -8,6 +8,8 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { HandLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 import { detectGestureRaw, getHandDebugInfo } from '../utils/gestureDetection';
 import { validateSentence, LEXICON } from '../utils/GrammarEngine';
+import { analyzeFingerStatesDetailed } from '../utils/fingerAnalysis';
+import { classifyFingerState } from '../utils/grammarClassifier';
 import { useSentenceBuilder } from '../hooks/useSentenceBuilder';
 import SentenceStrip from './SentenceStrip';
 import GestureSidebar from './GestureSidebar';
@@ -41,6 +43,8 @@ function SandboxMode() {
   const [showParseTree, setShowParseTree] = useState(true);
   const [debugInfo, setDebugInfo] = useState(null);
   const [wristY, setWristY] = useState(0.5);
+  const [fingerStates, setFingerStates] = useState(null);
+  const [grammarToken, setGrammarToken] = useState(null);
 
   // Sentence builder hook
   const {
@@ -65,6 +69,8 @@ function SandboxMode() {
     if (!landmarks || landmarks.length === 0) {
       processGestureInput(null, 0.5);
       setDebugInfo(null);
+      setFingerStates(null);
+      setGrammarToken(null);
       return;
     }
 
@@ -78,6 +84,11 @@ function SandboxMode() {
     if (showDebug) {
       setDebugInfo(getHandDebugInfo(handLandmarks));
     }
+
+    // Angle-based finger analysis
+    const detailed = analyzeFingerStatesDetailed(handLandmarks);
+    setFingerStates(detailed);
+    setGrammarToken(classifyFingerState(detailed.states));
 
     // Detect gesture and process
     const gesture = detectGestureRaw(handLandmarks);
@@ -406,6 +417,31 @@ function SandboxMode() {
               <span>Lock Progress:</span>
               <span>{(lockProgress * 100).toFixed(0)}%</span>
             </div>
+            {fingerStates && (
+              <>
+                <div className="debug-row" style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.4rem', marginTop: '0.2rem' }}>
+                  <span style={{ color: '#c084fc', fontWeight: 600 }}>Finger Analysis (3D Angles)</span>
+                </div>
+                {Object.keys(fingerStates.angles).map((finger) => (
+                  <div className="debug-row" key={finger}>
+                    <span style={{ textTransform: 'capitalize' }}>{finger}:</span>
+                    <span>
+                      <strong style={{ color: fingerStates.states[finger] ? '#4ade80' : '#f87171' }}>
+                        {fingerStates.states[finger] ? 'OPEN' : 'CURLED'}
+                      </strong>
+                      {' '}
+                      <span style={{ color: '#888' }}>{fingerStates.angles[finger].toFixed(1)}&deg;</span>
+                    </span>
+                  </div>
+                ))}
+                <div className="debug-row" style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.4rem', marginTop: '0.2rem' }}>
+                  <span>Grammar Token:</span>
+                  <strong style={{ color: grammarToken && grammarToken !== 'UNKNOWN' ? '#fbbf24' : '#888' }}>
+                    {grammarToken || 'N/A'}
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

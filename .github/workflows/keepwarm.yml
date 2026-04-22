@@ -1,0 +1,15 @@
+name: keep HF Space warm
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping grammar engine /health
+        run: |
+          curl --fail --silent --show-error --max-time 60 \
+            https://shaankar39-mlaf-grammar-engine.hf.space/health

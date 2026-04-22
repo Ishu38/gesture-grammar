@@ -1,5 +1,9 @@
 # MLAF — Multimodal Language Acquisition Framework
 
+[![tests](https://github.com/Ishu38/gesture-grammar/actions/workflows/test.yml/badge.svg)](https://github.com/Ishu38/gesture-grammar/actions/workflows/test.yml)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-lightgrey.svg)](LICENSE)
+[![Live demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://multi-modal-gesture-grammar.vercel.app)
+
 In-browser, real-time English grammar acquisition through hand gestures — designed for learners with motor impairment and deaf/hard-of-hearing users. Combines symbolic AI (formal grammars, type theory, knowledge graphs) with neural perception (MediaPipe vision, ONNX classification) so the system adapts to each learner's motor abilities in real time.
 
 **Live Demo:** https://multi-modal-gesture-grammar.vercel.app

@@ -4,23 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
-    <meta name="description" content="Build sentences with hand gestures - Learn grammar through movement" />
+    <meta name="description" content="In-browser real-time English grammar acquisition through hand gestures, for learners with motor impairment and deaf/hard-of-hearing users. Patent-pending." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://multi-modal-gesture-grammar.vercel.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://multi-modal-gesture-grammar.vercel.app/" />
+    <meta property="og:title" content="MLAF — Multimodal Language Acquisition Framework" />
+    <meta property="og:description" content="In-browser real-time English grammar acquisition through hand gestures, for learners with motor impairment and deaf/hard-of-hearing users. Patent-pending." />
+    <meta property="og:image" content="https://multi-modal-gesture-grammar.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="MLAF" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MLAF — Multimodal Language Acquisition Framework" />
+    <meta name="twitter:description" content="In-browser real-time English grammar acquisition through hand gestures. Patent-pending." />
+    <meta name="twitter:image" content="https://multi-modal-gesture-grammar.vercel.app/og-image.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>Gesture Grammar</title>
+    <title>MLAF — Multimodal Language Acquisition Framework</title>
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Clear any stale service workers from previous PWA builds
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          regs.forEach(function(r) { r.unregister(); });
-        });
-      }
-    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -1,12 +1,16 @@
 @{%
 /**
- * grammar.ne — Formal CFG for Gesture Grammar
+ * grammar.ne — Formal CFG for MLAF (Multimodal Language Acquisition Framework)
+ *
+ * NOTE: This is a REFERENCE file only. The app uses GestureGrammar.js (hand-written ESM)
+ * instead of nearleyc-compiled output, to avoid CJS/ESM compatibility issues.
+ * The require() below is valid Nearley .ne syntax but is NOT executed at runtime.
  *
  * Production rules (Earley-parseable via Nearley.js):
  *   S   → NP VP
  *   NP  → SUBJECT_I | SUBJECT_YOU | SUBJECT_HE | SUBJECT_SHE | SUBJECT_WE | SUBJECT_THEY
  *   VP  → VT OBJ | VI
- *   VT  → GRAB | EAT | WANT | DRINK | GRABS | EATS | WANTS | DRINKS
+ *   VT  → GRAB | EAT | WANT | DRINK | SEE | GRABS | EATS | WANTS | DRINKS | SEES
  *   VI  → GO | STOP | GOES | STOPS
  *   OBJ → APPLE | BALL | WATER | FOOD | BOOK | HOUSE
  *
@@ -43,10 +47,12 @@ VT -> %GRAB   {% ([t]) => ({ type: 'VT', value: t.value, sForm: false }) %}
    | %EAT     {% ([t]) => ({ type: 'VT', value: t.value, sForm: false }) %}
    | %WANT    {% ([t]) => ({ type: 'VT', value: t.value, sForm: false }) %}
    | %DRINK   {% ([t]) => ({ type: 'VT', value: t.value, sForm: false }) %}
+   | %SEE     {% ([t]) => ({ type: 'VT', value: t.value, sForm: false }) %}
    | %GRABS   {% ([t]) => ({ type: 'VT', value: t.value, sForm: true }) %}
    | %EATS    {% ([t]) => ({ type: 'VT', value: t.value, sForm: true }) %}
    | %WANTS   {% ([t]) => ({ type: 'VT', value: t.value, sForm: true }) %}
    | %DRINKS  {% ([t]) => ({ type: 'VT', value: t.value, sForm: true }) %}
+   | %SEES    {% ([t]) => ({ type: 'VT', value: t.value, sForm: true }) %}
 
 # ── Intransitive Verbs ────────────────────────────────────────────────────────
 VI -> %GO     {% ([t]) => ({ type: 'VI', value: t.value, sForm: false }) %}

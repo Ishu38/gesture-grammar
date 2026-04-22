@@ -1,9 +1,10 @@
 /**
- * GestureGrammar.js — Compiled grammar as ESM
+ * GestureGrammar.js — Compiled grammar as ESM (MLAF)
  *
  * Hand-written ES module equivalent of what `nearleyc grammar.ne` would produce.
  * Uses Nearley's internal rule format: { name, symbols, postprocess }.
  *
+ * Part of the MLAF (Multimodal Language Acquisition Framework) system.
  * This avoids CJS/ESM conversion issues with Vite while being 1:1 equivalent
  * to the .ne file.
  *
@@ -11,7 +12,7 @@
  *   S   → NP VP
  *   NP  → SUBJECT_I | SUBJECT_YOU | SUBJECT_HE | SUBJECT_SHE | SUBJECT_WE | SUBJECT_THEY
  *   VP  → VT OBJ | VI
- *   VT  → GRAB | EAT | WANT | DRINK | GRABS | EATS | WANTS | DRINKS
+ *   VT  → GRAB | EAT | WANT | DRINK | SEE | GRABS | EATS | WANTS | DRINKS | SEES
  *   VI  → GO | STOP | GOES | STOPS
  *   OBJ → APPLE | BALL | WATER | FOOD | BOOK | HOUSE
  */
@@ -39,10 +40,6 @@ function ppVPTransitive([vt, obj]) {
 
 function ppVPIntransitive([vi]) {
   return { type: 'VP', children: [vi], transitive: false };
-}
-
-function ppVerb(sForm) {
-  return ([t]) => ({ type: t.type === undefined ? 'V' : (sForm ? 'VT' : 'VT'), value: t.value, sForm });
 }
 
 function ppVT(sForm) {
@@ -80,10 +77,12 @@ const rules = [
   { name: 'VT', symbols: [tok('EAT')],    postprocess: ppVT(false) },
   { name: 'VT', symbols: [tok('WANT')],   postprocess: ppVT(false) },
   { name: 'VT', symbols: [tok('DRINK')],  postprocess: ppVT(false) },
+  { name: 'VT', symbols: [tok('SEE')],    postprocess: ppVT(false) },
   { name: 'VT', symbols: [tok('GRABS')],  postprocess: ppVT(true) },
   { name: 'VT', symbols: [tok('EATS')],   postprocess: ppVT(true) },
   { name: 'VT', symbols: [tok('WANTS')],  postprocess: ppVT(true) },
   { name: 'VT', symbols: [tok('DRINKS')], postprocess: ppVT(true) },
+  { name: 'VT', symbols: [tok('SEES')],   postprocess: ppVT(true) },
 
   // VI → intransitive verb terminals
   { name: 'VI', symbols: [tok('GO')],    postprocess: ppVI(false) },

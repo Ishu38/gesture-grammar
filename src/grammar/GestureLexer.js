@@ -8,21 +8,10 @@
  * Required interface methods: reset, next, save, formatError, has
  */
 
-// All terminal symbols the grammar recognizes
-const KNOWN_TOKENS = new Set([
-  // Subjects
-  'SUBJECT_I', 'SUBJECT_YOU', 'SUBJECT_HE', 'SUBJECT_SHE', 'SUBJECT_WE', 'SUBJECT_THEY',
-  // Base verbs (transitive)
-  'GRAB', 'EAT', 'WANT', 'DRINK',
-  // S-form verbs (transitive)
-  'GRABS', 'EATS', 'WANTS', 'DRINKS',
-  // Base verbs (intransitive)
-  'GO', 'STOP',
-  // S-form verbs (intransitive)
-  'GOES', 'STOPS',
-  // Objects
-  'APPLE', 'BALL', 'WATER', 'FOOD', 'BOOK', 'HOUSE',
-]);
+import { LEXICON } from '../data/Lexicon.js';
+
+// Derive terminal symbols from the canonical LEXICON (single source of truth)
+const KNOWN_TOKENS = new Set(Object.keys(LEXICON));
 
 export class GestureLexer {
   constructor() {
@@ -51,6 +40,9 @@ export class GestureLexer {
       return undefined;
     }
     const value = this.buffer[this.index];
+    if (typeof value !== 'string') {
+      throw new Error(`GestureLexer: expected string token at index ${this.index}, got ${typeof value}`);
+    }
     const token = {
       type: value,
       value: value,

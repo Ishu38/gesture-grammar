@@ -6,9 +6,10 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { LEXICON, getCorrectVerbForm } from '../utils/GrammarEngine';
+import { IRREGULAR_VERBS } from '../utils/GrammarRules';
 
-// Configuration constants
-const LOCK_THRESHOLD_FRAMES = 45; // ~1.5 seconds at 30fps
+// Default configuration constants
+const DEFAULT_LOCK_THRESHOLD_FRAMES = 45; // ~1.5 seconds at 30fps
 const DEBOUNCE_DURATION_MS = 2000; // 2 seconds cooldown after adding word
 const NEUTRAL_TIMEOUT_MS = 500; // Time with no gesture to reset
 
@@ -19,14 +20,36 @@ const TENSE_ZONES = {
   PAST: { min: 0.7, max: 1.0, label: 'Past', suffix: 'ed' },
 };
 
-// Audio context for sound effects
-let audioContext = null;
+// Per-gesture adaptive lock thresholds (fraction of base threshold)
+// Distinctive gestures need fewer frames; ambiguous ones need more
+const GESTURE_LOCK_MULTIPLIER = {
+  STOP: 0.5,          // Very distinctive (open palm) — 50% of base
+  GRAB: 0.6,          // Distinctive (claw/pinch) — 60%
+  HOUSE: 0.6,         // Distinctive (roof shape)
+  WATER: 0.65,        // Fairly distinctive (W shape)
+  SUBJECT_I: 0.7,     // Fist + thumb — recognizable
+  SUBJECT_HE: 0.7,    // Hitchhiker thumb
+  SEE: 0.75,          // V-shape — fairly distinctive but can overlap with WE
+  DRINK: 0.85,        // C-shape, can be confused with YOU
+  SUBJECT_YOU: 0.85,  // Index point, can be confused with DRINK
+  APPLE: 0.9,         // Cupped hand — subtle
+  BOOK: 0.9,          // Flat palm — subtle
+};
+
+// Audio context singleton — shared across hook instances, never closed
+// (closing breaks audio for other mounted instances; browsers manage GC)
+let _sharedAudioContext = null;
+
+function getAudioContext() {
+  if (!_sharedAudioContext || _sharedAudioContext.state === 'closed') {
+    _sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return _sharedAudioContext;
+}
 
 function playSuccessSound() {
   try {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    const audioContext = getAudioContext();
 
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -52,9 +75,7 @@ function playSuccessSound() {
 
 function playErrorSound() {
   try {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    const audioContext = getAudioContext();
 
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
@@ -103,23 +124,42 @@ function applyTenseToVerb(grammarId, tense) {
         tense: 'future',
         auxiliary: 'will',
       };
-    case 'PAST':
-      // Simple past tense transformation
-      let pastForm = baseDisplay;
-      if (baseDisplay.endsWith('e')) {
-        pastForm = baseDisplay + 'd';
-      } else if (baseDisplay.endsWith('op')) {
-        pastForm = baseDisplay + 'ped'; // stop -> stopped
-      } else if (baseDisplay.endsWith('ab')) {
-        pastForm = baseDisplay + 'bed'; // grab -> grabbed
+    case 'PAST': {
+      // Use IRREGULAR_VERBS from GrammarRules.js (single source of truth)
+      // Strip S-form suffix before lookup: "drinks" → "drink", "goes" → "go"
+      let lower = baseDisplay.toLowerCase();
+      // Check if the base form (without S-form suffix) has an irregular entry
+      let irregular = IRREGULAR_VERBS[lower];
+      if (!irregular) {
+        // Try stripping common S-form suffixes: -es, -s
+        const stripped = lower.endsWith('es') ? lower.slice(0, -2)
+          : lower.endsWith('s') ? lower.slice(0, -1)
+          : null;
+        if (stripped && IRREGULAR_VERBS[stripped]) {
+          irregular = IRREGULAR_VERBS[stripped];
+          lower = stripped;
+        }
+      }
+      // Use the base form (without S-suffix) for past tense construction
+      const baseForPast = lower;
+      let pastForm;
+      if (irregular?.past) {
+        pastForm = irregular.past;
+      } else if (baseForPast.endsWith('e')) {
+        pastForm = baseForPast + 'd';
+      } else if (baseForPast.endsWith('op')) {
+        pastForm = baseForPast + 'ped'; // stop -> stopped
+      } else if (baseForPast.endsWith('ab')) {
+        pastForm = baseForPast + 'bed'; // grab -> grabbed
       } else {
-        pastForm = baseDisplay + 'ed';
+        pastForm = baseForPast + 'ed';
       }
       return {
         grammarId,
         display: pastForm,
         tense: 'past',
       };
+    }
     case 'PRESENT':
     default:
       return {
@@ -132,13 +172,19 @@ function applyTenseToVerb(grammarId, tense) {
 
 /**
  * Custom hook for building sentences with gesture input
+ * @param {object} options
+ * @param {number} options.confidenceFrames — frames required to lock a gesture (from AccessibilityProfile)
  */
-export function useSentenceBuilder() {
+export function useSentenceBuilder(options = {}) {
+  // Stored in a ref so CognitiveLoadAdapter can update it without re-rendering
+  const lockThresholdRef = useRef(options.confidenceFrames || DEFAULT_LOCK_THRESHOLD_FRAMES);
   // Sentence state
   const [sentence, setSentence] = useState([]);
 
-  // Lock state
+  // Lock state — use a ref alongside state to avoid stale closures in animation loops.
+  // The ref is the source of truth; the state drives React re-renders.
   const [isLocked, setIsLocked] = useState(false);
+  const isLockedRef = useRef(false);
   const [lockProgress, setLockProgress] = useState(0);
 
   // Current gesture tracking
@@ -158,6 +204,7 @@ export function useSentenceBuilder() {
   const clearSentence = useCallback(() => {
     setSentence([]);
     setIsLocked(false);
+    isLockedRef.current = false;
     setLockProgress(0);
     confidenceCounterRef.current = 0;
     previousGestureRef.current = null;
@@ -226,8 +273,10 @@ export function useSentenceBuilder() {
     playSuccessSound();
 
     // Enter debounce period
+    isLockedRef.current = true;
     setIsLocked(true);
     debounceTimeoutRef.current = setTimeout(() => {
+      isLockedRef.current = false;
       setIsLocked(false);
     }, DEBOUNCE_DURATION_MS);
 
@@ -250,14 +299,16 @@ export function useSentenceBuilder() {
       setCurrentTenseZone(getTenseZone(wristY));
     }
 
-    // If locked (in debounce period), ignore input but allow neutral reset
-    if (isLocked) {
+    // If locked (in debounce period), ignore input but allow neutral reset.
+    // Read from ref (not state) to avoid stale closures in animation loops.
+    if (isLockedRef.current) {
       if (!gesture) {
         // User dropped hand - can reset debounce early
         if (neutralTimeoutRef.current) {
           clearTimeout(neutralTimeoutRef.current);
         }
         neutralTimeoutRef.current = setTimeout(() => {
+          isLockedRef.current = false;
           setIsLocked(false);
           if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current);
@@ -291,25 +342,29 @@ export function useSentenceBuilder() {
       previousGestureRef.current = gesture;
     }
 
+    // Adaptive threshold: distinctive gestures lock faster
+    const gestureMultiplier = GESTURE_LOCK_MULTIPLIER[gesture] || 1.0;
+    const effectiveThreshold = Math.max(10, Math.round(lockThresholdRef.current * gestureMultiplier));
+
     // Update progress
-    const progress = Math.min(confidenceCounterRef.current / LOCK_THRESHOLD_FRAMES, 1);
+    const progress = Math.min(confidenceCounterRef.current / effectiveThreshold, 1);
     setLockProgress(progress);
 
     // Check if threshold reached
-    if (confidenceCounterRef.current >= LOCK_THRESHOLD_FRAMES) {
+    if (confidenceCounterRef.current >= effectiveThreshold) {
       // Determine tense for verbs
       const tense = LEXICON[gesture]?.type === 'VERB' ? getTenseZone(wristY) : 'PRESENT';
       addToSentence(gesture, tense);
     }
-  }, [isLocked, addToSentence]);
+  }, [addToSentence]);
 
   /**
    * Force add a word (bypass confidence check)
    */
   const forceAddWord = useCallback((grammarId, tense = 'PRESENT') => {
-    if (isLocked) return false;
+    if (isLockedRef.current) return false;
     return addToSentence(grammarId, tense);
-  }, [isLocked, addToSentence]);
+  }, [addToSentence]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -336,6 +391,11 @@ export function useSentenceBuilder() {
     addToSentence: forceAddWord,
     clearSentence,
     undoLastWord,
+
+    // Dynamic threshold control (used by CognitiveLoadAdapter)
+    setConfidenceThreshold: (frames) => {
+      lockThresholdRef.current = Math.max(10, Math.min(120, Math.round(frames)));
+    },
 
     // Utilities
     getTenseZone,

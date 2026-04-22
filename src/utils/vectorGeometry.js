@@ -49,23 +49,49 @@ export function angleBetweenPoints3D(a, b, c) {
 }
 
 /**
- * Normalize landmarks relative to wrist position and palm size.
+ * Normalize landmarks relative to wrist position and max distance.
  * - Translates so wrist is at origin
- * - Scales by wrist-to-middle-finger-MCP distance (landmark 9)
- *   which is anatomically stable across hand sizes
+ * - Scales by max distance from wrist to any landmark
+ *   (matches the RF classifier's normalization for consistency)
  * @param {Array<{x:number, y:number, z?:number}>} landmarks - 21 hand landmarks
  * @returns {Array<{x:number, y:number, z:number}>} normalized landmarks
  */
 export function normalizeToWrist(landmarks) {
   const wrist = landmarks[0];
-  const middleMCP = landmarks[9];
 
-  const palmSize = euclideanDistance3D(wrist, middleMCP);
-  const scale = palmSize > 0 ? palmSize : 1;
-
-  return landmarks.map((lm) => ({
-    x: (lm.x - wrist.x) / scale,
-    y: (lm.y - wrist.y) / scale,
-    z: ((lm.z || 0) - (wrist.z || 0)) / scale,
+  // Center at wrist
+  const centered = landmarks.map((lm) => ({
+    x: lm.x - wrist.x,
+    y: lm.y - wrist.y,
+    z: (lm.z || 0) - (wrist.z || 0),
   }));
+
+  // Scale by max distance (consistent with RF classifier normalization)
+  let maxDist = 0;
+  for (let i = 0; i < centered.length; i++) {
+    const d = Math.sqrt(centered[i].x ** 2 + centered[i].y ** 2 + centered[i].z ** 2);
+    if (d > maxDist) maxDist = d;
+  }
+
+  const scale = maxDist > 1e-8 ? maxDist : 1;
+  return centered.map((lm) => ({
+    x: lm.x / scale,
+    y: lm.y / scale,
+    z: lm.z / scale,
+  }));
+}
+
+/**
+ * Flatten 21 landmarks into a 63-dimensional configuration vector.
+ * @param {Array<{x:number, y:number, z:number}>} landmarks
+ * @returns {Float64Array}
+ */
+export function flattenToConfigVector(landmarks) {
+  const vec = new Float64Array(63);
+  for (let i = 0; i < 21; i++) {
+    vec[i * 3] = landmarks[i].x;
+    vec[i * 3 + 1] = landmarks[i].y;
+    vec[i * 3 + 2] = landmarks[i].z || 0;
+  }
+  return vec;
 }

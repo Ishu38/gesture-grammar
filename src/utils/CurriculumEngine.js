@@ -181,9 +181,11 @@ function analyzeError(userSeq, requiredSeq, challenge) {
 /**
  * Get word type from Grammar ID
  */
+const OBJECT_IDS = new Set(['APPLE', 'BALL', 'WATER', 'FOOD', 'BOOK', 'HOUSE']);
+
 function getWordType(grammarId) {
   if (grammarId.startsWith('SUBJECT')) return 'SUBJECT';
-  if (grammarId.startsWith('OBJECT') || grammarId === 'APPLE' || grammarId === 'BALL') return 'OBJECT';
+  if (grammarId.startsWith('OBJECT') || OBJECT_IDS.has(grammarId)) return 'OBJECT';
   return 'VERB';
 }
 
@@ -200,7 +202,7 @@ function arraysEqual(a, b) {
 // =============================================================================
 
 export class ProgressTracker {
-  constructor(storageKey = 'gesture_grammar_progress') {
+  constructor(storageKey = 'mlaf_progress') {
     this.storageKey = storageKey;
     this.progress = this.load();
   }
@@ -358,8 +360,18 @@ export class LessonManager {
     this.currentChallengeIndex = 0;
     this.hintSystem = null;
     this.progressTracker = new ProgressTracker();
+    this.masteryGate = null;  // Injected by SandboxMode via setMasteryGate()
     this.sessionErrors = [];
     this.sessionScore = 0;
+  }
+
+  /**
+   * Inject a GestureMasteryGate instance so that correct challenge answers
+   * also record mastery productions (cumulative principle: Ch.2, Birsh & Carreker).
+   * @param {import('../core/GestureMasteryGate').GestureMasteryGate} gate
+   */
+  setMasteryGate(gate) {
+    this.masteryGate = gate;
   }
 
   loadLesson(lesson) {
@@ -388,6 +400,7 @@ export class LessonManager {
   }
 
   submitAnswer(userSequence) {
+    if (!this.currentLesson) return { isCorrect: false, feedback: 'No lesson loaded.' };
     const challenge = this.currentLesson.challenges[this.currentChallengeIndex];
     const result = validateChallenge(challenge, userSequence);
 
@@ -400,6 +413,12 @@ export class LessonManager {
 
     if (result.isCorrect) {
       this.sessionScore += result.score;
+      // Record mastery production for each gesture in the correct sequence
+      if (this.masteryGate) {
+        userSequence.forEach(grammarId => {
+          this.masteryGate.recordProduction(grammarId);
+        });
+      }
     } else {
       this.sessionErrors.push(result.errorType);
     }
@@ -408,6 +427,7 @@ export class LessonManager {
   }
 
   nextChallenge() {
+    if (!this.currentLesson) return null;
     if (this.currentChallengeIndex < this.currentLesson.challenges.length - 1) {
       this.currentChallengeIndex++;
       this.hintSystem = new HintSystem(this.currentLesson.challenges[this.currentChallengeIndex]);

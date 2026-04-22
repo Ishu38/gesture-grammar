@@ -1,0 +1,104 @@
+{
+  "$schema": "../CurriculumSchema.json",
+  "level_id": "LVL_02_SVO_ORDER",
+  "title": "SVO Word Order",
+  "description": "Learn the basic English sentence structure: Subject-Verb-Object. In ISL, sentences often follow SOV order. English requires SVO.",
+  "difficulty": 1,
+  "estimated_time_minutes": 8,
+  "prerequisites": [],
+  "learning_objectives": [
+    "Understand that English uses Subject-Verb-Object (SVO) word order",
+    "Recognize the difference between ISL (SOV) and English (SVO) order",
+    "Build simple SVO sentences using gestures"
+  ],
+  "grammar_concepts": ["SVO_WORD_ORDER", "ISL_SOV_TRANSFER"],
+  "intro_content": {
+    "title": "English Word Order: Subject → Verb → Object",
+    "explanation": "In English, sentences follow a strict order: first WHO (Subject), then WHAT THEY DO (Verb), then TO WHAT (Object). In ISL, the order is often SOV (Subject-Object-Verb). When learning English, it's important to put the verb BEFORE the object.",
+    "examples": [
+      { "correct": "I grab apple.", "rule": "SVO: Subject first, then Verb, then Object" },
+      { "incorrect": "I apple grab.", "error": "This is SOV order (ISL pattern) — in English, the verb comes before the object" }
+    ]
+  },
+  "challenges": [
+    {
+      "challenge_id": "CH_02_01",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 1,
+      "prompt_display": "Build: 'I grab apple'",
+      "prompt_spoken": "Build the sentence: I grab apple.",
+      "context_description": "A person reaching for an apple",
+      "target_concept": "Basic SVO Order",
+      "target_concept_explanation": "Place the Subject first, then the Verb, then the Object.",
+      "required_sequence": ["SUBJECT_I", "GRAB", "APPLE"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "Start with the Subject: Who is doing the action?",
+        "Next comes the Verb: What action are they doing?",
+        "Finally, the Object: What are they acting on?"
+      ],
+      "error_feedback_map": {
+        "SUBJECT_I|APPLE|GRAB": {
+          "error_type": "ORDER_ERROR",
+          "feedback": "You used ISL word order (SOV)! In English, the verb comes BEFORE the object: 'I grab apple', not 'I apple grab'.",
+          "rule_reference": "English uses SVO order: Subject → Verb → Object",
+          "gesture_hint": "After signing I, sign GRAB next, then APPLE"
+        },
+        "GRAB|SUBJECT_I|APPLE": {
+          "error_type": "ORDER_ERROR",
+          "feedback": "The verb should not come first. Start with the Subject (I), then Verb (grab), then Object (apple).",
+          "rule_reference": "English SVO: Subject always comes first.",
+          "gesture_hint": "Start with SUBJECT_I"
+        },
+        "APPLE|SUBJECT_I|GRAB": {
+          "error_type": "ORDER_ERROR",
+          "feedback": "This is topic-fronting (ISL pattern). In English, the subject comes first, not the object.",
+          "rule_reference": "Avoid placing the object at the beginning of the sentence.",
+          "gesture_hint": "Start with SUBJECT_I, not APPLE"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 20, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    },
+    {
+      "challenge_id": "CH_02_02",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 2,
+      "prompt_display": "Build: 'I stop'",
+      "prompt_spoken": "Build the sentence: I stop.",
+      "context_description": "A person holding up their hand to stop",
+      "target_concept": "SV Order (intransitive verb — no object needed)",
+      "target_concept_explanation": "Some verbs like 'stop' don't need an object. The sentence is just Subject + Verb.",
+      "required_sequence": ["SUBJECT_I", "STOP"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "This sentence only needs two words.",
+        "'Stop' is intransitive — it doesn't need an object.",
+        "Sign SUBJECT_I first, then STOP."
+      ],
+      "error_feedback_map": {
+        "STOP|SUBJECT_I": {
+          "error_type": "ORDER_ERROR",
+          "feedback": "The verb comes after the subject in English. Say 'I stop', not 'stop I'.",
+          "rule_reference": "English SVO: Subject first, then Verb.",
+          "gesture_hint": "Start with SUBJECT_I"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 15, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    }
+  ],
+  "summary": {
+    "key_takeaways": [
+      "English sentences follow SVO order: Subject → Verb → Object",
+      "ISL often uses SOV order — be aware of this transfer pattern",
+      "Some verbs (intransitive) don't need an object",
+      "Always start with the Subject"
+    ],
+    "common_mistakes": [
+      "Putting the object before the verb (ISL SOV transfer)",
+      "Putting the object at the start (ISL topic-fronting)",
+      "Starting with the verb instead of the subject"
+    ],
+    "next_lesson": "LVL_03_PRONOUN_VERBS"
+  },
+  "completion_criteria": { "min_score_percent": 70, "max_errors_per_challenge": 3, "required_challenges_completed": 2 }
+}

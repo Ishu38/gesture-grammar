@@ -1,0 +1,8 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+pyswip==0.3.2
+pydantic==2.9.0
+orjson==3.10.0
+
+# ML / Training pipeline (install only when training)
+# pip install -r training/requirements.txt

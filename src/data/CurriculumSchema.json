@@ -2,8 +2,8 @@
   "$schema": "CurriculumSchema/v1.0",
   "meta": {
     "version": "1.0.0",
-    "description": "Schema definition for Gesture Grammar curriculum lessons",
-    "author": "Gesture Grammar Team"
+    "description": "Schema definition for MLAF curriculum lessons",
+    "author": "MLAF Team"
   },
 
   "schema_definition": {

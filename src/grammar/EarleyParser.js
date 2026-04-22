@@ -1,5 +1,6 @@
 /**
  * EarleyParser.js — Parser wrapper using Nearley.js (Earley algorithm)
+ * Part of the MLAF (Multimodal Language Acquisition Framework) system.
  *
  * Two-phase validation:
  *   Phase 1 (Syntactic): CFG enforces word order (S → NP VP) and transitivity
@@ -11,15 +12,15 @@
 
 import nearley from 'nearley';
 import grammarDef from './GestureGrammar.js';
-import { LEXICON } from '../utils/GrammarEngine.js';
+import { LEXICON } from '../data/Lexicon.js';
 
 // ── Human-readable category labels ─────────────────────────────────────────────
 
 const CATEGORY_LABELS = {
   SUBJECT_I: 'Subject', SUBJECT_YOU: 'Subject', SUBJECT_HE: 'Subject',
   SUBJECT_SHE: 'Subject', SUBJECT_WE: 'Subject', SUBJECT_THEY: 'Subject',
-  GRAB: 'Verb', EAT: 'Verb', WANT: 'Verb', DRINK: 'Verb',
-  GRABS: 'Verb', EATS: 'Verb', WANTS: 'Verb', DRINKS: 'Verb',
+  GRAB: 'Verb', EAT: 'Verb', WANT: 'Verb', DRINK: 'Verb', SEE: 'Verb',
+  GRABS: 'Verb', EATS: 'Verb', WANTS: 'Verb', DRINKS: 'Verb', SEES: 'Verb',
   GO: 'Verb', STOP: 'Verb', GOES: 'Verb', STOPS: 'Verb',
   APPLE: 'Object', BALL: 'Object', WATER: 'Object',
   FOOD: 'Object', BOOK: 'Object', HOUSE: 'Object',
@@ -37,8 +38,10 @@ const NONTERMINAL_SUGGESTIONS = {
 // ── Helper: build readable sentence from parse tree ────────────────────────────
 
 function buildReadableSentence(parseTree) {
+  if (!parseTree) return '';
   const words = [];
   function walk(node) {
+    if (!node) return;
     if (node.value) {
       const entry = LEXICON[node.value];
       words.push(entry ? entry.display : node.value);
@@ -57,9 +60,10 @@ function buildReadableSentence(parseTree) {
 // ── Helper: extract NP and verb node from parse tree ───────────────────────────
 
 function extractParts(parseTree) {
-  const np = parseTree.children[0]; // NP node
-  const vp = parseTree.children[1]; // VP node
-  const verbNode = vp.children[0]; // VT or VI node
+  const children = parseTree?.children || [];
+  const np = children[0] || null;
+  const vp = children[1] || null;
+  const verbNode = vp?.children?.[0] || null;
   return { np, vp, verbNode };
 }
 
@@ -67,6 +71,7 @@ function extractParts(parseTree) {
 
 function checkAgreement(parseTree) {
   const { np, verbNode } = extractParts(parseTree);
+  if (!np || !verbNode) return { valid: true };
   const needsSForm = np.person === 3 && np.number === 'singular';
   const verbEntry = LEXICON[verbNode.value];
 
@@ -190,7 +195,7 @@ function findFailurePoint(sentenceArray) {
 // ── Main export ────────────────────────────────────────────────────────────────
 
 /**
- * Validates a sentence array against the gesture grammar CFG.
+ * Validates a sentence array against the MLAF grammar CFG.
  *
  * @param {string[]} sentenceArray - Array of grammar ID strings (e.g., ['SUBJECT_I', 'GRAB', 'APPLE'])
  * @returns {object} Validation result with shape:
@@ -198,7 +203,7 @@ function findFailurePoint(sentenceArray) {
  */
 export function validateSentence(sentenceArray) {
   // ── Empty input ──────────────────────────────────────────────────────────────
-  if (!sentenceArray || sentenceArray.length === 0) {
+  if (!Array.isArray(sentenceArray) || sentenceArray.length === 0) {
     return {
       isValid: false,
       isComplete: false,
@@ -252,15 +257,17 @@ export function validateSentence(sentenceArray) {
       if (prevParser.results.length > 0) {
         // Previous tokens formed a complete sentence — extra tokens
         const prevVerb = extractParts(prevParser.results[0]).verbNode;
-        const verbEntry = LEXICON[prevVerb.value];
-        if (!prevVerb.sForm && prevVerb.type === 'VI') {
-          return {
-            isValid: false,
-            isComplete: false,
-            error: 'Intransitive verb cannot take an Object.',
-            suggestion: `"${verbEntry?.display}" doesn't need an Object. Remove "${failedEntry?.display}" or use a transitive verb.`,
-            expectedNext: [],
-          };
+        if (prevVerb?.value) {
+          const verbEntry = LEXICON[prevVerb.value];
+          if (prevVerb.type === 'VI') {
+            return {
+              isValid: false,
+              isComplete: false,
+              error: 'Intransitive verb cannot take an Object.',
+              suggestion: `"${verbEntry?.display}" doesn't need an Object. Remove "${failedEntry?.display}" or use a transitive verb.`,
+              expectedNext: [],
+            };
+          }
         }
         return {
           isValid: false,

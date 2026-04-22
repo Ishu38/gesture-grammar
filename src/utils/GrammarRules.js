@@ -122,6 +122,7 @@ export const IRREGULAR_VERBS = {
   want:  { base: 'want',  s_form: 'wants', past: 'wanted',   ing: 'wanting' },
   grab:  { base: 'grab',  s_form: 'grabs', past: 'grabbed',  ing: 'grabbing'},
   stop:  { base: 'stop',  s_form: 'stops', past: 'stopped',  ing: 'stopping'},
+  drink: { base: 'drink', s_form: 'drinks',past: 'drank',    ing: 'drinking'},
 };
 
 // =============================================================================

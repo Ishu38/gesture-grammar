@@ -1,0 +1,59 @@
+{
+  "model_type": "CNN_1D",
+  "onnx_file": "gesture_cnn_EXP_002.onnx",
+  "input_shape": [
+    1,
+    21,
+    3
+  ],
+  "output_shape": [
+    1,
+    19
+  ],
+  "num_classes": 19,
+  "gesture_ids": [
+    "subject_i",
+    "subject_you",
+    "subject_he",
+    "subject_she",
+    "subject_we",
+    "subject_they",
+    "verb_want",
+    "verb_eat",
+    "verb_see",
+    "verb_grab",
+    "verb_drink",
+    "verb_go",
+    "verb_stop",
+    "object_food",
+    "object_water",
+    "object_book",
+    "object_apple",
+    "object_ball",
+    "object_house"
+  ],
+  "class_names": [
+    "subject_i",
+    "subject_you",
+    "subject_he",
+    "subject_she",
+    "subject_we",
+    "subject_they",
+    "verb_want",
+    "verb_eat",
+    "verb_see",
+    "verb_grab",
+    "verb_drink",
+    "verb_go",
+    "verb_stop",
+    "object_food",
+    "object_water",
+    "object_book",
+    "object_apple",
+    "object_ball",
+    "object_house"
+  ],
+  "normalization": "wrist_origin_unit_scale",
+  "val_accuracy": 0.9965349965349966,
+  "val_f1_macro": 0.9964906977656328
+}

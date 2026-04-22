@@ -1,0 +1,93 @@
+{
+  "$schema": "../CurriculumSchema.json",
+  "level_id": "LVL_04_COMPLETE",
+  "title": "Complete Sentences",
+  "description": "Practice building complete sentences with objects. Learn which verbs need objects (transitive) and which don't (intransitive).",
+  "difficulty": 2,
+  "estimated_time_minutes": 10,
+  "prerequisites": ["LVL_03_PRONOUN_VERBS"],
+  "learning_objectives": [
+    "Distinguish transitive verbs (need object) from intransitive (no object)",
+    "Build complete SVO sentences with all object gestures",
+    "Recognize when a sentence is incomplete"
+  ],
+  "grammar_concepts": ["TRANSITIVITY", "SENTENCE_COMPLETENESS"],
+  "intro_content": {
+    "title": "Complete Your Sentences!",
+    "explanation": "Some verbs NEED an object to make sense (transitive): 'I grab ___'. Others are complete without one (intransitive): 'I stop'. Knowing the difference helps you build correct sentences.",
+    "examples": [
+      { "correct": "I grab apple.", "rule": "Transitive: grab needs an object" },
+      { "correct": "I stop.", "rule": "Intransitive: stop is complete without an object" },
+      { "incorrect": "I grab.", "error": "Incomplete! 'Grab' needs something to grab" }
+    ]
+  },
+  "challenges": [
+    {
+      "challenge_id": "CH_04_01",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 1,
+      "prompt_display": "Build: 'I drink water'",
+      "prompt_spoken": "Build the sentence: I drink water.",
+      "context_description": "A person drinking a glass of water",
+      "target_concept": "Transitive Verb with Object",
+      "target_concept_explanation": "'Drink' is transitive — it needs an object (what you drink).",
+      "required_sequence": ["SUBJECT_I", "DRINK", "WATER"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "Who is drinking? Start with the subject.",
+        "What action? Use the DRINK verb gesture.",
+        "What are they drinking? Complete with the object."
+      ],
+      "error_feedback_map": {
+        "SUBJECT_I|DRINK": {
+          "error_type": "INCOMPLETE_SENTENCE",
+          "feedback": "'Drink' is transitive — you need to say WHAT you drink. Add an object!",
+          "rule_reference": "Transitive verbs require a direct object.",
+          "gesture_hint": "Add WATER to complete the sentence"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 20, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    },
+    {
+      "challenge_id": "CH_04_02",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 2,
+      "prompt_display": "Build: 'We want book'",
+      "prompt_spoken": "Build the sentence: We want book.",
+      "context_description": "Children reaching for a book",
+      "target_concept": "Plural Subject with Transitive Verb",
+      "target_concept_explanation": "'We' is 1st person plural. Use the base verb form 'want' (not 'wants').",
+      "required_sequence": ["SUBJECT_WE", "WANT", "BOOK"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "'We' means more than one person. Use the WE gesture.",
+        "'We' uses the base form: 'want' not 'wants'.",
+        "What do we want? Finish with the object."
+      ],
+      "error_feedback_map": {
+        "SUBJECT_WE|WANTS|BOOK": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "'We' is plural! Use the base form 'want', not 'wants'. The S-form is only for He/She/It.",
+          "rule_reference": "Plural subjects (We, They) use base form verbs.",
+          "gesture_hint": "Use WANT instead of WANTS"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 20, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    }
+  ],
+  "summary": {
+    "key_takeaways": [
+      "Transitive verbs (grab, eat, drink, want) need an object",
+      "Intransitive verbs (stop, go) are complete without an object",
+      "Plural subjects (We, They) use base verb forms",
+      "Always check: is my sentence complete?"
+    ],
+    "common_mistakes": [
+      "Leaving out the object with transitive verbs",
+      "Using S-form with plural subjects",
+      "Adding unnecessary objects to intransitive verbs"
+    ],
+    "next_lesson": "LVL_05_VERB_AGREE"
+  },
+  "completion_criteria": { "min_score_percent": 70, "max_errors_per_challenge": 3, "required_challenges_completed": 2 }
+}

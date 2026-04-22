@@ -1,8 +1,8 @@
 # MLAF — Multimodal Language Acquisition Framework
 
-[![tests](https://github.com/Ishu38/gesture-grammar/actions/workflows/test.yml/badge.svg)](https://github.com/Ishu38/gesture-grammar/actions/workflows/test.yml)
 [![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-lightgrey.svg)](LICENSE)
 [![Live demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://multi-modal-gesture-grammar.vercel.app)
+[![Patent Pending](https://img.shields.io/badge/Patent-Pending-blueviolet.svg)](#)
 
 In-browser, real-time English grammar acquisition through hand gestures — designed for learners with motor impairment and deaf/hard-of-hearing users. Combines symbolic AI (formal grammars, type theory, knowledge graphs) with neural perception (MediaPipe vision, ONNX classification) so the system adapts to each learner's motor abilities in real time.
 
@@ -50,7 +50,7 @@ Frontend deploys to Vercel as a PWA. Backend deploys to Hugging Face Spaces (Doc
 - **Frontend:** React 19, Vite 7, MediaPipe, ONNX Runtime Web, Nearley, graphology, Tailwind CSS, vite-plugin-pwa
 - **Backend:** Python 3.11, FastAPI, Uvicorn, pyswip, SWI-Prolog, Pydantic v2
 - **Infra:** Docker (multi-stage), Vercel (frontend), Hugging Face Spaces (backend)
-- **Code:** ~12K LOC of core, 214 tests passing
+- **Code:** ~12K LOC of core, vitest suite of 214 tests (full source held privately during patent prosecution — see *License & source availability* below)
 
 ## Run locally
 
@@ -103,9 +103,11 @@ Frontend-only: `npm run dev:frontend` (port 5173, Vite proxy forwards `/grammar/
 
 Built in participatory consultation with motor-impaired and deaf/hard-of-hearing learners. Empirical user-study results forthcoming.
 
-## License
+## License & source availability
 
 [PolyForm Noncommercial 1.0.0](LICENSE) — free to read, run locally, study, evaluate, and use for any noncommercial purpose (research, education, personal study, hobby). Commercial use, redistribution, and derivative works for commercial purposes require a separate license from the author.
+
+This repository contains the public surface area of MLAF: the frontend shell, project documentation, the live demo, and the deployment configuration. The grammar engine internals (Prolog rules, ISL interference logic), trained gesture-classifier weights, training data, and full test suite are held privately during patent prosecution. Reviewers, evaluators, and prospective licensees can request access to the full source under a mutual NDA — contact the author below.
 
 For commercial licensing inquiries, contact the author directly.
 

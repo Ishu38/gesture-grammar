@@ -21,7 +21,9 @@ const FINGER_JOINTS = {
   pinky:  { mcp: 17, pip: 18, dip: 19 },
 };
 
-const OPEN_THRESHOLD = 160; // degrees — above this the finger is "extended"
+// Aligned with gestureDetection.js EXTENDED_THRESHOLD (155°) so UI display
+// and actual gesture detection agree on finger state.
+const OPEN_THRESHOLD = 155; // degrees — above this the finger is "extended"
 
 /**
  * Compute the PIP/IP joint angle for a finger.

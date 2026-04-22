@@ -1,0 +1,93 @@
+{
+  "$schema": "../CurriculumSchema.json",
+  "level_id": "LVL_05_VERB_AGREE",
+  "title": "Advanced Verb Agreement",
+  "description": "Master the full subject-verb agreement paradigm across all persons and numbers.",
+  "difficulty": 3,
+  "estimated_time_minutes": 12,
+  "prerequisites": ["LVL_04_COMPLETE"],
+  "learning_objectives": [
+    "Apply correct verb forms for all 6 subject pronouns",
+    "Distinguish singular (S-form) from plural (base form) verbs",
+    "Build grammatically correct sentences with any subject-verb combination"
+  ],
+  "grammar_concepts": ["FULL_AGREEMENT_PARADIGM", "PERSON_NUMBER_SYSTEM"],
+  "intro_content": {
+    "title": "The Full Agreement Table",
+    "explanation": "Now let's put it all together. For every subject, you need the right verb form:\n\n• I/You/We/They → base form (grab, eat, want)\n• He/She → S-form (grabs, eats, wants)\n\nThis is the complete present tense agreement system.",
+    "examples": [
+      { "correct": "They eat food.", "rule": "Plural → base form" },
+      { "correct": "He eats food.", "rule": "3rd singular → S-form" },
+      { "incorrect": "They eats food.", "error": "Wrong! 'They' needs base form 'eat'" }
+    ]
+  },
+  "challenges": [
+    {
+      "challenge_id": "CH_05_01",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 1,
+      "prompt_display": "Build: 'They grab ball'",
+      "prompt_spoken": "Build the sentence: They grab ball.",
+      "context_description": "A group of children reaching for a ball",
+      "target_concept": "Plural Subject with Base Form Verb",
+      "target_concept_explanation": "'They' is 3rd person PLURAL. Plural subjects always use the base verb form.",
+      "required_sequence": ["SUBJECT_THEY", "GRAB", "BALL"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "'They' refers to multiple people. Which gesture represents a group?",
+        "Plural subjects use BASE form: 'grab' not 'grabs'.",
+        "What do they grab? Add the object."
+      ],
+      "error_feedback_map": {
+        "SUBJECT_THEY|GRABS|BALL": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "'They' is PLURAL — use 'grab' (base form), not 'grabs' (S-form). Only He/She/It uses the S-form.",
+          "rule_reference": "Plural subjects → base form. Singular 3rd person → S-form.",
+          "gesture_hint": "Use GRAB gesture, not GRABS"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 18, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    },
+    {
+      "challenge_id": "CH_05_02",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 2,
+      "prompt_display": "Build: 'You want apple'",
+      "prompt_spoken": "Build the sentence: You want apple.",
+      "context_description": "Pointing at someone who looks at an apple",
+      "target_concept": "Second Person with Base Form",
+      "target_concept_explanation": "'You' is 2nd person — always uses the base verb form, whether singular or plural.",
+      "required_sequence": ["SUBJECT_YOU", "WANT", "APPLE"],
+      "acceptable_alternatives": [],
+      "hints": [
+        "'You' is 2nd person. Which gesture points to the other person?",
+        "'You' always uses the base form: 'want' not 'wants'.",
+        "Complete with the object."
+      ],
+      "error_feedback_map": {
+        "SUBJECT_YOU|WANTS|APPLE": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "'You' uses the base form 'want', not 'wants'. The S-form is only for He/She/It.",
+          "rule_reference": "You → base form (want, grab, eat)",
+          "gesture_hint": "Use WANT instead of WANTS"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 18, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    }
+  ],
+  "summary": {
+    "key_takeaways": [
+      "I/You/We/They → base form (grab, eat, want, stop, go, drink)",
+      "He/She → S-form (grabs, eats, wants, stops, goes, drinks)",
+      "This rule only applies in PRESENT tense",
+      "Practice all combinations until they feel automatic"
+    ],
+    "common_mistakes": [
+      "Using S-form with They (They grabs ✗ → They grab ✓)",
+      "Using S-form with You (You wants ✗ → You want ✓)",
+      "Forgetting S-form with He/She (He grab ✗ → He grabs ✓)"
+    ],
+    "next_lesson": null
+  },
+  "completion_criteria": { "min_score_percent": 70, "max_errors_per_challenge": 3, "required_challenges_completed": 2 }
+}

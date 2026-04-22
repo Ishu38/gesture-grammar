@@ -1,4 +1,13 @@
 /* =============================================================================
+   ANIMATIONS
+   ============================================================================= */
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* =============================================================================
    BASE STYLES
    ============================================================================= */
 
@@ -1027,6 +1036,258 @@
 }
 
 /* =============================================================================
+   ACCESSIBILITY PANEL
+   ============================================================================= */
+
+.accessibility-panel {
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.accessibility-header {
+  margin-bottom: 0.4rem;
+}
+
+.accessibility-title {
+  margin: 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #64748b;
+}
+
+.profile-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.profile-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-option.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+}
+
+.profile-icon {
+  font-size: 1.1rem;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-label {
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.profile-desc {
+  font-size: 0.6rem;
+  color: #64748b;
+}
+
+.profile-check {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.profile-active-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.active-badge {
+  padding: 0.1rem 0.4rem;
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 3px;
+  color: #93c5fd;
+  font-weight: 600;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+/* =============================================================================
+   TEXT TO SPEECH PANEL
+   ============================================================================= */
+
+.tts-panel {
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tts-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.tts-icon {
+  font-size: 1rem;
+}
+
+.tts-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tts-sentence {
+  padding: 0.4rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  min-height: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.tts-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tts-speak-btn {
+  padding: 0.35rem 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tts-speak-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.tts-speak-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tts-speak-btn.speaking {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.tts-rate {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tts-rate-label {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+.tts-rate input[type="range"] {
+  width: 60px;
+  accent-color: #3b82f6;
+}
+
+/* =============================================================================
+   ERROR OVERLAY CANVAS
+   ============================================================================= */
+
+.error-overlay-canvas {
+  pointer-events: none;
+}
+
+/* =============================================================================
+   HIGH CONTRAST MODE
+   ============================================================================= */
+
+.app.high-contrast {
+  background: #000000;
+}
+
+.app.high-contrast .app-header {
+  background: #000;
+  border-bottom-color: #fff;
+}
+
+.app.high-contrast .app-header h1 {
+  color: #ffffff;
+}
+
+.app.high-contrast .app-header .subtitle {
+  color: #cccccc;
+}
+
+.app.high-contrast .sandbox-mode {
+  background: #000;
+}
+
+.app.high-contrast .gesture-sidebar {
+  background: #111;
+  border-color: #fff;
+}
+
+.app.high-contrast .sentence-strip {
+  background: #111;
+  border-color: #fff;
+}
+
+.app.high-contrast .validation-panel {
+  border-width: 2px;
+}
+
+.app.high-contrast .word-block {
+  border-width: 3px;
+}
+
+.app.high-contrast .debug-panel {
+  background: #111;
+  color: #fff;
+}
+
+.app.high-contrast .profile-option {
+  border-color: #666;
+  color: #fff;
+}
+
+.app.high-contrast .profile-option.active {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* =============================================================================
    PARSE TREE VISUALIZER
    ============================================================================= */
 
@@ -1179,4 +1440,690 @@
 .legend-label strong {
   color: #cbd5e1;
   font-family: var(--font-mono);
+}
+
+/* =============================================================================
+   ISL INTERFERENCE PANEL
+   Displays real-time detection of Indian Sign Language → English transfer errors.
+   Patent-critical UI: the visible output of ISLInterferenceDetector.js
+   ============================================================================= */
+
+.isl-interference-panel {
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  border: 1.5px solid;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 0.78rem;
+  overflow: hidden;
+}
+
+.isl-severity-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.07);
+}
+
+.isl-severity-warning {
+  border-color: rgba(234, 179, 8, 0.5);
+  background: rgba(234, 179, 8, 0.07);
+}
+
+.isl-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.isl-severity-error .isl-panel-header {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.isl-severity-warning .isl-panel-header {
+  background: rgba(234, 179, 8, 0.12);
+}
+
+.isl-panel-icon {
+  font-size: 0.9rem;
+}
+
+.isl-severity-error .isl-panel-icon { color: #f87171; }
+.isl-severity-warning .isl-panel-icon { color: #facc15; }
+
+.isl-panel-title {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.isl-severity-error .isl-panel-title { color: #fca5a5; }
+.isl-severity-warning .isl-panel-title { color: #fde047; }
+
+.isl-pattern-count {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-family: var(--font-mono);
+}
+
+.isl-pattern-block {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.isl-pattern-block:last-child {
+  border-bottom: none;
+}
+
+.isl-pattern-name {
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+  color: #94a3b8;
+}
+
+.isl-pattern-description {
+  color: #cbd5e1;
+  margin-bottom: 0.35rem;
+  line-height: 1.4;
+}
+
+.isl-correction {
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 2px solid rgba(74, 222, 128, 0.5);
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.35rem;
+  color: #86efac;
+  line-height: 1.4;
+  border-radius: 0 4px 4px 0;
+}
+
+.isl-correction-label {
+  font-weight: 600;
+  color: #4ade80;
+  margin-right: 0.4rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.isl-examples {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.5rem;
+  align-items: center;
+  font-size: 0.7rem;
+}
+
+.isl-example-label {
+  color: #64748b;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.isl-example-bad {
+  color: #f87171;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.isl-example-good {
+  color: #4ade80;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+/* =============================================================================
+   AUTOMATICITY / FLUENCY PANEL
+   Visualizes gesture response latency as a proxy for automaticity development.
+   Patent-critical UI: output of AutomaticityTracker.js
+   Cognitive science basis: NRP Big Five Fluency component (Birsh & Carreker,
+   2018, Ch.1, p.56; Ch.12); LaBerge & Samuels (1974) automaticity theory.
+   ============================================================================= */
+
+.automaticity-panel {
+  border-top: 1px solid rgba(167, 139, 250, 0.25) !important;
+}
+
+.automaticity-row {
+  display: grid;
+  grid-template-columns: 5rem 1fr 2.5rem 4rem 1rem 3rem;
+  gap: 0 0.4rem;
+  align-items: center;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.7rem;
+}
+
+.automaticity-row:last-child {
+  border-bottom: none;
+}
+
+.automaticity-gesture-id {
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.automaticity-bar-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.automaticity-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, #7c3aed);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.automaticity-score-label {
+  color: #c4b5fd;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-align: right;
+}
+
+.automaticity-label {
+  color: #64748b;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+.automaticity-trend {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+}
+
+.automaticity-ms {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-align: right;
+  color: #475569;
+}
+
+/* =============================================================================
+   COGNITIVE LOAD BADGE
+   Real-time load level indicator driven by CognitiveLoadAdapter jitter computation.
+   Cognitive science basis: Birsh & Carreker (2018), Ch.8 Executive Function;
+   Ch.11 Multi-Modal Handwriting (motor instability as load proxy).
+   ============================================================================= */
+
+.cognitive-load-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(0, 0, 0, 0.4);
+  transition: color 0.5s ease, border-color 0.5s ease;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.cl-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background 0.5s ease;
+  flex-shrink: 0;
+}
+
+/* =============================================================================
+   MASTERY GATE PANEL
+   Visualizes cumulative curriculum progression gate.
+   Patent-critical UI: output of GestureMasteryGate.js
+   Cognitive science basis: Structured Literacy cumulative principle
+   (Birsh & Carreker, 2018, Ch.1 p.52; Ch.2); Criterion 5 Preface p.44–45.
+   ============================================================================= */
+
+.mastery-panel {
+  border-top: 1px solid rgba(52, 211, 153, 0.25) !important;
+}
+
+.mastery-stage-block {
+  margin: 0.2rem 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.mastery-stage-complete {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.mastery-stage-active {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(96, 165, 250, 0.05);
+}
+
+.mastery-stage-locked {
+  border-color: rgba(100, 116, 139, 0.2);
+  background: rgba(0, 0, 0, 0.15);
+  opacity: 0.5;
+}
+
+.mastery-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.mastery-stage-icon {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.mastery-stage-complete .mastery-stage-icon { color: #34d399; }
+.mastery-stage-active  .mastery-stage-icon  { color: #60a5fa; }
+.mastery-stage-locked  .mastery-stage-icon  { color: #475569; }
+
+.mastery-stage-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.mastery-stage-complete .mastery-stage-label { color: #6ee7b7; }
+.mastery-stage-active  .mastery-stage-label  { color: #93c5fd; }
+.mastery-stage-locked  .mastery-stage-label  { color: #475569; }
+
+.mastery-gesture-list {
+  padding: 0.15rem 0.5rem 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mastery-gesture-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 4.5rem;
+  gap: 0 0.4rem;
+  align-items: center;
+  font-size: 0.68rem;
+}
+
+.mastery-gesture-id {
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mastery-bar-wrap {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mastery-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background 0.4s ease;
+  min-width: 2px;
+}
+
+.mastery-status-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-align: right;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+/* =============================================================================
+   SESSION DATA LOGGER PANEL
+   Diagnostic-prescriptive data display for session monitoring.
+   Patent-critical UI: output of SessionDataLogger.js
+   Cognitive science basis: Structured Literacy diagnostic-prescriptive principle
+   (Birsh & Carreker, 2018, Ch.1 p.52; Ch.2; Preface Criterion 7).
+   ============================================================================= */
+
+.session-log-panel {
+  border-top: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+.session-export-btn {
+  padding: 0.2rem 0.5rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 4px;
+  color: #fbbf24;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.session-export-btn:hover {
+  background: rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.6);
+  transform: scale(1.05);
+}
+
+.session-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.3rem;
+  padding: 0.3rem 0;
+}
+
+.session-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.session-stat-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.session-stat-label {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.session-load-dist {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+}
+
+.session-load-label {
+  font-size: 0.6rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.session-load-bar {
+  flex: 1;
+  height: 6px;
+  display: flex;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.session-load-seg {
+  height: 100%;
+  transition: width 0.5s ease;
+  min-width: 0;
+}
+
+/* =============================================================================
+   LOW-STIMULUS MODE (ASD Accessibility)
+   Disables all animations, transitions, pulsing, glowing, expanding elements.
+   Applied when AccessibilityProfile.isLowStimulus() returns true.
+   Also respects prefers-reduced-motion for system-level accessibility.
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.app.low-stimulus *,
+.app.low-stimulus *::before,
+.app.low-stimulus *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.app.low-stimulus .pulse-glow,
+.app.low-stimulus .pwa-update-icon {
+  animation: none !important;
+}
+
+.app.low-stimulus .gesture-card:hover,
+.app.low-stimulus .pwa-btn-primary:hover,
+.app.low-stimulus .tts-speak-btn:hover:not(:disabled),
+.app.low-stimulus .session-export-btn:hover {
+  transform: none !important;
+}
+
+.app.low-stimulus .parse-tree-container {
+  animation: none !important;
+}
+
+/* Predictable feedback zone — fixed position, no movement */
+.predictable-feedback-zone {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  max-width: 90vw;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+.predictable-feedback-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.predictable-feedback-message.feedback-error {
+  background: #1a1a2e;
+  border: 2px solid #ef4444;
+  color: #fca5a5;
+}
+
+.predictable-feedback-message.feedback-success {
+  background: #1a1a2e;
+  border: 2px solid #22c55e;
+  color: #86efac;
+}
+
+.predictable-feedback-message.feedback-hint {
+  background: #1a1a2e;
+  border: 2px solid #3b82f6;
+  color: #93c5fd;
+}
+
+/* Perseveration pause overlay */
+.perseveration-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.perseveration-card {
+  background: #1a1a2e;
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  padding: 24px 32px;
+  max-width: 400px;
+  text-align: center;
+  color: #e2e8f0;
+}
+
+.perseveration-card h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #93c5fd;
+}
+
+.perseveration-card p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.perseveration-suggestion {
+  padding: 10px;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #86efac;
+}
+
+.perseveration-continue-btn {
+  padding: 8px 24px;
+  background: #3b82f6;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Session timer bar */
+.session-timer-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9800;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.session-timer-fill {
+  height: 100%;
+  background: #3b82f6;
+}
+
+.session-timer-fill.warning {
+  background: #f59e0b;
+}
+
+.session-timer-fill.ending {
+  background: #ef4444;
+}
+
+/* Micro-break overlay */
+.micro-break-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 26, 0.92);
+}
+
+.micro-break-card {
+  background: #1a1a2e;
+  border: 2px solid #60a5fa;
+  border-radius: 16px;
+  padding: 32px 40px;
+  max-width: 360px;
+  text-align: center;
+  color: #e2e8f0;
+}
+
+.micro-break-card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #93c5fd;
+}
+
+.micro-break-card p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.micro-break-timer {
+  font-size: 32px;
+  font-weight: 700;
+  color: #60a5fa;
+  font-family: var(--font-mono);
+  margin-bottom: 20px;
+}
+
+.micro-break-ready-btn {
+  padding: 10px 32px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Session end overlay */
+.session-end-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 15, 26, 0.92);
+}
+
+.session-end-card {
+  background: #1a1a2e;
+  border: 2px solid #22c55e;
+  border-radius: 16px;
+  padding: 32px 40px;
+  max-width: 360px;
+  text-align: center;
+  color: #e2e8f0;
+}
+
+.session-end-card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #86efac;
+}
+
+.session-end-card p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
 }

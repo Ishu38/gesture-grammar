@@ -2,7 +2,7 @@
   "$schema": "GestureLexicon/v1.0",
   "meta": {
     "version": "1.0.0",
-    "description": "Physical-to-Abstract mapping for Gesture Grammar system",
+    "description": "Physical-to-Abstract mapping for MLAF (Multimodal Language Acquisition Framework)",
     "landmark_reference": {
       "WRIST": 0,
       "THUMB": { "CMC": 1, "MCP": 2, "IP": 3, "TIP": 4 },
@@ -156,13 +156,14 @@
         "type": "MODIFIER",
         "english_gloss": "Plural / Multiple / -s suffix",
         "usage_context": "Modifies preceding noun to indicate plurality",
+        "grammar_supported": false,
         "grammatical_properties": {
           "number": "plural",
           "morphological_role": "suffix"
         }
       },
       "priority": 3,
-      "notes": "Two fingers represent 'more than one' - a visual quantity marker"
+      "notes": "PLANNED — not yet in Earley grammar or LEXICON. Two fingers represent 'more than one' - a visual quantity marker"
     },
 
     {
@@ -226,13 +227,14 @@
         "type": "GRAMMATICAL_MARKER",
         "english_gloss": "[Active Voice Marker]",
         "usage_context": "Indicates Subject performs action (S does V to O)",
+        "grammar_supported": false,
         "grammatical_properties": {
           "voice": "active",
           "agent_position": "subject"
         }
       },
       "priority": 4,
-      "notes": "Forward motion represents active agency - subject initiates action"
+      "notes": "PLANNED — not yet in Earley grammar or LEXICON. Forward motion represents active agency - subject initiates action"
     },
 
     {
@@ -266,6 +268,7 @@
         "type": "GRAMMATICAL_MARKER",
         "english_gloss": "[Passive Voice Marker]",
         "usage_context": "Indicates Subject receives action (S is V-ed by O)",
+        "grammar_supported": false,
         "grammatical_properties": {
           "voice": "passive",
           "agent_position": "object"
@@ -417,10 +420,11 @@
         "concept": "AFFIRMATION",
         "type": "MODIFIER",
         "english_gloss": "Yes / Agree / Confirm",
-        "usage_context": "Affirms or confirms preceding statement"
+        "usage_context": "Affirms or confirms preceding statement",
+        "grammar_supported": false
       },
       "priority": 3,
-      "notes": "Universal positive affirmation gesture"
+      "notes": "PLANNED — not yet in Earley grammar or LEXICON. Universal positive affirmation gesture"
     },
 
     {
@@ -449,7 +453,7 @@
         "logical_join": "AND"
       },
       "semantic_mapping": {
-        "grammar_id": "OBJECT_APPLE",
+        "grammar_id": "APPLE",
         "concept": "CONCRETE_NOUN",
         "type": "OBJECT",
         "english_gloss": "Apple / Food item",
@@ -471,11 +475,11 @@
     },
     "VERB": {
       "description": "Action words",
-      "grammar_ids": ["GRAB", "GO", "EAT", "WANT", "STOP"]
+      "grammar_ids": ["GRAB", "GO", "EAT", "WANT", "STOP", "SEE", "DRINK"]
     },
     "OBJECT": {
       "description": "Noun phrases that receive the action",
-      "grammar_ids": ["OBJECT_APPLE", "OBJECT_BALL", "OBJECT_WATER", "OBJECT_FOOD", "OBJECT_BOOK"]
+      "grammar_ids": ["APPLE", "BALL", "WATER", "FOOD", "BOOK", "HOUSE"]
     },
     "MODIFIER": {
       "description": "Words that modify other elements",

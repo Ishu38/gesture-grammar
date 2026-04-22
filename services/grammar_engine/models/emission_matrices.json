@@ -1,0 +1,411 @@
+{
+  "timestamp": "2026-03-03T11:14:48.982664",
+  "project": "MLAF - Multimodal Language Acquisition Framework",
+  "institution": "Research collaboration \u2014 IIT Patna & IIT Kharagpur",
+  "uasam_emission": {
+    "subject_i": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "subject_you": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "subject_he": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "subject_she": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "subject_we": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "subject_they": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_want": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_eat": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_see": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_grab": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_drink": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_go": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "verb_stop": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_food": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_water": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_book": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_apple": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_ball": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    },
+    "object_house": {
+      "silent": 0.25,
+      "vocalization": 0.25,
+      "speech_attempt": 0.25,
+      "clear_speech": 0.25
+    }
+  },
+  "uasam_note": "uniform prior (no audio data)",
+  "gaze_emission": {
+    "subject_i": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "subject_you": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "subject_he": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "subject_she": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "subject_we": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "subject_they": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_want": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_eat": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_see": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_grab": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_drink": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_go": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "verb_stop": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_food": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_water": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_book": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_apple": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_ball": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    },
+    "object_house": {
+      "direct": 0.25,
+      "averted": 0.25,
+      "tracking_hand": 0.25,
+      "tracking_face": 0.25
+    }
+  },
+  "gaze_note": "uniform prior (no gaze data)",
+  "fusion_weights": {
+    "best_weights": {
+      "w_visual": 0.6666666666666667,
+      "w_acoustic": 0.16666666666666669,
+      "w_gaze": 0.16666666666666669
+    },
+    "best_accuracy": 1.0,
+    "grid_search_results": [
+      {
+        "w_visual": 0.6666666666666667,
+        "w_acoustic": 0.16666666666666669,
+        "w_gaze": 0.16666666666666669,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5714285714285715,
+        "w_acoustic": 0.14285714285714288,
+        "w_gaze": 0.28571428571428575,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5,
+        "w_acoustic": 0.125,
+        "w_gaze": 0.37499999999999994,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5714285714285714,
+        "w_acoustic": 0.2857142857142857,
+        "w_gaze": 0.14285714285714285,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5,
+        "w_acoustic": 0.25,
+        "w_gaze": 0.25,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.4444444444444444,
+        "w_acoustic": 0.2222222222222222,
+        "w_gaze": 0.33333333333333326,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5000000000000001,
+        "w_acoustic": 0.375,
+        "w_gaze": 0.12500000000000003,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.44444444444444453,
+        "w_acoustic": 0.33333333333333337,
+        "w_gaze": 0.22222222222222227,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.4,
+        "w_acoustic": 0.3,
+        "w_gaze": 0.3,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.7142857142857143,
+        "w_acoustic": 0.14285714285714288,
+        "w_gaze": 0.14285714285714288,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.625,
+        "w_acoustic": 0.125,
+        "w_gaze": 0.25,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5555555555555556,
+        "w_acoustic": 0.11111111111111113,
+        "w_gaze": 0.33333333333333337,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.625,
+        "w_acoustic": 0.25000000000000006,
+        "w_gaze": 0.12500000000000003,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5555555555555556,
+        "w_acoustic": 0.22222222222222227,
+        "w_gaze": 0.22222222222222227,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5,
+        "w_acoustic": 0.2,
+        "w_gaze": 0.3,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5555555555555556,
+        "w_acoustic": 0.3333333333333333,
+        "w_gaze": 0.11111111111111112,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5,
+        "w_acoustic": 0.3,
+        "w_gaze": 0.2,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.45454545454545453,
+        "w_acoustic": 0.2727272727272727,
+        "w_gaze": 0.2727272727272727,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.75,
+        "w_acoustic": 0.12500000000000003,
+        "w_gaze": 0.12500000000000003,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.6666666666666667,
+        "w_acoustic": 0.11111111111111113,
+        "w_gaze": 0.22222222222222227,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.6,
+        "w_acoustic": 0.1,
+        "w_gaze": 0.3,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.6666666666666666,
+        "w_acoustic": 0.22222222222222224,
+        "w_gaze": 0.11111111111111112,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.6,
+        "w_acoustic": 0.2,
+        "w_gaze": 0.2,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5454545454545454,
+        "w_acoustic": 0.18181818181818182,
+        "w_gaze": 0.2727272727272727,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.6000000000000001,
+        "w_acoustic": 0.30000000000000004,
+        "w_gaze": 0.10000000000000002,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5454545454545455,
+        "w_acoustic": 0.27272727272727276,
+        "w_gaze": 0.18181818181818185,
+        "accuracy": 1.0
+      },
+      {
+        "w_visual": 0.5,
+        "w_acoustic": 0.25,
+        "w_gaze": 0.25,
+        "accuracy": 1.0
+      }
+    ]
+  }
+}

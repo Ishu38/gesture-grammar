@@ -23,3 +23,21 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Environment variables
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+
+# Local backups / scratch
+.vercel.*.bak/
+*.odt
+
+# Training data (tracked outside git / HF Datasets)
+services/grammar_engine/data/processed/
+services/grammar_engine/data/raw/
+services/grammar_engine/data/splits/
+services/grammar_engine/data/custom/

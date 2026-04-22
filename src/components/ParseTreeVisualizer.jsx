@@ -71,20 +71,23 @@ function normalizeTree(node) {
  * then a top-down pass to assign coordinates.
  */
 function computeLayout(tree) {
+  // Use a WeakMap to avoid mutating the input tree nodes
+  const leafCounts = new WeakMap();
+
   // Pass 1: count leaves bottom-up (determines subtree width)
   function countLeaves(node) {
     if (!node.children || node.children.length === 0) {
-      node._leafCount = 1;
+      leafCounts.set(node, 1);
     } else {
-      node._leafCount = node.children.reduce(
+      leafCounts.set(node, node.children.reduce(
         (sum, child) => sum + countLeaves(child), 0
-      );
+      ));
     }
-    return node._leafCount;
+    return leafCounts.get(node);
   }
   countLeaves(tree);
 
-  const totalWidth = tree._leafCount * MIN_LEAF_WIDTH;
+  const totalWidth = leafCounts.get(tree) * MIN_LEAF_WIDTH;
   const nodes = [];
   const edges = [];
   let maxDepth = 0;
@@ -106,7 +109,7 @@ function computeLayout(tree) {
     if (node.children && node.children.length > 0) {
       let childX = x;
       for (const child of node.children) {
-        const childWidth = (child._leafCount / node._leafCount) * width;
+        const childWidth = (leafCounts.get(child) / leafCounts.get(node)) * width;
         const childCx = childX + childWidth / 2;
         const childCy = 30 + (depth + 1) * LEVEL_HEIGHT;
 

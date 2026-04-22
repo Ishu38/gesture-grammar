@@ -1,0 +1,95 @@
+{
+  "$schema": "../CurriculumSchema.json",
+  "level_id": "LVL_03_PRONOUN_VERBS",
+  "title": "Pronouns & Verbs",
+  "description": "Expand your vocabulary with new pronouns (He, She) and verbs (grab, eat). Build longer SVO sentences.",
+  "difficulty": 2,
+  "estimated_time_minutes": 10,
+  "prerequisites": ["LVL_02_SVO_ORDER"],
+  "learning_objectives": [
+    "Use He/She pronoun gestures as subjects",
+    "Combine different subjects with different verbs",
+    "Build SVO sentences with varied vocabulary"
+  ],
+  "grammar_concepts": ["PRONOUN_VARIETY", "TRANSITIVE_VERBS"],
+  "intro_content": {
+    "title": "More Subjects, More Verbs!",
+    "explanation": "Now that you know SVO order, let's practice with more subjects (He, She) and verbs (grab, eat). Remember: the order is always Subject → Verb → Object.",
+    "examples": [
+      { "correct": "He grabs apple.", "rule": "He + S-form verb (grabs) + object" },
+      { "correct": "She eats food.", "rule": "She + S-form verb (eats) + object" }
+    ]
+  },
+  "challenges": [
+    {
+      "challenge_id": "CH_03_01",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 1,
+      "prompt_display": "Build: 'He grabs ball'",
+      "prompt_spoken": "Build the sentence: He grabs ball.",
+      "context_description": "A boy catching a ball",
+      "target_concept": "Third-Person Subject with Transitive Verb",
+      "target_concept_explanation": "'He' is a 3rd person singular subject. With 'He', use the S-form of the verb: 'grabs' not 'grab'.",
+      "required_sequence": ["SUBJECT_HE", "GRABS", "BALL"],
+      "acceptable_alternatives": [
+        { "sequence": ["SUBJECT_HE", "GRAB", "BALL"], "note": "Accepted but agreement note given" }
+      ],
+      "hints": [
+        "Start with the subject: Who grabs the ball?",
+        "'He' needs the S-form verb. What is the S-form of 'grab'?",
+        "Finish with the object: What does he grab?"
+      ],
+      "error_feedback_map": {
+        "SUBJECT_HE|BALL|GRABS": {
+          "error_type": "ORDER_ERROR",
+          "feedback": "Remember SVO order! The verb 'grabs' comes before the object 'ball'.",
+          "rule_reference": "English SVO: Subject → Verb → Object",
+          "gesture_hint": "After HE, sign GRABS, then BALL"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 20, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    },
+    {
+      "challenge_id": "CH_03_02",
+      "challenge_type": "FULL_SENTENCE",
+      "order": 2,
+      "prompt_display": "Build: 'She eats food'",
+      "prompt_spoken": "Build the sentence: She eats food.",
+      "context_description": "A girl eating food",
+      "target_concept": "Female Subject with S-Form Verb",
+      "target_concept_explanation": "'She' is 3rd person singular, just like 'He'. Use S-form verbs with She.",
+      "required_sequence": ["SUBJECT_SHE", "EATS", "FOOD"],
+      "acceptable_alternatives": [
+        { "sequence": ["SUBJECT_SHE", "EATS", "APPLE"], "note": "Correct structure, different object" }
+      ],
+      "hints": [
+        "The subject is 'She' — which gesture represents her?",
+        "'She' is 3rd person singular. Use the S-form: 'eats'.",
+        "What does she eat? Look for a food-related gesture."
+      ],
+      "error_feedback_map": {
+        "SUBJECT_SHE|EAT|FOOD": {
+          "error_type": "AGREEMENT_VIOLATION",
+          "feedback": "'She' needs the S-form verb 'eats', not the base form 'eat'.",
+          "rule_reference": "He/She/It → verb + s",
+          "gesture_hint": "Use EATS instead of EAT"
+        }
+      },
+      "scoring": { "points": 100, "time_bonus_threshold_seconds": 20, "time_bonus_points": 25, "hint_penalty": 10, "error_penalty": 5 }
+    }
+  ],
+  "summary": {
+    "key_takeaways": [
+      "'He' and 'She' are 3rd person singular — they need S-form verbs",
+      "Practice different subject-verb-object combinations",
+      "Always maintain SVO word order"
+    ],
+    "common_mistakes": [
+      "Using base form with He/She (He grab → He grabs)",
+      "Confusing He and She gestures",
+      "Putting object before verb"
+    ],
+    "next_lesson": "LVL_04_COMPLETE"
+  },
+  "completion_criteria": { "min_score_percent": 70, "max_errors_per_challenge": 3, "required_challenges_completed": 2 }
+}

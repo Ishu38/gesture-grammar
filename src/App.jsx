@@ -7,6 +7,7 @@ import SandboxMode from './components/SandboxMode'
 import GestureRecorder from './components/GestureRecorder'
 import SessionReport from './components/SessionReport'
 import DemoHandout from './components/DemoHandout'
+import DemoHandoutBengali from './components/DemoHandoutBengali'
 import AboutUs from './components/AboutUs'
 import ContactUs from './components/ContactUs'
 import { AccessibilityProfile, saveProfileSelection, loadProfileSelection } from './core/AccessibilityProfile'
@@ -34,6 +35,7 @@ const SCREENS = {
   RECORDER: 'RECORDER',
   REPORT: 'REPORT',
   HANDOUT: 'HANDOUT',
+  BENGALI_HANDOUT: 'BENGALI_HANDOUT',
   ABOUT: 'ABOUT',
   CONTACT: 'CONTACT',
 };
@@ -86,10 +88,6 @@ function App() {
     setScreen(SCREENS.MODE_SELECT);
   }, []);
 
-  const handleOpenHandout = useCallback(() => {
-    setScreen(SCREENS.HANDOUT);
-  }, []);
-
   const handleBackToWelcome = useCallback(() => {
     setScreen(SCREENS.WELCOME);
   }, []);
@@ -100,11 +98,12 @@ function App() {
       case 'ABOUT':   setScreen(SCREENS.ABOUT); break;
       case 'CONTACT': setScreen(SCREENS.CONTACT); break;
       case 'HANDOUT': setScreen(SCREENS.HANDOUT); break;
+      case 'BENGALI': setScreen(SCREENS.BENGALI_HANDOUT); break;
       default:        setScreen(SCREENS.WELCOME);
     }
   }, []);
 
-  const isActiveScreen = screen !== SCREENS.WELCOME && screen !== SCREENS.HANDOUT && screen !== SCREENS.ABOUT && screen !== SCREENS.CONTACT;
+  const isActiveScreen = screen !== SCREENS.WELCOME && screen !== SCREENS.HANDOUT && screen !== SCREENS.BENGALI_HANDOUT && screen !== SCREENS.ABOUT && screen !== SCREENS.CONTACT;
 
   return (
     <ErrorBoundary>
@@ -137,7 +136,6 @@ function App() {
         {screen === SCREENS.WELCOME && (
           <WelcomeScreen
             onStart={() => setScreen(SCREENS.PROFILE)}
-            onHandout={handleOpenHandout}
             onNavigate={handleNavigate}
           />
         )}
@@ -300,9 +298,14 @@ function App() {
           />
         )}
 
-        {/* ============== DEMO HANDOUT ============== */}
+        {/* ============== DEMO HANDOUT (ENGLISH) ============== */}
         {screen === SCREENS.HANDOUT && (
-          <DemoHandout onBack={handleBackToWelcome} />
+          <DemoHandout onBack={handleBackToWelcome} onNavigate={handleNavigate} />
+        )}
+
+        {/* ============== DEMO HANDOUT (BENGALI) ============== */}
+        {screen === SCREENS.BENGALI_HANDOUT && (
+          <DemoHandoutBengali onBack={handleBackToWelcome} onNavigate={handleNavigate} />
         )}
 
         {/* ============== ABOUT US ============== */}

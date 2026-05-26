@@ -128,7 +128,7 @@ function FeatureCard({ number, title, desc, highlights, color }) {
   );
 }
 
-export default function WelcomeScreen({ onStart, onHandout, onNavigate }) {
+export default function WelcomeScreen({ onStart, onNavigate }) {
   return (
     <div style={style.screen}>
       {/* ── TOP NAV ── */}
@@ -138,8 +138,9 @@ export default function WelcomeScreen({ onStart, onHandout, onNavigate }) {
           <NavButton onClick={() => onNavigate && onNavigate('HOME')}>Home</NavButton>
           <NavButton onClick={() => onNavigate && onNavigate('ABOUT')}>About Us</NavButton>
           <NavButton onClick={() => onNavigate && onNavigate('CONTACT')}>Contact Us</NavButton>
+          <NavButton onClick={() => onNavigate && onNavigate('HANDOUT')}>Handout</NavButton>
+          <NavButton onClick={() => onNavigate && onNavigate('BENGALI')}>বাংলা</NavButton>
           <span style={{ marginLeft: '0.75rem', ...style.badge, fontSize: '0.58rem' }}>PATENT PENDING</span>
-          {onHandout && <NavButton onClick={onHandout}>Handout</NavButton>}
         </div>
       </div>
 
@@ -181,19 +182,6 @@ export default function WelcomeScreen({ onStart, onHandout, onNavigate }) {
           >
             Try the Demo →
           </button>
-          {onHandout && (
-            <button onClick={onHandout} style={{
-              padding: '0.85rem 2rem', fontSize: '0.9rem', fontWeight: 600,
-              color: BRAND.muted, background: BRAND.surface,
-              border: `1px solid ${BRAND.border}`, borderRadius: 12,
-              cursor: 'pointer', letterSpacing: '0.03em', transition: 'all 0.15s',
-            }}
-              onMouseEnter={e => { e.target.style.borderColor = 'rgba(255,255,255,0.2)'; e.target.style.color = '#e2e8f0'; }}
-              onMouseLeave={e => { e.target.style.borderColor = BRAND.border; e.target.style.color = BRAND.muted; }}
-            >
-              One-Page Handout
-            </button>
-          )}
         </div>
       </div>
 

@@ -38,7 +38,7 @@ function FeatureRow({ icon, title, desc, color = '#4ade80' }) {
   );
 }
 
-export default function DemoHandout({ onBack }) {
+export default function DemoHandout({ onBack, onNavigate }) {
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
@@ -69,6 +69,15 @@ export default function DemoHandout({ onBack }) {
         }}>
           Print Handout
         </button>
+        {onNavigate && (
+          <button onClick={() => onNavigate('BENGALI')} style={{
+            padding: '0.8rem 2rem', fontSize: '0.95rem', fontWeight: 600,
+            color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+            border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px', cursor: 'pointer',
+          }}>
+            বাংলা সংস্করণ
+          </button>
+        )}
         {onBack && (
           <button onClick={onBack} style={{
             padding: '0.8rem 2rem', fontSize: '0.95rem', fontWeight: 600,

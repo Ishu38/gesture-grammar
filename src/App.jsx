@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import ErrorBoundary from './components/ErrorBoundary'
 import WelcomeScreen from './components/WelcomeScreen'
 import ModeSelect from './components/ModeSelect'
@@ -6,6 +6,7 @@ import AccessibilityPanel from './components/AccessibilityPanel'
 import SandboxMode from './components/SandboxMode'
 import GestureRecorder from './components/GestureRecorder'
 import SessionReport from './components/SessionReport'
+import DemoHandout from './components/DemoHandout'
 import { AccessibilityProfile, saveProfileSelection, loadProfileSelection } from './core/AccessibilityProfile'
 import UpdatePrompt, { getAppVersion } from './components/UpdatePrompt'
 import './App.css'
@@ -30,6 +31,7 @@ const SCREENS = {
   SANDBOX: 'SANDBOX',
   RECORDER: 'RECORDER',
   REPORT: 'REPORT',
+  HANDOUT: 'HANDOUT',
 };
 
 function App() {
@@ -37,11 +39,15 @@ function App() {
   const [sessionKey, setSessionKey] = useState(0); // Forces full remount of SandboxMode
   const [profileType, setProfileType] = useState(() => loadProfileSelection());
 
-  // Session data refs — collected during GUIDED/SANDBOX, shown in REPORT
-  const sessionDataRef = useRef({
+  // Session data — collected during GUIDED/SANDBOX, shown in REPORT
+  const [sessionData, setSessionData] = useState({
     sessionStats: null,
     masteryReport: null,
     automaticitySummary: null,
+    knowledgeReport: null,
+    sessionNarrative: null,
+    learnerModel: null,
+    allExplanations: null,
   });
 
   const accessibilityProfile = useMemo(
@@ -61,7 +67,7 @@ function App() {
 
   const handleEndSession = useCallback((data) => {
     if (data) {
-      sessionDataRef.current = data;
+      setSessionData(data);
     }
     setScreen(SCREENS.REPORT);
   }, []);
@@ -71,9 +77,17 @@ function App() {
   }, []);
 
   const handleNewSession = useCallback(() => {
-    sessionDataRef.current = { sessionStats: null, masteryReport: null, automaticitySummary: null };
-    setSessionKey(k => k + 1); // Force full remount of SandboxMode, clearing all async state
+    setSessionData({ sessionStats: null, masteryReport: null, automaticitySummary: null, knowledgeReport: null, sessionNarrative: null, learnerModel: null, allExplanations: null });
+    setSessionKey(k => k + 1);
     setScreen(SCREENS.MODE_SELECT);
+  }, []);
+
+  const handleOpenHandout = useCallback(() => {
+    setScreen(SCREENS.HANDOUT);
+  }, []);
+
+  const handleBackToWelcome = useCallback(() => {
+    setScreen(SCREENS.WELCOME);
   }, []);
 
   return (
@@ -83,7 +97,10 @@ function App() {
 
         {/* ============== WELCOME ============== */}
         {screen === SCREENS.WELCOME && (
-          <WelcomeScreen onStart={() => setScreen(SCREENS.PROFILE)} />
+          <WelcomeScreen
+            onStart={() => setScreen(SCREENS.PROFILE)}
+            onHandout={handleOpenHandout}
+          />
         )}
 
         {/* ============== PROFILE SELECTION ============== */}
@@ -222,16 +239,21 @@ function App() {
         {/* ============== SESSION REPORT ============== */}
         {screen === SCREENS.REPORT && (
           <SessionReport
-            sessionStats={sessionDataRef.current.sessionStats}
-            masteryReport={sessionDataRef.current.masteryReport}
-            automaticitySummary={sessionDataRef.current.automaticitySummary}
-            knowledgeReport={sessionDataRef.current.knowledgeReport}
-            sessionNarrative={sessionDataRef.current.sessionNarrative}
-            learnerModel={sessionDataRef.current.learnerModel}
-            allExplanations={sessionDataRef.current.allExplanations}
+            sessionStats={sessionData.sessionStats}
+            masteryReport={sessionData.masteryReport}
+            automaticitySummary={sessionData.automaticitySummary}
+            knowledgeReport={sessionData.knowledgeReport}
+            sessionNarrative={sessionData.sessionNarrative}
+            learnerModel={sessionData.learnerModel}
+            allExplanations={sessionData.allExplanations}
             onNewSession={handleNewSession}
             onBackToMenu={handleBackToMenu}
           />
+        )}
+
+        {/* ============== DEMO HANDOUT ============== */}
+        {screen === SCREENS.HANDOUT && (
+          <DemoHandout onBack={handleBackToWelcome} />
         )}
 
         {/* Footer — only show in active modes */}

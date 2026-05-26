@@ -2127,3 +2127,35 @@
   color: #94a3b8;
   line-height: 1.5;
 }
+
+/* =============================================================================
+   PRINT STYLES
+   ============================================================================= */
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .app-header, .app-footer, .no-print,
+  [role="contentinfo"],
+  .debug-panel, .debug-toggle,
+  .sandbox-mode, .gesture-sidebar,
+  .tense-indicator-container,
+  button:not(.print-only) {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

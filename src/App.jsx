@@ -7,6 +7,8 @@ import SandboxMode from './components/SandboxMode'
 import GestureRecorder from './components/GestureRecorder'
 import SessionReport from './components/SessionReport'
 import DemoHandout from './components/DemoHandout'
+import AboutUs from './components/AboutUs'
+import ContactUs from './components/ContactUs'
 import { AccessibilityProfile, saveProfileSelection, loadProfileSelection } from './core/AccessibilityProfile'
 import UpdatePrompt, { getAppVersion } from './components/UpdatePrompt'
 import './App.css'
@@ -32,6 +34,8 @@ const SCREENS = {
   RECORDER: 'RECORDER',
   REPORT: 'REPORT',
   HANDOUT: 'HANDOUT',
+  ABOUT: 'ABOUT',
+  CONTACT: 'CONTACT',
 };
 
 function App() {
@@ -90,7 +94,17 @@ function App() {
     setScreen(SCREENS.WELCOME);
   }, []);
 
-  const isActiveScreen = screen !== SCREENS.WELCOME && screen !== SCREENS.HANDOUT;
+  const handleNavigate = useCallback((screen) => {
+    switch (screen) {
+      case 'HOME':    setScreen(SCREENS.WELCOME); break;
+      case 'ABOUT':   setScreen(SCREENS.ABOUT); break;
+      case 'CONTACT': setScreen(SCREENS.CONTACT); break;
+      case 'HANDOUT': setScreen(SCREENS.HANDOUT); break;
+      default:        setScreen(SCREENS.WELCOME);
+    }
+  }, []);
+
+  const isActiveScreen = screen !== SCREENS.WELCOME && screen !== SCREENS.HANDOUT && screen !== SCREENS.ABOUT && screen !== SCREENS.CONTACT;
 
   return (
     <ErrorBoundary>
@@ -124,6 +138,7 @@ function App() {
           <WelcomeScreen
             onStart={() => setScreen(SCREENS.PROFILE)}
             onHandout={handleOpenHandout}
+            onNavigate={handleNavigate}
           />
         )}
 
@@ -288,6 +303,16 @@ function App() {
         {/* ============== DEMO HANDOUT ============== */}
         {screen === SCREENS.HANDOUT && (
           <DemoHandout onBack={handleBackToWelcome} />
+        )}
+
+        {/* ============== ABOUT US ============== */}
+        {screen === SCREENS.ABOUT && (
+          <AboutUs onNavigate={handleNavigate} />
+        )}
+
+        {/* ============== CONTACT US ============== */}
+        {screen === SCREENS.CONTACT && (
+          <ContactUs onNavigate={handleNavigate} />
         )}
 
         {/* Footer — only show in active modes */}

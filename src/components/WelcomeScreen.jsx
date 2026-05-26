@@ -128,14 +128,17 @@ function FeatureCard({ number, title, desc, highlights, color }) {
   );
 }
 
-export default function WelcomeScreen({ onStart, onHandout }) {
+export default function WelcomeScreen({ onStart, onHandout, onNavigate }) {
   return (
     <div style={style.screen}>
       {/* ── TOP NAV ── */}
       <div style={style.nav}>
         <span style={style.navBrand}>MLAF</span>
         <div style={style.navRight}>
-          <span style={{ ...style.badge, fontSize: '0.58rem' }}>PATENT PENDING</span>
+          <NavButton onClick={() => onNavigate && onNavigate('HOME')}>Home</NavButton>
+          <NavButton onClick={() => onNavigate && onNavigate('ABOUT')}>About Us</NavButton>
+          <NavButton onClick={() => onNavigate && onNavigate('CONTACT')}>Contact Us</NavButton>
+          <span style={{ marginLeft: '0.75rem', ...style.badge, fontSize: '0.58rem' }}>PATENT PENDING</span>
           {onHandout && <NavButton onClick={onHandout}>Handout</NavButton>}
         </div>
       </div>

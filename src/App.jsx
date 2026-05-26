@@ -90,10 +90,34 @@ function App() {
     setScreen(SCREENS.WELCOME);
   }, []);
 
+  const isActiveScreen = screen !== SCREENS.WELCOME && screen !== SCREENS.HANDOUT;
+
   return (
     <ErrorBoundary>
       <UpdatePrompt />
       <div className={`app ${uiAdaptations.highContrast ? 'high-contrast' : ''} ${accessibilityProfile.isLowStimulus() ? 'low-stimulus' : ''}`}>
+
+        {/* Persistent Home button — visible on all active screens */}
+        {isActiveScreen && (
+          <button
+            onClick={handleBackToWelcome}
+            aria-label="Return to home screen"
+            className="home-nav-btn"
+            style={{
+              position: 'fixed', top: 12, left: 12, zIndex: 9999,
+              width: 40, height: 40, borderRadius: 10,
+              background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(255,255,255,0.1)',
+              color: '#94a3b8', fontSize: '1.1rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.target.style.background = 'rgba(74,222,128,0.15)'; e.target.style.borderColor = 'rgba(74,222,128,0.4)'; e.target.style.color = '#4ade80'; }}
+            onMouseLeave={e => { e.target.style.background = 'rgba(15,23,42,0.85)'; e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.color = '#94a3b8'; }}
+          >
+            ◂
+          </button>
+        )}
 
         {/* ============== WELCOME ============== */}
         {screen === SCREENS.WELCOME && (
@@ -113,6 +137,16 @@ function App() {
             minHeight: '100vh',
             padding: '2rem',
           }}>
+            <button
+              onClick={handleBackToWelcome}
+              style={{
+                position: 'absolute', top: 20, left: 20,
+                background: 'none', border: 'none', color: '#94a3b8',
+                fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600,
+              }}
+            >
+              ← Home
+            </button>
             <h2 style={{
               fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0',
               marginBottom: '0.5rem',

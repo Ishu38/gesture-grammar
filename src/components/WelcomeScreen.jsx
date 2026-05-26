@@ -1,307 +1,354 @@
 /**
- * WelcomeScreen.jsx — Professional landing screen for MLAF
- * First impression for educators, funders, and institutional partners.
- * Clean, modern, accessible — sells the vision in 10 seconds.
+ * WelcomeScreen.jsx — Professional landing page for MLAF
+ * Designed for educators, funders, and institutional decision-makers.
+ * First impression: credibility, clarity, confidence.
  */
 
 const BRAND = {
-  bg:        'linear-gradient(160deg, #06080d 0%, #0f172a 40%, #1a1a2e 70%, #16213e 100%)',
-  primary:   '#4ade80',
-  secondary: '#22d3ee',
-  accent:    '#8b5cf6',
-  text:      '#e2e8f0',
-  muted:     '#94a3b8',
-  dim:       '#475569',
-  border:    'rgba(255,255,255,0.06)',
+  green:   '#4ade80',
+  cyan:    '#22d3ee',
+  purple:  '#8b5cf6',
+  blue:    '#3b82f6',
+  amber:   '#f59e0b',
+  rose:    '#f43f5e',
+  surface: 'rgba(255,255,255,0.025)',
+  border:  'rgba(255,255,255,0.07)',
+  muted:   '#94a3b8',
+  dim:     '#64748b',
 };
 
-const STATS = [
-  { value: '10', label: 'Patent claims' },
-  { value: '99.5%', label: 'CNN accuracy' },
-  { value: '19', label: 'Gesture vocabulary' },
-  { value: '5', label: 'Curriculum stages' },
-];
+const style = {
+  screen: {
+    minHeight: '100vh',
+    background: 'linear-gradient(160deg, #05070d 0%, #0c1220 30%, #111827 60%, #0f172a 100%)',
+    fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+    color: '#e2e8f0',
+    overflowX: 'hidden',
+    position: 'relative',
+  },
+  nav: {
+    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    padding: '12px 24px',
+    background: 'rgba(5,7,13,0.8)', backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.04)',
+  },
+  navBrand: { fontSize: '0.8rem', fontWeight: 800, color: '#4ade80', letterSpacing: '0.15em' },
+  navRight: { display: 'flex', gap: '1rem', alignItems: 'center' },
+  navLink: {
+    fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600,
+    letterSpacing: '0.05em', textDecoration: 'none',
+    cursor: 'pointer', background: 'none', border: 'none',
+  },
+  badge: {
+    padding: '3px 10px', borderRadius: 20, fontSize: '0.6rem', fontWeight: 700,
+    letterSpacing: '0.08em', background: 'rgba(74,222,128,0.08)',
+    border: '1px solid rgba(74,222,128,0.2)', color: '#4ade80',
+  },
+};
 
-const FEATURES = [
-  {
-    icon: 'M12 6v6l4 2', // Play button stylized
-    title: 'Gesture-Based Grammar',
-    desc: 'Build English sentences with hand movements — no keyboard, no voice required.',
-    color: '#4ade80',
-    symbol: '✋',
-  },
-  {
-    icon: 'M9 12l2 2 4-4',
-    title: 'ISL Transfer Detection',
-    desc: 'Identifies Indian Sign Language word-order patterns and guides toward English SVO.',
-    color: '#8b5cf6',
-    symbol: '🔤',
-  },
-  {
-    icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-    title: 'Motor-Adaptive AI',
-    desc: 'Calibrates to hand tremor in real time. Cognitive load monitoring prevents fatigue.',
-    color: '#3b82f6',
-    symbol: '🎯',
-  },
-  {
-    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-    title: 'Diagnostic Reports',
-    desc: 'Bayesian Knowledge Tracing estimates mastery per concept. Data-driven instruction.',
-    color: '#f59e0b',
-    symbol: '📊',
-  },
-];
+function NavButton({ children, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      fontSize: '0.7rem', color: BRAND.muted, fontWeight: 600,
+      letterSpacing: '0.04em', background: 'none', border: 'none',
+      cursor: 'pointer', padding: '6px 12px', borderRadius: 6,
+      transition: 'all 0.15s',
+    }}
+      onMouseEnter={e => { e.target.style.color = '#e2e8f0'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
+      onMouseLeave={e => { e.target.style.color = BRAND.muted; e.target.style.background = 'none'; }}
+    >
+      {children}
+    </button>
+  );
+}
 
-const STEP_CARDS = [
-  { step: 1, title: 'Select Profile', desc: 'Motor / Deaf / Blind / Dyslexia — the system adapts.' },
-  { step: 2, title: 'Make a Gesture', desc: 'Perform the hand sign in front of the camera.' },
-  { step: 3, title: 'Build a Sentence', desc: 'Words lock in place. Grammar validated in real time.' },
-  { step: 4, title: 'Speak & Learn', desc: 'TTS reads the sentence aloud. Reports show progress.' },
-];
+function StatPill({ value, label }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '0 1rem', borderLeft: `1px solid ${BRAND.border}` }}>
+      <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </div>
+      <div style={{ fontSize: '0.6rem', color: BRAND.dim, marginTop: 2, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({ number, title, desc, highlights, color }) {
+  return (
+    <div style={{
+      background: BRAND.surface,
+      border: `1px solid ${BRAND.border}`,
+      borderRadius: 16, padding: '1.5rem',
+      transition: 'border-color 0.25s, background 0.25s, transform 0.25s',
+      cursor: 'default',
+    }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${color}40`;
+        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = BRAND.border;
+        e.currentTarget.style.background = BRAND.surface;
+        e.currentTarget.style.transform = 'none';
+      }}
+    >
+      <div style={{
+        width: 36, height: 36, borderRadius: 10,
+        background: `${color}12`, color,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem',
+        border: `1px solid ${color}20`,
+      }}>
+        {String(number).padStart(2, '0')}
+      </div>
+      <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f1f5f9', margin: '0 0 0.5rem' }}>
+        {title}
+      </h3>
+      <p style={{ fontSize: '0.78rem', color: BRAND.muted, lineHeight: 1.6, margin: '0 0 0.75rem' }}>
+        {desc}
+      </p>
+      {highlights && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+          {highlights.map((h, i) => (
+            <span key={i} style={{
+              fontSize: '0.62rem', padding: '2px 8px', borderRadius: 4,
+              background: `${color}08`, color, fontWeight: 600,
+              letterSpacing: '0.03em',
+            }}>
+              {h}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function WelcomeScreen({ onStart, onHandout }) {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      minHeight: '100vh',
-      background: BRAND.bg,
-      fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-      color: BRAND.text,
-      overflowX: 'hidden',
-    }}>
+    <div style={style.screen}>
+      {/* ── TOP NAV ── */}
+      <div style={style.nav}>
+        <span style={style.navBrand}>MLAF</span>
+        <div style={style.navRight}>
+          <span style={{ ...style.badge, fontSize: '0.58rem' }}>PATENT PENDING</span>
+          {onHandout && <NavButton onClick={onHandout}>Handout</NavButton>}
+        </div>
+      </div>
+
       {/* ── HERO ── */}
       <div style={{
+        padding: '120px 2rem 60px', maxWidth: '800px', margin: '0 auto',
         textAlign: 'center',
-        padding: '3.5rem 2rem 2.5rem',
-        maxWidth: '680px',
       }}>
-        {/* Badge */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          padding: '4px 14px', borderRadius: 20,
-          background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)',
-          marginBottom: '1.5rem',
-        }}>
-          <span style={{
-            width: 7, height: 7, borderRadius: '50%', background: '#4ade80',
-            boxShadow: '0 0 6px #4ade80',
-          }} />
-          <span style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 600, letterSpacing: '0.05em' }}>
-            PATENT PENDING · LIVE DEMO
-          </span>
-        </div>
-
-        {/* Title */}
         <h1 style={{
-          fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-          fontWeight: 900,
-          color: '#ffffff',
-          letterSpacing: '0.12em',
-          margin: 0,
-          lineHeight: 1,
+          fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 900,
+          color: '#ffffff', lineHeight: 1.1, margin: 0,
+          letterSpacing: '-0.02em',
         }}>
-          M L A F
+          English grammar for children<br />
+          <span style={{ color: '#4ade80' }}>who cannot write, type, or speak.</span>
         </h1>
+
         <p style={{
-          fontSize: 'clamp(0.85rem, 1.5vw, 1.05rem)',
-          color: BRAND.muted,
-          marginTop: '0.6rem',
-          letterSpacing: '0.08em',
-          fontWeight: 400,
+          fontSize: '1.05rem', color: BRAND.muted, marginTop: '1.25rem',
+          lineHeight: 1.65, maxWidth: '560px', marginLeft: 'auto', marginRight: 'auto',
         }}>
-          Multimodal Language Acquisition Framework
+          MLAF teaches sentence structure through hand gestures detected by
+          any phone camera. Adaptive AI calibrates to motor impairment,
+          detects Indian Sign Language transfer, and speaks completed
+          sentences aloud — becoming the child's voice.
         </p>
 
-        {/* Hero description */}
-        <p style={{
-          fontSize: '1.05rem',
-          color: '#cbd5e1',
-          lineHeight: 1.7,
-          marginTop: '1.75rem',
-          fontWeight: 400,
-        }}>
-          Teaching English grammar to <strong style={{ color: '#4ade80' }}>motor-impaired learners</strong> and 
-          <strong style={{ color: '#8b5cf6' }}> deaf/hard-of-hearing children</strong> through 
-          hand gestures, adaptive AI, and real-time grammar analysis.
-          No keyboard. No voice. Just your hands.
-        </p>
-
-        {/* CTA buttons */}
-        <div style={{
-          display: 'flex', gap: '0.75rem', justifyContent: 'center',
-          marginTop: '2rem', flexWrap: 'wrap',
-        }}>
+        {/* CTA */}
+        <div style={{ marginTop: '2rem', display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button onClick={onStart} style={{
-            padding: '0.9rem 2.75rem',
-            fontSize: '1rem', fontWeight: 700,
-            color: '#0f172a',
-            background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
-            border: 'none', borderRadius: '12px',
-            cursor: 'pointer', letterSpacing: '0.04em',
-            boxShadow: '0 4px 28px rgba(74,222,128,0.3)',
+            padding: '0.85rem 2.5rem', fontSize: '0.95rem', fontWeight: 700,
+            color: '#05070d', background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
+            border: 'none', borderRadius: 12, cursor: 'pointer', letterSpacing: '0.03em',
+            boxShadow: '0 4px 24px rgba(74,222,128,0.25)',
             transition: 'transform 0.15s, box-shadow 0.15s',
           }}
-            onMouseEnter={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 8px 36px rgba(74,222,128,0.45)'; }}
-            onMouseLeave={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 28px rgba(74,222,128,0.3)'; }}
+            onMouseEnter={e => { e.target.style.transform = 'translateY(-1px)'; e.target.style.boxShadow = '0 8px 32px rgba(74,222,128,0.35)'; }}
+            onMouseLeave={e => { e.target.style.transform = 'none'; e.target.style.boxShadow = '0 4px 24px rgba(74,222,128,0.25)'; }}
           >
-            Begin Session
+            Try the Demo →
           </button>
-
           {onHandout && (
             <button onClick={onHandout} style={{
-              padding: '0.9rem 2rem',
-              fontSize: '0.95rem', fontWeight: 600,
-              color: BRAND.muted,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '12px', cursor: 'pointer',
-              letterSpacing: '0.03em',
-              transition: 'all 0.15s',
+              padding: '0.85rem 2rem', fontSize: '0.9rem', fontWeight: 600,
+              color: BRAND.muted, background: BRAND.surface,
+              border: `1px solid ${BRAND.border}`, borderRadius: 12,
+              cursor: 'pointer', letterSpacing: '0.03em', transition: 'all 0.15s',
             }}
-              onMouseEnter={e => { e.target.style.background = 'rgba(255,255,255,0.08)'; e.target.style.borderColor = 'rgba(255,255,255,0.2)'; }}
-              onMouseLeave={e => { e.target.style.background = 'rgba(255,255,255,0.04)'; e.target.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+              onMouseEnter={e => { e.target.style.borderColor = 'rgba(255,255,255,0.2)'; e.target.style.color = '#e2e8f0'; }}
+              onMouseLeave={e => { e.target.style.borderColor = BRAND.border; e.target.style.color = BRAND.muted; }}
             >
-              Demo Handout
+              One-Page Handout
             </button>
           )}
         </div>
       </div>
 
-      {/* ── STATS STRIP ── */}
+      {/* ── STATS ── */}
       <div style={{
-        display: 'flex', gap: '2rem', justifyContent: 'center',
-        padding: '1.25rem 2rem', flexWrap: 'wrap',
-        borderTop: `1px solid ${BRAND.border}`, borderBottom: `1px solid ${BRAND.border}`,
-        width: '100%', maxWidth: '680px',
-        background: 'rgba(255,255,255,0.01)',
+        display: 'flex', justifyContent: 'center', gap: '0',
+        width: 'fit-content', margin: '0 auto', padding: '1.5rem 2rem',
+        background: BRAND.surface, borderRadius: 14,
+        border: `1px solid ${BRAND.border}`,
+        marginBottom: '4rem',
       }}>
-        {STATS.map(s => (
-          <div key={s.label} style={{ textAlign: 'center' }}>
-            <div style={{
-              fontSize: '1.5rem', fontWeight: 800,
-              background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>
-              {s.value}
-            </div>
-            <div style={{ fontSize: '0.65rem', color: BRAND.dim, marginTop: '0.15rem', letterSpacing: '0.04em' }}>
-              {s.label}
-            </div>
-          </div>
-        ))}
+        <StatPill value="10" label="Patent claims" />
+        <StatPill value="99.5%" label="CNN accuracy" />
+        <StatPill value="19" label="Gestures" />
+        <StatPill value="In-browser" label="Zero cloud data" />
+        <StatPill value="PWA" label="Works offline" />
       </div>
 
-      {/* ── FEATURE CARDS ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '1rem',
-        maxWidth: '820px',
-        width: '100%',
-        padding: '2rem',
-        boxSizing: 'border-box',
-      }}>
-        {FEATURES.map(f => (
-          <div key={f.title} style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: `1px solid ${BRAND.border}`,
-            borderRadius: '14px',
-            padding: '1.5rem',
-            transition: 'border-color 0.2s, background 0.2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = `${f.color}40`; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = BRAND.border; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
-          >
-            <div style={{
-              width: 44, height: 44, borderRadius: 12,
-              background: `${f.color}15`, color: f.color,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.3rem', marginBottom: '1rem',
-            }}>
-              {f.symbol}
-            </div>
-            <div style={{
-              fontWeight: 700, fontSize: '0.95rem',
-              color: '#e2e8f0', marginBottom: '0.4rem',
-            }}>
-              {f.title}
-            </div>
-            <div style={{
-              fontSize: '0.8rem', color: BRAND.muted,
-              lineHeight: 1.55,
-            }}>
-              {f.desc}
-            </div>
+      {/* ── FEATURES GRID ── */}
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{ fontSize: '0.7rem', color: BRAND.dim, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            What makes MLAF different
           </div>
-        ))}
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f1f5f9', margin: 0, lineHeight: 1.3 }}>
+            Adaptive. Explainable. Built for real classrooms.
+          </h2>
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '1rem', marginBottom: '3rem',
+        }}>
+          <FeatureCard
+            number={1} title="Motor-Adaptive Recognition"
+            color={BRAND.green}
+            desc="Camera detects hand tremor via positional jitter analysis. Tolerance bands auto-widen as motor instability increases — the system gets MORE forgiving, not less."
+            highlights={['Real-time jitter', '6-frame hysteresis', 'Fatigue detection']}
+          />
+          <FeatureCard
+            number={2} title="ISL Transfer Correction"
+            color={BRAND.purple}
+            desc="Detects when deaf learners default to Indian Sign Language SOV word order and guides toward English SVO. Explicit contrastive feedback with linguistic rationale."
+            highlights={['SOV→SVO reorder', 'Pro-drop detection', 'Topic fronting fix']}
+          />
+          <FeatureCard
+            number={3} title="Bayesian Knowledge Tracing"
+            color={BRAND.blue}
+            desc="Estimates P(known) for every grammar concept after every gesture. Predicts retention decay, identifies transfer latency. No more guesswork — data-driven pedagogy."
+            highlights={['Per-concept P(know)', 'Decay forecasting', 'Transfer tracking']}
+          />
+          <FeatureCard
+            number={4} title="Explainable AI"
+            color={BRAND.amber}
+            desc="Every error generates a human-readable explanation — not a black box. Educators and therapists see WHY the system made each decision, traced to specific linguistic rules."
+            highlights={['Root cause analysis', 'Remediation path', 'Session narratives']}
+          />
+          <FeatureCard
+            number={5} title="Neuro-Symbolic Architecture"
+            color={BRAND.rose}
+            desc="MediaPipe neural perception + ONNX RF classifier + Chomskyan X-bar grammar via SWI-Prolog + Bayesian trimodal fusion. AI that reasons, not just pattern-matches."
+            highlights={['Bayesian fusion', 'Earley parser', 'Graph RAG reasoning']}
+          />
+          <FeatureCard
+            number={6} title="Accessibility-First"
+            color={BRAND.green}
+            desc="5 learner profiles: Motor Impairment, Deaf/HoH, Blind/Low Vision, Dyslexia, Autism (Low-Stimulus). Each adjusts feedback modality, timing, and visual complexity."
+            highlights={['5 profiles', 'TTS output', 'Haptic feedback', 'Gaze-dwell input']}
+          />
+        </div>
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{
-        maxWidth: '820px', width: '100%',
-        padding: '1.5rem 2rem 2rem', boxSizing: 'border-box',
-      }}>
-        <h3 style={{
-          textAlign: 'center', fontSize: '0.9rem', fontWeight: 700,
-          color: BRAND.muted, letterSpacing: '0.08em', textTransform: 'uppercase',
-          marginBottom: '1.5rem',
-        }}>
-          How It Works
-        </h3>
+      <div style={{ maxWidth: '900px', margin: '0 auto 4rem', padding: '0 2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '0.7rem', color: BRAND.dim, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+            How it works
+          </div>
+        </div>
+
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem',
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem',
         }}>
-          {STEP_CARDS.map(s => (
-            <div key={s.step} style={{
-              textAlign: 'center',
-              padding: '1rem 0.5rem',
-              borderRadius: 10,
-              background: 'rgba(255,255,255,0.015)',
+          {[
+            { num: '01', title: 'Select Profile', desc: 'Choose the accessibility profile that matches the learner.' },
+            { num: '02', title: 'Make a Gesture', desc: 'Perform the hand sign in front of any device camera.' },
+            { num: '03', title: 'Build Sentence', desc: 'Words lock into Subject-Verb-Object position. Grammar validated in real time.' },
+            { num: '04', title: 'Speaks Aloud', desc: 'TTS reads the complete sentence. Session report shows learning progress.' },
+          ].map(step => (
+            <div key={step.num} style={{
+              position: 'relative', padding: '1.5rem 1rem', textAlign: 'center',
+              background: BRAND.surface, borderRadius: 12,
               border: `1px solid ${BRAND.border}`,
             }}>
               <div style={{
-                width: 32, height: 32, borderRadius: '50%', margin: '0 auto 0.6rem',
+                fontSize: '1.5rem', fontWeight: 900,
                 background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
-                color: '#0f172a', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800,
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                marginBottom: '0.5rem',
               }}>
-                {s.step}
+                {step.num}
               </div>
-              <div style={{ fontWeight: 700, fontSize: '0.78rem', color: '#e2e8f0', marginBottom: '0.3rem' }}>
-                {s.title}
+              <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#e2e8f0', marginBottom: '0.35rem' }}>
+                {step.title}
               </div>
-              <div style={{ fontSize: '0.68rem', color: BRAND.muted, lineHeight: 1.4 }}>
-                {s.desc}
+              <div style={{ fontSize: '0.7rem', color: BRAND.muted, lineHeight: 1.5 }}>
+                {step.desc}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── SECONDARY CTA ── */}
+      {/* ── PILOT CTA ── */}
       <div style={{
-        textAlign: 'center', padding: '0 2rem 2.5rem',
+        maxWidth: '700px', margin: '0 auto 3rem', padding: '2rem',
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.06), rgba(59,130,246,0.06))',
+        border: `1px solid ${BRAND.border}`, borderRadius: 16, textAlign: 'center',
       }}>
-        <p style={{
-          fontSize: '0.8rem', color: BRAND.dim, marginBottom: '1rem',
-          fontStyle: 'italic',
+        <div style={{
+          fontSize: '0.65rem', color: '#8b5cf6', fontWeight: 700,
+          letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem',
         }}>
-          Under the hood: 1D CNN (99.5% accuracy) via ONNX Runtime, Bayesian trimodal fusion,<br />
-          Earley parser with Chomskyan X-bar grammar, and adaptive cognitive tutoring — all in-browser.
+          Pilot Study — Seeking Partners
+        </div>
+        <p style={{
+          fontSize: '0.85rem', color: BRAND.muted, lineHeight: 1.6,
+          maxWidth: '500px', margin: '0 auto 1rem',
+        }}>
+          We are looking for 10–15 students (ages 6–14) with cerebral palsy, autism, or
+          hearing impairment for an 8-week study. We provide tablets, training, and
+          diagnostic reports. <strong style={{ color: '#e2e8f0' }}>No cost to your institution.</strong>
         </p>
+        <button onClick={onStart} style={{
+          padding: '0.6rem 2rem', fontSize: '0.85rem', fontWeight: 700,
+          color: '#fff', background: 'rgba(139,92,246,0.2)',
+          border: '1px solid rgba(139,92,246,0.4)', borderRadius: 10,
+          cursor: 'pointer',
+        }}>
+          Try the Demo
+        </button>
       </div>
 
       {/* ── FOOTER ── */}
       <div style={{
-        padding: '1.25rem 2rem', borderTop: `1px solid ${BRAND.border}`,
-        width: '100%', textAlign: 'center',
-        fontSize: '0.7rem', color: BRAND.dim,
-        letterSpacing: '0.03em', boxSizing: 'border-box',
+        borderTop: `1px solid ${BRAND.border}`, padding: '2rem',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '1rem', maxWidth: '900px', margin: '0 auto',
+        fontSize: '0.68rem', color: BRAND.dim,
       }}>
-        Designed & Created by Neil Shankar Ray · NLP & Speech AI Engineer · Applied Linguist (MA, 14 yrs) · IIT Patna AI/ML
+        <div>
+          Designed & Created by <strong style={{ color: '#e2e8f0' }}>Neil Shankar Ray</strong>
+          {' · '}NLP & Speech AI Engineer · Applied Linguist (MA, 14 yrs) · IIT Patna AI/ML
+        </div>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <span>Patent Pending TEMP/E-1/22951/2026-KOL</span>
+          <span style={{ color: BRAND.muted }}>roychinu45@gmail.com</span>
+        </div>
       </div>
     </div>
   );

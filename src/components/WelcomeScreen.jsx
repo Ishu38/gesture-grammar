@@ -350,7 +350,7 @@ export default function WelcomeScreen({ onStart, onHandout, onNavigate }) {
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <span>Patent Pending TEMP/E-1/22951/2026-KOL</span>
-          <span style={{ color: BRAND.muted }}>roychinu45@gmail.com</span>
+          <span style={{ color: BRAND.muted }}>neilshankarray@vaaani.in · vaaani.in</span>
         </div>
       </div>
     </div>

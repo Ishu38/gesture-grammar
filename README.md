@@ -115,7 +115,7 @@ For commercial licensing inquiries, contact the author directly.
 
 **Neil Shankar Ray** — NLP & Speech AI Engineer · Applied Linguist (MA, 14 yrs) · IIT Patna AI/ML
 LinkedIn: https://www.linkedin.com/in/neilsray
-Email: roychinu45@gmail.com
+Email: neilshankarray@vaaani.in · Website: https://vaaani.in
 
 ---
 

@@ -101,10 +101,21 @@ export default function ContactUs({ onNavigate }) {
               Email
             </div>
             <div>
-              <a href="mailto:roychinu45@gmail.com" style={{
+              <a href="mailto:neilshankarray@vaaani.in" style={{
                 fontSize: '0.9rem', color: '#60a5fa', textDecoration: 'none',
               }}>
-                roychinu45@gmail.com
+                neilshankarray@vaaani.in
+              </a>
+            </div>
+
+            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', paddingTop: 2 }}>
+              Website
+            </div>
+            <div>
+              <a href="https://vaaani.in" target="_blank" rel="noopener noreferrer" style={{
+                fontSize: '0.9rem', color: '#60a5fa', textDecoration: 'none',
+              }}>
+                https://vaaani.in
               </a>
             </div>
 

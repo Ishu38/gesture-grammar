@@ -256,7 +256,8 @@ export default function DemoHandout({ onBack }) {
                 </div>
                 <div style={{ fontSize: '0.6rem', color: '#94a3b8', lineHeight: 1.6 }}>
                   NLP & Speech AI Engineer · Applied Linguist (MA, 14 yrs) · IIT Patna AI/ML<br />
-                  roychinu45@gmail.com<br />
+                  neilshankarray@vaaani.in<br />
+                  vaaani.in<br />
                   linkedin.com/in/neilsray
                 </div>
               </div>
@@ -271,7 +272,7 @@ export default function DemoHandout({ onBack }) {
           lineHeight: 1.5,
         }}>
           MLAF — Multimodal Language Acquisition Framework · Patent-Pending TEMP/E-1/22951/2026-KOL, Indian Patent Office (2026)
-          <br />All rights reserved. Commercial licensing inquiries: roychinu45@gmail.com
+           <br />All rights reserved. Commercial licensing inquiries: neilshankarray@vaaani.in · vaaani.in
         </div>
       </div>
     </>

@@ -35,6 +35,9 @@ import { buildMLAFKnowledgeGraph } from '../core/MLAFKnowledgeGraph';
 import { GraphRAG } from '../core/GraphRAG';
 import { AbductiveFeedbackLoop, ERROR_EVENTS } from '../core/AbductiveFeedbackLoop';
 import { CompositionalGeneralization } from '../core/CompositionalGeneralization';
+import { KnowledgeTracer } from '../core/KnowledgeTracer';
+import { ExplainabilityEngine } from '../core/ExplainabilityEngine';
+import { AdaptivePedagogyEngine, learnerStateColor, learnerStateLabel } from '../core/AdaptivePedagogyEngine';
 import SentenceStrip from './SentenceStrip';
 import GestureSidebar from './GestureSidebar';
 import TenseIndicator from './TenseIndicator';
@@ -136,6 +139,13 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const compGenRef = useRef(null);
   const graphInitializedRef = useRef(false);
 
+  // Adaptive Neuro-Symbolic Intelligence — meta-controller + BKT + explainability
+  const knowledgeTracerRef = useRef(new KnowledgeTracer());
+  const explainabilityEngineRef = useRef(null); // initialized after graphRAG
+  const adaptivePedagogyRef = useRef(new AdaptivePedagogyEngine({
+    profileType: accessibilityProfile?.type || 'default',
+  }));
+
   // ISL Feature refs
   const srsRef = useRef(new SpacedRepetitionScheduler());
   const achievementRef = useRef(new AchievementSystem());
@@ -189,6 +199,12 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const [achievementReport, setAchievementReport] = useState(() => achievementRef.current.getAchievementReport());
   const [achievementToast, setAchievementToast] = useState(null);
 
+  // Adaptive Pedagogy state
+  const [learnerState, setLearnerState] = useState('FLOWING');
+  const [pedagogyDecisions, setPedagogyDecisions] = useState([]);
+  const [latestExplanations, setLatestExplanations] = useState([]);
+  const [knowledgeReport, setKnowledgeReport] = useState(null);
+
   // AAC state
   const [showPhraseBank, setShowPhraseBank] = useState(false);
   const [savedPhrases, setSavedPhrases] = useState(() => phraseBankRef.current.getAll());
@@ -213,7 +229,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     confidenceFrames: accessibilityProfile?.getConfidenceThreshold(),
   });
 
-  // Initialize Graph RAG, feedback loop, and compositional generalization (once)
+  // Initialize Graph RAG, feedback loop, explainability, and compositional generalization (once)
   useEffect(() => {
     if (graphInitializedRef.current) return;
     graphInitializedRef.current = true;
@@ -222,6 +238,10 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       const kg = buildMLAFKnowledgeGraph();
       graphRAGRef.current = new GraphRAG(kg);
       feedbackLoopRef.current = new AbductiveFeedbackLoop(graphRAGRef.current);
+      explainabilityEngineRef.current = new ExplainabilityEngine(
+        graphRAGRef.current,
+        knowledgeTracerRef.current
+      );
     } catch (err) {
       console.error('[MLAF] GraphRAG initialization failed:', err);
     }
@@ -667,10 +687,31 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
 
         // Record type mismatch error in feedback loop
         if (feedbackLoopRef.current && !isValid) {
-          feedbackLoopRef.current.recordError(ERROR_EVENTS.TYPE_MISMATCH, {
+          const errorResult = feedbackLoopRef.current.recordError(ERROR_EVENTS.TYPE_MISMATCH, {
             recognizedGesture: gesture,
             sentenceTokens: currentSlots,
           });
+
+          // Generate explainability narrative
+          if (explainabilityEngineRef.current) {
+            const explanation = explainabilityEngineRef.current.explainError(
+              ERROR_EVENTS.TYPE_MISMATCH,
+              { recognizedGesture: gesture, sentenceTokens: currentSlots }
+            );
+            if (explanation) {
+              setLatestExplanations(prev =>
+                [...prev.slice(-9), explanation]
+              );
+              sessionLoggerRef.current.logExplanation(explanation);
+            }
+          }
+
+          // Record incorrect attempt in BKT
+          if (knowledgeTracerRef.current) {
+            knowledgeTracerRef.current.recordOpportunity(gesture, false, {
+              responseTimeMs: Date.now() - (cognitiveLoadAdapterRef.current._lastUpdateTime || Date.now()),
+            });
+          }
         }
       }
     } else if (gesture && semanticTypeSystem.current) {
@@ -723,6 +764,61 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       console.warn('[MLAF] processLandmarks frame error:', err.message);
     }
   }, [processGestureInput, showDebug, showErrorOverlay, setConfidenceThreshold, sentence, fingerspellMode]);
+
+  // Record successful gesture productions in KnowledgeTracer when sentence grows
+  useEffect(() => {
+    const newLen = sentence.length;
+    const prevLen = prevSentenceLengthRef.current;
+    if (newLen > prevLen && newLen > 0) {
+      // A word was added — record successful gesture
+      const lastWord = sentence[newLen - 1];
+      const grammarId = lastWord?.grammar_id || lastWord?.grammarId;
+      if (grammarId && knowledgeTracerRef.current) {
+        knowledgeTracerRef.current.recordOpportunity(grammarId, true, {});
+
+        // Record S-V agreement if present
+        if (lastWord?.type === 'VERB') {
+          const subject = sentence.find(w => w.type === 'SUBJECT');
+          if (subject) {
+            const subjectId = subject.grammar_id || subject.grammarId;
+            const verbId = grammarId;
+            // Check if the correct verb form was used (auto-conjugated in useSentenceBuilder)
+            knowledgeTracerRef.current.recordAgreementAttempt(
+              subjectId, verbId, verbId, true
+            );
+          }
+        }
+
+        // Update knowledge report periodically
+        setKnowledgeReport(knowledgeTracerRef.current.getOverallReport());
+      }
+    }
+    prevSentenceLengthRef.current = newLen;
+  }, [sentence]);
+
+  // Periodic AdaptivePedagogyEngine update (ties together all data sources)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (adaptivePedagogyRef.current && knowledgeTracerRef.current) {
+        const update = adaptivePedagogyRef.current.update({
+          knowledgeTracer: knowledgeTracerRef.current,
+          cognitiveLoad: { level: cognitiveLoad, jitter: cognitiveLoadAdapterRef.current?.getJitter?.() || 0 },
+          masteryReport,
+          sentence,
+          latestError: latestExplanations.length > 0 ? latestExplanations[latestExplanations.length - 1] : null,
+        });
+
+        if (update.learnerState !== learnerState) {
+          setLearnerState(update.learnerState);
+        }
+        if (update.decisions.length > 0) {
+          setPedagogyDecisions(update.decisions.slice(-5));
+        }
+      }
+    }, 6000); // Every 6 seconds
+
+    return () => clearInterval(interval);
+  }, [cognitiveLoad, masteryReport, sentence, latestExplanations, learnerState]);
 
   // Draw hand landmarks
   const drawLandmarks = useCallback((landmarks, ctx, width, height) => {
@@ -1391,11 +1487,35 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
                   <button
                     className="debug-toggle"
                     onClick={() => {
-                      sessionLoggerRef.current.logSessionEnd();
+                      // End session logging
+                      sessionLoggerRef.current.endSession();
+
+                      // Generate session narrative from explainability engine
+                      let sessionNarrative = null;
+                      if (explainabilityEngineRef.current) {
+                        sessionNarrative = explainabilityEngineRef.current.generateSessionNarrative(
+                          knowledgeTracerRef.current.getOverallReport(),
+                          masteryGateRef.current.getMasteryReport()
+                        );
+                      }
+
+                      // Get learner model from adaptive pedagogy engine
+                      let learnerModel = null;
+                      if (adaptivePedagogyRef.current) {
+                        learnerModel = adaptivePedagogyRef.current.getLearnerModel(
+                          knowledgeTracerRef.current
+                        );
+                      }
+
                       onEndSession({
                         sessionStats: sessionLoggerRef.current.getSessionSummary(),
                         masteryReport: masteryGateRef.current.getMasteryReport(),
                         automaticitySummary: automaticityTrackerRef.current.getSessionSummary(),
+                        knowledgeReport: knowledgeTracerRef.current.getOverallReport(),
+                        sessionNarrative,
+                        learnerModel,
+                        allExplanations: explainabilityEngineRef.current?.getAllExplanations() || [],
+                        pedagogyDecisions,
                       });
                     }}
                     style={{ background: 'rgba(248, 113, 113, 0.15)', borderColor: 'rgba(248, 113, 113, 0.4)', color: '#f87171' }}
@@ -1431,6 +1551,24 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
               <span>Jitter:</span>
               <span>{cognitiveLoadAdapterRef.current.getJitter().toFixed(4)}</span>
             </div>
+            <div className="debug-row">
+              <span>Learner State:</span>
+              <strong style={{ color: learnerStateColor(learnerState) }}>
+                {learnerStateLabel(learnerState)}
+              </strong>
+            </div>
+            {pedagogyDecisions.length > 0 && (
+              <div className="debug-row" style={{ gridColumn: '1 / -1', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.4rem', marginTop: '0.2rem' }}>
+                <span style={{ color: '#c084fc', fontWeight: 600 }}>Pedagogy Decisions</span>
+              </div>
+            )}
+            {pedagogyDecisions.map((d, i) => (
+              <div key={i} className="debug-row" style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontSize: '0.6rem', color: '#94a3b8' }}>
+                  {d.type}: {d.rationale}
+                </span>
+              </div>
+            ))}
             <div className="debug-row">
               <span>Avg Thumb Dist:</span>
               <span>{debugInfo.avgThumbToFingers}</span>

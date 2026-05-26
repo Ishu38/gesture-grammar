@@ -258,6 +258,40 @@ export class SessionDataLogger {
     });
   }
 
+  /**
+   * Log an explainability engine explanation.
+   * These are human-readable diagnostic narratives for each error event.
+   *
+   * @param {object} explanation — from ExplainabilityEngine.explainError()
+   */
+  logExplanation(explanation) {
+    if (!explanation) return;
+    this._pushEvent('EXPLANATION', {
+      error_type: explanation.errorType,
+      severity: explanation.severity,
+      narrative: explanation.narrative,
+      root_cause: explanation.rootCause,
+      remediation: explanation.remediation,
+      l1_transfer: explanation.l1Transfer,
+      system_action: explanation.systemAction,
+      knowledge_state: explanation.knowledgeState || null,
+    });
+  }
+
+  /**
+   * Log a BKT knowledge state snapshot.
+   * Attaches current knowledge estimates to any event.
+   *
+   * @param {object} knowledgeSnapshot — from KnowledgeTracer.getSnapshot()
+   */
+  logKnowledgeSnapshot(knowledgeSnapshot) {
+    if (!knowledgeSnapshot) return;
+    this._pushEvent('KNOWLEDGE_SNAPSHOT', {
+      parameters: knowledgeSnapshot.parameters,
+      states: knowledgeSnapshot.states,
+    });
+  }
+
   // ===========================================================================
   // PUBLIC — Session statistics and reporting
   // ===========================================================================

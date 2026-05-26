@@ -225,6 +225,10 @@ function App() {
             sessionStats={sessionDataRef.current.sessionStats}
             masteryReport={sessionDataRef.current.masteryReport}
             automaticitySummary={sessionDataRef.current.automaticitySummary}
+            knowledgeReport={sessionDataRef.current.knowledgeReport}
+            sessionNarrative={sessionDataRef.current.sessionNarrative}
+            learnerModel={sessionDataRef.current.learnerModel}
+            allExplanations={sessionDataRef.current.allExplanations}
             onNewSession={handleNewSession}
             onBackToMenu={handleBackToMenu}
           />

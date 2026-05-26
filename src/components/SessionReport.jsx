@@ -45,6 +45,10 @@ export default function SessionReport({
   sessionStats,
   masteryReport,
   automaticitySummary,
+  knowledgeReport,
+  sessionNarrative,
+  learnerModel,
+  allExplanations,
   onNewSession,
   onBackToMenu,
 }) {
@@ -231,6 +235,195 @@ export default function SessionReport({
           )}
         </div>
       </div>
+
+      {/* Learning Insights — from ExplainabilityEngine */}
+      {sessionNarrative && (
+        <div style={{
+          maxWidth: '640px',
+          width: '100%',
+          marginBottom: '2rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+        }}>
+          <h3 style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 1rem' }}>
+            Learning Insights
+          </h3>
+          {sessionNarrative.headline && (
+            <p style={{ color: '#cbd5e1', fontSize: '0.8rem', lineHeight: 1.5, margin: '0 0 1rem' }}>
+              {sessionNarrative.headline}
+            </p>
+          )}
+
+          {/* Strengths & Challenges */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <div style={{ color: '#4ade80', fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                Strengths
+              </div>
+              {(sessionNarrative.strengths || []).slice(0, 4).map((s, i) => (
+                <div key={i} style={{ color: '#94a3b8', fontSize: '0.65rem', padding: '2px 0', lineHeight: 1.4 }}>
+                  + {s}
+                </div>
+              ))}
+            </div>
+            <div>
+              <div style={{ color: '#fbbf24', fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                Areas for Growth
+              </div>
+              {(sessionNarrative.challenges || []).slice(0, 4).map((c, i) => (
+                <div key={i} style={{ color: '#94a3b8', fontSize: '0.65rem', padding: '2px 0', lineHeight: 1.4 }}>
+                  - {c}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ISL Transfer Summary */}
+          {sessionNarrative.islSummary && (
+            <div style={{
+              fontSize: '0.65rem', color: '#c084fc', background: 'rgba(168, 85, 247, 0.08)',
+              borderRadius: 6, padding: '8px 12px', marginBottom: '0.75rem', lineHeight: 1.4,
+            }}>
+              {sessionNarrative.islSummary}
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {(sessionNarrative.recommendations || []).length > 0 && (
+            <>
+              <div style={{ color: '#60a5fa', fontSize: '0.7rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+                Recommendations
+              </div>
+              {sessionNarrative.recommendations.map((r, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: '0.5rem', fontSize: '0.65rem',
+                  padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.04)',
+                }}>
+                  <span style={{
+                    fontSize: '0.55rem', fontWeight: 700, padding: '1px 6px', borderRadius: 3,
+                    background: r.priority === 'HIGH' ? 'rgba(248, 113, 113, 0.2)' : 'rgba(251, 191, 36, 0.15)',
+                    color: r.priority === 'HIGH' ? '#f87171' : '#fbbf24',
+                    flexShrink: 0,
+                  }}>
+                    {r.priority}
+                  </span>
+                  <div>
+                    <div style={{ color: '#cbd5e1' }}>{r.action}</div>
+                    <div style={{ color: '#64748b', marginTop: 2 }}>{r.rationale}</div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Knowledge State — from BKT */}
+      {knowledgeReport && (
+        <div style={{
+          maxWidth: '640px',
+          width: '100%',
+          marginBottom: '2rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '12px',
+          padding: '1.5rem',
+        }}>
+          <h3 style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
+            Knowledge State (BKT)
+          </h3>
+          <div style={{
+            display: 'flex', gap: '0.75rem', marginBottom: '1rem', flexWrap: 'wrap',
+          }}>
+            <span style={{
+              fontSize: '0.65rem', color: '#22d3ee',
+              background: 'rgba(34, 211, 238, 0.1)', borderRadius: 4, padding: '3px 8px',
+            }}>
+              Avg mastery: {Math.round(knowledgeReport.averagePKnown * 100)}%
+            </span>
+            <span style={{
+              fontSize: '0.65rem', color: '#4ade80',
+              background: 'rgba(74, 222, 128, 0.1)', borderRadius: 4, padding: '3px 8px',
+            }}>
+              {knowledgeReport.masteryCount}/{knowledgeReport.totalConcepts} concepts mastered
+            </span>
+          </div>
+
+          {/* Concept progress bars */}
+          {knowledgeReport.weakestConcepts && knowledgeReport.weakestConcepts.length > 0 && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginBottom: '0.5rem' }}>
+                Developing Concepts
+              </div>
+              {knowledgeReport.weakestConcepts.map(c => (
+                <ProgressBar
+                  key={c.conceptId}
+                  label={c.conceptId.replace(/_/g, ' ')}
+                  percent={Math.round(c.pKnown * 100)}
+                  color={c.pKnown > 0.6 ? '#60a5fa' : c.pKnown > 0.3 ? '#fbbf24' : '#f87171'}
+                />
+              ))}
+            </div>
+          )}
+
+          {knowledgeReport.strongestConcepts && knowledgeReport.strongestConcepts.length > 0 && (
+            <div style={{ marginBottom: '0.75rem' }}>
+              <div style={{ color: '#94a3b8', fontSize: '0.65rem', marginBottom: '0.5rem' }}>
+                Strongest Concepts
+              </div>
+              {knowledgeReport.strongestConcepts.slice(0, 5).map(c => (
+                <ProgressBar
+                  key={c.conceptId}
+                  label={c.conceptId.replace(/_/g, ' ')}
+                  percent={Math.round(c.pKnown * 100)}
+                  color="#4ade80"
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Decay risk alerts */}
+          {knowledgeReport.decayRisks && knowledgeReport.decayRisks.length > 0 && (
+            <div style={{
+              fontSize: '0.65rem', color: '#fb923c', background: 'rgba(251, 146, 60, 0.08)',
+              borderRadius: 6, padding: '8px 12px', lineHeight: 1.4,
+            }}>
+              Review needed: {knowledgeReport.decayRisks.map(r => r.conceptId.replace(/_/g, ' ')).join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Latest Pedagogy Explanations */}
+      {allExplanations && allExplanations.length > 0 && (
+        <div style={{
+          maxWidth: '640px',
+          width: '100%',
+          marginBottom: '2rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '12px',
+          padding: '1.25rem',
+        }}>
+          <h3 style={{ color: '#e2e8f0', fontSize: '0.9rem', fontWeight: 700, margin: '0 0 0.75rem' }}>
+            System Explanations
+          </h3>
+          {allExplanations.slice(-3).map((exp, i) => (
+            <div key={i} style={{
+              fontSize: '0.65rem', color: '#94a3b8', padding: '6px 0',
+              borderBottom: i < Math.min(allExplanations.length, 3) - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+              lineHeight: 1.5,
+            }}>
+              <span style={{ color: exp.severity === 'CRITICAL' ? '#f87171' : exp.severity === 'WARNING' ? '#fbbf24' : '#60a5fa', fontWeight: 600 }}>
+                [{exp.severity}]
+              </span>{' '}
+              {exp.narrative}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '1rem' }}>

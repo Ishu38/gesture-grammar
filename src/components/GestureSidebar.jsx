@@ -131,6 +131,14 @@ const CATEGORY_COLORS = {
     text: 'text-green-200',
     badge: 'bg-green-600',
   },
+  MODIFIER: {
+    bg: 'bg-purple-900/50',
+    border: 'border-purple-500',
+    activeBorder: 'border-yellow-400',
+    activeBg: 'bg-purple-700',
+    text: 'text-purple-200',
+    badge: 'bg-purple-600',
+  },
 };
 
 /**
@@ -196,9 +204,11 @@ function GestureCard({ gesture, isActive, lockProgress }) {
  * Main GestureSidebar component
  */
 function GestureSidebar({ currentGesture, lockProgress = 0, currentTenseZone }) {
-  // Group gestures by category
+  // Group gestures by category — includes MODIFIER for plural, yes/no,
+  // and the swipe-direction voice markers so the user can actually see
+  // every gesture the classifier recognises.
   const groupedGestures = useMemo(() => {
-    const groups = { SUBJECT: [], VERB: [], OBJECT: [] };
+    const groups = { SUBJECT: [], VERB: [], OBJECT: [], MODIFIER: [] };
     GESTURE_CARDS.forEach(g => {
       if (groups[g.category]) {
         groups[g.category].push(g);
@@ -208,7 +218,7 @@ function GestureSidebar({ currentGesture, lockProgress = 0, currentTenseZone }) 
   }, []);
 
   return (
-    <div className="gesture-sidebar" style={{ transform: 'scaleX(-1)' }}>
+    <div className="gesture-sidebar">
       <div className="sidebar-header">
         <h3 className="sidebar-title">Gesture Guide</h3>
         {currentGesture && (
@@ -277,6 +287,26 @@ function GestureSidebar({ currentGesture, lockProgress = 0, currentTenseZone }) 
             ))}
           </div>
         </div>
+
+        {/* Modifiers (plural, yes, voice markers) */}
+        {groupedGestures.MODIFIER.length > 0 && (
+          <div className="gesture-category">
+            <h4 className="category-title" style={{ color: '#a855f7' }}>
+              <span className="category-icon">✦</span>
+              Modifiers
+            </h4>
+            <div className="gesture-list">
+              {groupedGestures.MODIFIER.map(gesture => (
+                <GestureCard
+                  key={gesture.id}
+                  gesture={gesture}
+                  isActive={currentGesture === gesture.id}
+                  lockProgress={currentGesture === gesture.id ? lockProgress : 0}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Instructions */}

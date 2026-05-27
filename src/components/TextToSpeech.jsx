@@ -9,41 +9,54 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-/** Feminine-sounding English voice name fragments (ordered by quality) */
-const FEMALE_VOICE_PATTERNS = [
-  'Google UK English Female',
-  'Google US English Female',
-  'Microsoft Zira',
-  'Samantha',
-  'Karen',
-  'Moira',
-  'Fiona',
-  'female',
-  'Female',
-  'woman',
-  'Woman',
+/** Three languages MLAF supports natively. Codes match what the Web Speech
+ *  API exposes on every major desktop OS (Chrome / Edge / Firefox).
+ *  Bengali ("bn") may be missing on a stock Windows install — the OS-level
+ *  TTS engine has to be installed in Settings → Time & language → Speech.
+ *  When unavailable the picker shows a helpful empty-state message. */
+const LANGUAGES = [
+  { code: 'en', label: 'English', defaultLang: 'en-IN', voicePrefixes: ['en'] },
+  { code: 'hi', label: 'हिन्दी',  defaultLang: 'hi-IN', voicePrefixes: ['hi'] },
+  { code: 'bn', label: 'বাংলা',   defaultLang: 'bn-IN', voicePrefixes: ['bn'] },
 ];
 
-/** Fallback English voice patterns if no female voice found */
-const FALLBACK_ENGLISH = ['en-GB', 'en-US', 'en-IN', 'en-AU', 'en'];
+/** Voice-name fragments that strongly imply a female voice. Pulled from
+ *  the Google / Microsoft / Apple TTS catalogues across the three target
+ *  languages. The "female" / "woman" generic strings catch most third-
+ *  party engines. */
+const FEMALE_VOICE_PATTERNS = [
+  // English
+  'Google UK English Female', 'Google US English Female',
+  'Microsoft Zira', 'Microsoft Aria', 'Microsoft Jenny',
+  'Samantha', 'Karen', 'Moira', 'Fiona', 'Tessa', 'Veena',
+  // Hindi
+  'Google हिन्दी', 'Microsoft Heera', 'Microsoft Kalpana', 'Lekha',
+  // Bengali
+  'Microsoft Tanishaa', 'Microsoft Bashkar', 'Google বাংলা',
+  // Generic fallbacks
+  'female', 'Female', 'woman', 'Woman',
+];
 
-function pickBestVoice(voices) {
+const MALE_VOICE_PATTERNS = [
+  'Google UK English Male', 'Google US English Male',
+  'Microsoft Mark', 'Microsoft David', 'Microsoft Guy', 'Microsoft Ravi',
+  'Microsoft Hemant', 'Microsoft Madhur',
+  'Daniel', 'Alex', 'Fred', 'Rishi',
+  'male', 'Male', 'man', 'Man',
+];
+
+/** Pick the best voice matching (lang, gender). Returns null if none. */
+function pickBestVoice(voices, langCode = 'en', gender = 'female') {
   if (!voices || voices.length === 0) return null;
-
-  // Try female voices first
-  for (const pattern of FEMALE_VOICE_PATTERNS) {
-    const match = voices.find(v => v.name.includes(pattern));
+  const langPool = voices.filter(v => v.lang.toLowerCase().startsWith(langCode));
+  if (langPool.length === 0) return null;
+  const namePatterns = gender === 'male' ? MALE_VOICE_PATTERNS : FEMALE_VOICE_PATTERNS;
+  for (const pattern of namePatterns) {
+    const match = langPool.find(v => v.name.includes(pattern));
     if (match) return match;
   }
-
-  // Fallback: any English voice
-  for (const lang of FALLBACK_ENGLISH) {
-    const match = voices.find(v => v.lang.startsWith(lang));
-    if (match) return match;
-  }
-
-  // Last resort: first available voice
-  return voices[0] || null;
+  // No gendered match — return the first voice for that language
+  return langPool[0];
 }
 
 function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
@@ -53,9 +66,13 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
   const [rate, setRate] = useState(0.85); // Slightly slower for clarity
   const [pitch, setPitch] = useState(1.05); // Slightly higher = more feminine
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
+  const [language, setLanguage] = useState('en');           // 'en' | 'hi' | 'bn'
+  const [gender, setGender]     = useState('female');       // 'female' | 'male'
   const lastSpokenRef = useRef('');
 
-  // Load available voices and pick best female voice
+  // Load available voices, and whenever the user changes language or gender,
+  // re-pick the best matching voice. Web Speech API populates voices
+  // asynchronously on Chrome, hence onvoiceschanged.
   useEffect(() => {
     if (!enabled || !('speechSynthesis' in window)) return;
 
@@ -63,12 +80,8 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
       const available = speechSynthesis.getVoices();
       if (available.length === 0) return;
       setVoices(available);
-
-      // Auto-pick best female voice
-      const best = pickBestVoice(available);
-      if (best && !selectedVoice) {
-        setSelectedVoice(best);
-      }
+      const best = pickBestVoice(available, language, gender);
+      if (best) setSelectedVoice(best);
     }
 
     loadVoices();
@@ -78,7 +91,7 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
       speechSynthesis.onvoiceschanged = null;
       speechSynthesis.cancel();
     };
-  }, [enabled]);
+  }, [enabled, language, gender]);
 
   // Build readable sentence from token array
   const readableSentence = sentence.map(w => w.word || w.display || w.grammar_id).join(' ');
@@ -181,31 +194,93 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
         </button>
       </div>
 
-      {/* Voice selector dropdown */}
-      {showVoiceSelector && (
-        <div style={{
-          marginTop: '0.5rem', maxHeight: '160px', overflowY: 'auto',
-          background: 'rgba(0,0,0,0.6)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          {voices.filter(v => v.lang.startsWith('en')).map(v => (
-            <div
-              key={v.name + v.lang}
-              onClick={() => { setSelectedVoice(v); setShowVoiceSelector(false); }}
+      {/* Language + gender pickers — sustainable Web Speech API, no model
+          download, works wherever the OS provides voices for the chosen
+          language. */}
+      <div style={{
+        marginTop: '0.5rem', display: 'flex', gap: '0.6rem',
+        alignItems: 'center', flexWrap: 'wrap',
+      }}>
+        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.55rem', color: '#64748b', marginRight: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Lang
+          </span>
+          {LANGUAGES.map(l => (
+            <button
+              key={l.code}
+              onClick={() => setLanguage(l.code)}
               style={{
-                padding: '4px 8px', fontSize: '0.6rem', color: v === selectedVoice ? '#4ade80' : '#94a3b8',
-                cursor: 'pointer', background: v === selectedVoice ? 'rgba(74,222,128,0.08)' : 'transparent',
+                padding: '3px 9px',
+                borderRadius: 4,
+                fontSize: '0.62rem',
+                fontWeight: 600,
+                background: language === l.code ? '#FF5252' : 'transparent',
+                color: language === l.code ? '#FFF6E6' : '#94a3b8',
+                border: `1px solid ${language === l.code ? '#FF5252' : 'rgba(255,255,255,0.12)'}`,
+                cursor: 'pointer',
               }}
             >
-              {v.name} ({v.lang})
-            </div>
+              {l.label}
+            </button>
           ))}
-          {voices.filter(v => v.lang.startsWith('en')).length === 0 && (
-            <div style={{ padding: '8px', fontSize: '0.6rem', color: '#64748b', textAlign: 'center' }}>
-              No English voices available. Install a TTS engine on your device.
-            </div>
-          )}
         </div>
-      )}
+        <div style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.55rem', color: '#64748b', marginRight: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Voice
+          </span>
+          {['female', 'male'].map(g => (
+            <button
+              key={g}
+              onClick={() => setGender(g)}
+              style={{
+                padding: '3px 9px',
+                borderRadius: 4,
+                fontSize: '0.62rem',
+                fontWeight: 600,
+                background: gender === g ? '#A855F7' : 'transparent',
+                color: gender === g ? '#FFF6E6' : '#94a3b8',
+                border: `1px solid ${gender === g ? '#A855F7' : 'rgba(255,255,255,0.12)'}`,
+                cursor: 'pointer',
+                textTransform: 'capitalize',
+              }}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Voice selector dropdown — filtered by selected language */}
+      {showVoiceSelector && (() => {
+        const langVoices = voices.filter(v => v.lang.toLowerCase().startsWith(language));
+        return (
+          <div style={{
+            marginTop: '0.5rem', maxHeight: '160px', overflowY: 'auto',
+            background: 'rgba(0,0,0,0.6)', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            {langVoices.map(v => (
+              <div
+                key={v.name + v.lang}
+                onClick={() => { setSelectedVoice(v); setShowVoiceSelector(false); }}
+                style={{
+                  padding: '4px 8px', fontSize: '0.6rem',
+                  color: v === selectedVoice ? '#4ade80' : '#94a3b8',
+                  cursor: 'pointer',
+                  background: v === selectedVoice ? 'rgba(74,222,128,0.08)' : 'transparent',
+                }}
+              >
+                {v.name} ({v.lang})
+              </div>
+            ))}
+            {langVoices.length === 0 && (
+              <div style={{ padding: '8px', fontSize: '0.6rem', color: '#64748b', textAlign: 'center', lineHeight: 1.5 }}>
+                No {LANGUAGES.find(l => l.code === language)?.label} voice installed.<br/>
+                Add one in: Windows → Settings → Time &amp; language → Speech → Add voices.
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

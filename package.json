@@ -1,7 +1,7 @@
 {
   "name": "mlaf",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "concurrently --kill-others --restart-tries 3 --restart-after 2000 --names grammar,vite --prefix-colors blue,magenta \"python3 -m uvicorn services.grammar_engine.app.main:app --host 0.0.0.0 --port 8300\" \"vite\"",

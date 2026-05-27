@@ -20,7 +20,7 @@ const BRAND = {
 const style = {
   screen: {
     minHeight: '100vh',
-    background: 'linear-gradient(160deg, #05070d 0%, #0c1220 30%, #111827 60%, #0f172a 100%)',
+    background: '#05070d',
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     color: '#e2e8f0',
     overflowX: 'hidden',
@@ -30,8 +30,7 @@ const style = {
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     padding: '12px 24px',
-    background: 'rgba(5,7,13,0.8)', backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.04)',
+    background: '#05070d', borderBottom: '1px solid rgba(255,255,255,0.04)',
   },
   navBrand: { fontSize: '0.8rem', fontWeight: 800, color: '#4ade80', letterSpacing: '0.15em' },
   navRight: { display: 'flex', gap: '1rem', alignItems: 'center' },

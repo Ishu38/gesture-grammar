@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#0f172a" />
     <meta name="description" content="In-browser real-time English grammar acquisition through hand gestures, for learners with motor impairment and deaf/hard-of-hearing users. Patent-pending." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -26,8 +26,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>MLAF — Multimodal Language Acquisition Framework</title>
+    <style>
+      /* Inline loading screen — disappears instantly once React mounts */
+      #root:empty::before {
+        content: '';
+        display: block;
+        position: fixed; inset: 0;
+        background: #05070d;
+        z-index: 99999;
+      }
+      #root:empty::after {
+        content: '';
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 36px; height: 36px;
+        border: 3px solid rgba(74,222,128,0.15);
+        border-top-color: #4ade80;
+        border-radius: 50%;
+        animation: mlaf-spin 0.7s linear infinite;
+        z-index: 100000;
+      }
+      #root:not(:empty)::before,
+      #root:not(:empty)::after {
+        display: none;
+      }
+      @keyframes mlaf-spin {
+        to { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+    </style>
   </head>
-  <body>
+  <body style="margin:0;background:#05070d;">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

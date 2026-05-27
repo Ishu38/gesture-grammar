@@ -5,7 +5,7 @@
 const STYLE = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(160deg, #05070d 0%, #0c1220 30%, #111827 60%, #0f172a 100%)',
+    background: '#05070d',
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
     color: '#e2e8f0',
     padding: '80px 2rem 4rem',
@@ -14,8 +14,7 @@ const STYLE = {
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     padding: '14px 24px',
-    background: 'rgba(5,7,13,0.85)', backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)',
+    background: '#05070d', borderBottom: '1px solid rgba(255,255,255,0.05)',
   },
   navBrand: { fontSize: '0.85rem', fontWeight: 800, color: '#4ade80', letterSpacing: '0.15em', cursor: 'pointer', background: 'none', border: 'none' },
   navLinks: { display: 'flex', gap: '0.5rem', alignItems: 'center' },

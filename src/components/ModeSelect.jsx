@@ -12,7 +12,7 @@ export default function ModeSelect({ onSelectGuided, onSelectSandbox, onSelectRe
       justifyContent: 'center',
       minHeight: '100vh',
       padding: '2rem',
-      background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
+      background: '#05070d',
       fontFamily: 'system-ui, -apple-system, sans-serif',
     }}>
       <h2 style={{

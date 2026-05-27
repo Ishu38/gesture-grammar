@@ -28,7 +28,7 @@ export default function AchievementToast({ achievement, onDismiss, lowStimulus =
   return (
     <div style={{
       position: 'fixed', top: 20, right: 20, zIndex: 10000,
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 100%)',
+      background: '#111827',
       border: '2px solid #fbbf24',
       borderRadius: 12, padding: '14px 20px',
       boxShadow: '0 8px 32px rgba(251, 191, 36, 0.3)',

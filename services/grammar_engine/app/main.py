@@ -18,12 +18,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import ORJSONResponse, Response
 from pydantic import BaseModel, Field
 
 from .engine import PrologEngine
+from . import tts_providers
 from .schemas import (
     GestureSequence,
     InterferencePattern,
@@ -488,3 +489,44 @@ def _dict_to_theta(d: dict | None) -> ThetaInfo | None:
         violation_type=d.get("violation_type"),
         missing_count=d.get("missing_count", 0),
     )
+
+
+# ---------------------------------------------------------------------------
+# TTS (text-to-speech) — server-side fallback for languages whose OS voice
+# is missing on the user's device. See tts_providers.py for the provider
+# chain (Bhashini first if configured, gTTS always-on fallback).
+# ---------------------------------------------------------------------------
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=400)
+    lang: str = Field(..., pattern="^(en|hi|bn)$")
+
+
+@app.post("/tts", responses={200: {"content": {"audio/mpeg": {}}}})
+async def tts_synthesize(req: TTSRequest) -> Response:
+    """Synthesize text to MP3 in the requested language.
+
+    Returns 200 with audio/mpeg body and an X-TTS-Provider header so the
+    frontend can show which provider answered. 503 if every provider fails.
+    """
+    try:
+        audio, provider = tts_providers.synthesize(req.text, req.lang)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    return Response(
+        content=audio,
+        media_type="audio/mpeg",
+        headers={
+            "X-TTS-Provider": provider,
+            "Cache-Control": "public, max-age=3600",
+        },
+    )
+
+
+@app.get("/tts/health")
+async def tts_health() -> dict:
+    """Diagnostic for the TTS chain — useful for confirming Bhashini
+    is wired correctly after setting BHASHINI_USER_ID + BHASHINI_API_KEY."""
+    return tts_providers.provider_status()

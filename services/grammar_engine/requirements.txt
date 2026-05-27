@@ -3,6 +3,10 @@ uvicorn[standard]==0.30.0
 pyswip==0.3.2
 pydantic==2.9.0
 orjson==3.10.0
+gTTS==2.5.4    # Free Google Translate TTS — no API key needed. Used by
+               # app/tts_providers.py as the fallback when no OS-installed
+               # Bengali / Hindi voice is found, and as the always-on path
+               # until BHASHINI_USER_ID + BHASHINI_API_KEY are configured.
 
 # ML / Training pipeline (install only when training)
 # pip install -r training/requirements.txt

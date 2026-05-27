@@ -96,25 +96,69 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
   // Build readable sentence from token array
   const readableSentence = sentence.map(w => w.word || w.display || w.grammar_id).join(' ');
 
-  const speak = useCallback((text) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  // Currently-playing HTMLAudioElement when we fall back to the server-side
+  // TTS endpoint. Held in a ref so stopSpeaking() can pause it cleanly.
+  const fallbackAudioRef = useRef(null);
+
+  /**
+   * Best-effort speech using the Web Speech API if a usable voice exists
+   * for the selected language; otherwise hits the FastAPI /grammar/tts
+   * endpoint (gTTS today, Bhashini when configured) and plays the
+   * returned MP3. This is the path that lets a Windows laptop without
+   * a Bengali OS voice still speak Bengali sentences.
+   */
+  const speak = useCallback(async (text) => {
+    if (typeof window === 'undefined') return;
     if (!text.trim()) return;
 
-    // Cancel any ongoing speech
-    speechSynthesis.cancel();
+    // Always cancel both pipelines before starting a new utterance.
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    if (fallbackAudioRef.current) {
+      try { fallbackAudioRef.current.pause(); } catch { /* noop */ }
+      fallbackAudioRef.current = null;
+    }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    if (selectedVoice) utterance.voice = selectedVoice;
-    utterance.rate = rate;
-    utterance.pitch = pitch;
-    utterance.volume = 1.0;
+    // Path 1 — Web Speech API has a voice that matches the chosen language.
+    const hasMatchingOSVoice =
+      selectedVoice && selectedVoice.lang.toLowerCase().startsWith(language);
+    if (hasMatchingOSVoice && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = selectedVoice;
+      utterance.rate = rate;
+      utterance.pitch = pitch;
+      utterance.volume = 1.0;
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      speechSynthesis.speak(utterance);
+      return;
+    }
 
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    speechSynthesis.speak(utterance);
-  }, [selectedVoice, rate, pitch]);
+    // Path 2 — No OS voice for this language → server-side TTS.
+    // /grammar is proxied by vite.config.js to the HF Space backend, where
+    // the /tts route returns audio/mpeg via gTTS (or Bhashini if its env
+    // vars are set on the Space).
+    try {
+      setIsSpeaking(true);
+      const resp = await fetch('/grammar/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, lang: language }),
+      });
+      if (!resp.ok) throw new Error(`tts ${resp.status}`);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.playbackRate = rate;
+      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); fallbackAudioRef.current = null; };
+      audio.onerror = () => { setIsSpeaking(false); URL.revokeObjectURL(url); fallbackAudioRef.current = null; };
+      fallbackAudioRef.current = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn('[TTS] server-side fallback failed:', err);
+      setIsSpeaking(false);
+    }
+  }, [selectedVoice, rate, pitch, language]);
 
   // Auto-speak when sentence is complete
   useEffect(() => {
@@ -133,6 +177,10 @@ function TextToSpeech({ sentence, isComplete, autoSpeak, enabled }) {
   const stopSpeaking = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       speechSynthesis.cancel();
+    }
+    if (fallbackAudioRef.current) {
+      try { fallbackAudioRef.current.pause(); } catch { /* noop */ }
+      fallbackAudioRef.current = null;
     }
     setIsSpeaking(false);
   }, []);

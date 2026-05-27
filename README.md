@@ -1,14 +1,26 @@
 # MLAF — Multimodal Language Acquisition Framework
 
-[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial%201.0.0-lightgrey.svg)](LICENSE)
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL%201.1-blue.svg)](LICENSE)
+[![Commercial](https://img.shields.io/badge/commercial-COMMERCIAL.md-orange.svg)](COMMERCIAL.md)
+[![Patent](https://img.shields.io/badge/patent-IN%20202631020540-blueviolet.svg)](PATENTS.md)
 [![Live demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://multi-modal-gesture-grammar.vercel.app)
-[![Patent Pending](https://img.shields.io/badge/Patent-Pending-blueviolet.svg)](#)
 
 In-browser, real-time English grammar acquisition through hand gestures — designed for learners with motor impairment and deaf/hard-of-hearing users. Combines symbolic AI (formal grammars, type theory, knowledge graphs) with neural perception (MediaPipe vision, ONNX classification) so the system adapts to each learner's motor abilities in real time.
 
 **Live Demo:** https://multi-modal-gesture-grammar.vercel.app
 
-**Patent Pending** — Provisional application TEMP/E-1/22951/2026-KOL, Indian Patent Office (2026). 10 claims.
+**Patent Pending** — Indian application no. **202631020540**, 10 claims. PCT filing planned by 21 February 2027. See [PATENTS.md](PATENTS.md).
+
+## Licence at a glance
+
+MLAF is released under **Business Source License 1.1** (see [LICENSE](LICENSE)) with a generous Additional Use Grant:
+
+- **Free** for individuals, families, accredited schools, registered non-profits serving persons with disabilities, and academic/clinical research.
+- **Paid commercial licence** required for for-profit clinics, paid services, hardware bundling, OEM redistribution, and any fee-charging deployment. See [COMMERCIAL.md](COMMERCIAL.md) — indicative pricing starts at ₹6,000/seat/year.
+- **Auto-converts** to Apache 2.0 on **27 May 2030** (4 years from initial release).
+- **Patent grant** under app. 202631020540 tracks the licence — covered for permitted purposes, separately licensable for commercial use.
+
+Cleanup of the prior PolyForm-Noncommercial licence: BSL 1.1 was chosen because it permits broader free use (schools, non-profits, research) while preserving paid-tier rights and patent enforceability, and it makes the project eligible for assistive-technology grants that require an open-source compatible licence.
 
 ---
 

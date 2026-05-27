@@ -98,7 +98,15 @@ function ErrorOverlay({ errorData, canvasWidth, canvasHeight, visible, predictab
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        transform: 'scaleX(-1)',
+        /* 2026-05-27: removed transform: scaleX(-1) which was inherited
+           from the previous design assumption that this canvas tracked
+           landmark coordinates. It does NOT — every shape and string drawn
+           here uses fixed pixel offsets (aggregate badge at canvasWidth-100,
+           constraint bars at barX=15, correction text at canvasWidth/2).
+           The mirror flipped the percentage to "X£9", "Accuracy" to "ycaruccA",
+           and the success message to backwards Hebrew-looking text. With
+           the mirror removed: text reads correctly, the badge moves back to
+           the right side of frame, bars sit on the left. */
         zIndex: 10,
       }}
     />

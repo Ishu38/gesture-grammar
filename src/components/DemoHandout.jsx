@@ -5,9 +5,9 @@
  */
 import { useCallback } from 'react';
 
-const BRAND = { primary: '#0f172a', accent: '#4ade80', muted: '#475569' };
+const BRAND = { primary: '#0F172A', accent: '#FF5252', muted: '#475569' };
 
-function SectionTitle({ children, color = '#4ade80' }) {
+function SectionTitle({ children, color = '#FF5252' }) {
   return (
     <h3 style={{
       fontSize: '0.95rem', fontWeight: 800, color, margin: '0 0 0.75rem',
@@ -19,7 +19,7 @@ function SectionTitle({ children, color = '#4ade80' }) {
   );
 }
 
-function FeatureRow({ icon, title, desc, color = '#4ade80' }) {
+function FeatureRow({ icon, title, desc, color = '#FF5252' }) {
   return (
     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
       <span style={{
@@ -59,11 +59,11 @@ export default function DemoHandout({ onBack, onNavigate }) {
       {/* Print button (hidden on print) */}
       <div className="no-print" style={{
         display: 'flex', justifyContent: 'center', gap: '1rem',
-        padding: '1rem', background: '#0f172a',
+        padding: '1rem', background: '#FFF6E6',
       }}>
         <button onClick={handlePrint} style={{
           padding: '0.8rem 2.5rem', fontSize: '1rem', fontWeight: 700,
-          color: '#0f172a', background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
+          color: '#FFF6E6', background: '#FF5252',
           border: 'none', borderRadius: '10px', cursor: 'pointer',
           boxShadow: '0 4px 20px rgba(74,222,128,0.3)',
         }}>
@@ -101,7 +101,7 @@ export default function DemoHandout({ onBack, onNavigate }) {
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
           marginBottom: '1.5rem', paddingBottom: '1rem',
-          borderBottom: '3px solid #4ade80',
+          borderBottom: '3px solid #FF5252',
         }}>
           <div>
             <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', margin: 0, letterSpacing: '0.08em' }}>
@@ -111,12 +111,12 @@ export default function DemoHandout({ onBack, onNavigate }) {
               Multimodal Language Acquisition Framework
             </p>
             <p style={{ fontSize: '0.62rem', color: '#94a3b8', margin: '0.15rem 0 0' }}>
-              Patent Pending — TEMP/E-1/22951/2026-KOL · Indian Patent Office (2026)
+              Patent Pending — 202631020540 · Indian Patent Office (2026)
             </p>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{
-              padding: '4px 10px', background: '#4ade8015', borderRadius: 6,
+              padding: '4px 10px', background: '#FF525215', borderRadius: 6,
               fontSize: '0.62rem', color: '#16a34a', fontWeight: 700, letterSpacing: '0.05em',
             }}>
               PATENT PENDING
@@ -139,7 +139,7 @@ export default function DemoHandout({ onBack, onNavigate }) {
           <div style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem 1rem',
           }}>
-            <FeatureRow icon="A" title="Adaptive AI" color="#4ade80"
+            <FeatureRow icon="A" title="Adaptive AI" color="#FF5252"
               desc="Auto-adjusts to motor tremor & cognitive load. No two learners treated the same."
             />
             <FeatureRow icon="I" title="ISL Transfer Detection" color="#8b5cf6"
@@ -257,7 +257,7 @@ export default function DemoHandout({ onBack, onNavigate }) {
 
               <div style={{
                 marginTop: '0.75rem', padding: '0.75rem',
-                background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+                background: '#0F172A',
                 borderRadius: 8, color: '#e2e8f0',
               }}>
                 <div style={{ fontWeight: 800, fontSize: '0.75rem', marginBottom: '0.5rem' }}>
@@ -280,7 +280,7 @@ export default function DemoHandout({ onBack, onNavigate }) {
           fontSize: '0.58rem', color: '#94a3b8', textAlign: 'center',
           lineHeight: 1.5,
         }}>
-          MLAF — Multimodal Language Acquisition Framework · Patent-Pending TEMP/E-1/22951/2026-KOL, Indian Patent Office (2026)
+          MLAF — Multimodal Language Acquisition Framework · Patent-Pending 202631020540, Indian Patent Office (2026)
            <br />All rights reserved. Commercial licensing inquiries: neilshankarray@vaaani.in · vaaani.in
         </div>
       </div>

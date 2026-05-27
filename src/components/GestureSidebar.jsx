@@ -5,32 +5,39 @@
 
 import { useMemo } from 'react';
 
-// Gesture definitions with icons and descriptions
+// Gesture definitions — kept STRICTLY in sync with src/data/GestureLexicon.json.
+// Every entry below corresponds to a real semantic_mapping.grammar_id the
+// classifier can actually recognize. The "shape" field must describe the
+// SAME handshape the classifier expects (i.e. the lexicon's human_description),
+// otherwise users mimic what the guide shows and the system stays at 0%.
+// Previous DRINK / BOOK / HOUSE / WATER cards were aspirational stubs and are
+// removed — they were never wired into the recognizer and caused users to
+// chase shapes the system could not lock.
 const GESTURE_CARDS = [
   // Subjects
   {
     id: 'SUBJECT_I',
     category: 'SUBJECT',
-    icon: '👊',
+    icon: '✊',
     label: 'I',
-    description: 'Thumb pointing at self',
-    shape: 'Fist + Thumb inward',
+    description: 'Closed fist',
+    shape: 'All fingers curled into palm',
   },
   {
     id: 'SUBJECT_YOU',
     category: 'SUBJECT',
-    icon: '👆',
+    icon: '☝️',
     label: 'YOU',
-    description: 'Point at camera',
-    shape: 'Index extended forward',
+    description: 'Point with index finger',
+    shape: 'Index extended, others curled',
   },
   {
     id: 'SUBJECT_HE',
     category: 'SUBJECT',
-    icon: '👍',
-    label: 'HE/SHE',
-    description: 'Thumb to the side',
-    shape: 'Hitchhiker thumb',
+    icon: '🤟',
+    label: 'HE / SHE',
+    description: 'Three fingers up',
+    shape: 'Index + Middle + Ring extended, Pinky curled, Thumb tucked',
   },
 
   // Verbs
@@ -39,58 +46,62 @@ const GESTURE_CARDS = [
     category: 'VERB',
     icon: '🤏',
     label: 'GRAB',
-    description: 'Claw / Pinch shape',
-    shape: 'All fingertips together',
-  },
-  {
-    id: 'DRINK',
-    category: 'VERB',
-    icon: '🤙',
-    label: 'DRINK',
-    description: 'C-shape (holding cup)',
-    shape: 'Thumb + Index curved',
+    description: 'Pinch shape',
+    shape: 'Thumb tip + Index tip touching, others relaxed',
   },
   {
     id: 'STOP',
     category: 'VERB',
     icon: '✋',
     label: 'STOP',
-    description: 'Open palm (stop sign)',
-    shape: 'All fingers extended',
+    description: 'Open palm',
+    shape: 'All five fingers spread, palm facing camera',
   },
 
-  // Objects
+  // Object
   {
     id: 'APPLE',
     category: 'OBJECT',
-    icon: '🍎',
+    icon: '🤚',
     label: 'APPLE',
-    description: 'Cupped hand',
-    shape: 'Fingers slightly curved',
+    description: 'Flat hand, palm down',
+    shape: 'Hand horizontal, palm facing the floor',
+  },
+
+  // Modifiers
+  {
+    id: 'PLURAL',
+    category: 'MODIFIER',
+    icon: '✌️',
+    label: 'PLURAL',
+    description: 'Two fingers up (peace sign)',
+    shape: 'Index + Middle extended, Thumb / Ring / Pinky curled',
   },
   {
-    id: 'BOOK',
-    category: 'OBJECT',
-    icon: '📖',
-    label: 'BOOK',
-    description: 'Flat palm facing up',
-    shape: 'Open hand horizontal',
+    id: 'AFFIRMATIVE',
+    category: 'MODIFIER',
+    icon: '👍',
+    label: 'YES',
+    description: 'Thumbs up',
+    shape: 'Thumb extended upward, other fingers curled',
+  },
+
+  // Voice markers (dynamic — motion gestures, not static handshape)
+  {
+    id: 'ACTIVE_VOICE',
+    category: 'MODIFIER',
+    icon: '➡️',
+    label: 'ACTIVE',
+    description: 'Swipe right',
+    shape: 'Open hand moves left → right across the frame',
   },
   {
-    id: 'HOUSE',
-    category: 'OBJECT',
-    icon: '🏠',
-    label: 'HOUSE',
-    description: 'Roof shape',
-    shape: 'Index + Middle tips touch',
-  },
-  {
-    id: 'WATER',
-    category: 'OBJECT',
-    icon: '💧',
-    label: 'WATER',
-    description: 'W-shape',
-    shape: '3 middle fingers spread',
+    id: 'PASSIVE_VOICE',
+    category: 'MODIFIER',
+    icon: '⬅️',
+    label: 'PASSIVE',
+    description: 'Swipe left',
+    shape: 'Open hand moves right → left across the frame',
   },
 ];
 
@@ -197,7 +208,7 @@ function GestureSidebar({ currentGesture, lockProgress = 0, currentTenseZone }) 
   }, []);
 
   return (
-    <div className="gesture-sidebar">
+    <div className="gesture-sidebar" style={{ transform: 'scaleX(-1)' }}>
       <div className="sidebar-header">
         <h3 className="sidebar-title">Gesture Guide</h3>
         {currentGesture && (

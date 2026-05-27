@@ -1,0 +1,12 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Maskable icons get cropped to a circle in the 80% safe zone.
+       Solid fill across full 512×512; main mark sits in centre 60%. -->
+  <rect width="512" height="512" fill="#FF5252"/>
+  <g fill="#FFF6E6" transform="translate(166,142) scale(3.0)">
+    <rect x="14" y="34" width="36" height="22" rx="10"/>
+    <rect x="14" y="14" width="7"  height="26" rx="3.5"/>
+    <rect x="24" y="6"  width="7"  height="34" rx="3.5"/>
+    <rect x="34" y="10" width="7"  height="30" rx="3.5"/>
+    <rect x="44" y="18" width="7"  height="22" rx="3.5"/>
+  </g>
+</svg>

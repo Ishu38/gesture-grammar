@@ -117,18 +117,23 @@ function App() {
             aria-label="Return to home screen"
             className="home-nav-btn"
             style={{
-              position: 'fixed', top: 12, left: 12, zIndex: 9999,
-              width: 40, height: 40, borderRadius: 10,
-              background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(255,255,255,0.1)',
-              color: '#94a3b8', fontSize: '1.1rem', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-              transition: 'all 0.2s',
+              position: 'fixed', top: 14, left: 14, zIndex: 9999,
+              padding: '7px 14px 7px 12px',
+              borderRadius: 10,
+              background: '#FFF6E6',
+              border: '2px solid #0F172A',
+              color: '#0F172A',
+              fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+              fontSize: '0.82rem', fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.35rem',
+              boxShadow: '3px 3px 0 0 #FF5252',
+              transition: 'transform 0.12s ease, box-shadow 0.12s ease',
             }}
-            onMouseEnter={e => { e.target.style.background = 'rgba(74,222,128,0.15)'; e.target.style.borderColor = 'rgba(74,222,128,0.4)'; e.target.style.color = '#4ade80'; }}
-            onMouseLeave={e => { e.target.style.background = 'rgba(15,23,42,0.85)'; e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.color = '#94a3b8'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-1px, -1px)'; e.currentTarget.style.boxShadow = '4px 4px 0 0 #FF5252'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translate(0, 0)'; e.currentTarget.style.boxShadow = '3px 3px 0 0 #FF5252'; }}
           >
-            ◂
+            <span aria-hidden="true">←</span> Home
           </button>
         )}
 
@@ -146,53 +151,77 @@ function App() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
             minHeight: '100vh',
-            padding: '2rem',
+            padding: '70px 1.5rem 3rem',
+            background: '#FFF6E6',
+            position: 'relative',
+            overflow: 'hidden',
           }}>
-            <button
-              onClick={handleBackToWelcome}
-              style={{
-                position: 'absolute', top: 20, left: 20,
-                background: 'none', border: 'none', color: '#94a3b8',
-                fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600,
-              }}
-            >
-              ← Home
-            </button>
-            <h2 style={{
-              fontSize: '1.5rem', fontWeight: 700, color: '#e2e8f0',
-              marginBottom: '0.5rem',
-            }}>
-              Accessibility Profile
-            </h2>
-            <p style={{
-              fontSize: '0.85rem', color: '#94a3b8', marginBottom: '2rem',
-              textAlign: 'center', maxWidth: '400px',
-            }}>
-              Select the profile that best matches the learner.
-              This adjusts error tolerance, confidence thresholds, and feedback intensity.
-            </p>
+            {/* Background splats */}
+            <svg viewBox="0 0 120 120" aria-hidden="true" style={{ position: 'absolute', top: 80, right: -30, width: 180, height: 180, opacity: 0.16, transform: 'rotate(20deg)', pointerEvents: 'none' }}>
+              <path d="M62 8 C 80 6, 95 22, 92 38 C 105 42, 116 56, 108 72 C 116 88, 100 105, 82 100 C 78 116, 56 118, 48 104 C 30 110, 14 96, 20 78 C 6 70, 4 50, 22 44 C 22 24, 44 12, 62 8 Z" fill="#A855F7"/>
+            </svg>
+            <svg viewBox="0 0 120 120" aria-hidden="true" style={{ position: 'absolute', bottom: 60, left: -40, width: 160, height: 160, opacity: 0.14, transform: 'rotate(-20deg)', pointerEvents: 'none' }}>
+              <path d="M62 8 C 80 6, 95 22, 92 38 C 105 42, 116 56, 108 72 C 116 88, 100 105, 82 100 C 78 116, 56 118, 48 104 C 30 110, 14 96, 20 78 C 6 70, 4 50, 22 44 C 22 24, 44 12, 62 8 Z" fill="#14B8A6"/>
+            </svg>
+
+            <div style={{ maxWidth: 760, width: '100%', position: 'relative', zIndex: 1 }}>
+              <div style={{
+                display: 'inline-block', background: '#FACC15', color: '#0F172A',
+                fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                fontSize: '0.72rem', fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                padding: '6px 12px', border: '2px solid #0F172A', borderRadius: 4,
+                marginBottom: '1.2rem',
+                boxShadow: '3px 3px 0 0 #0F172A',
+              }}>
+                Step 1 of 3
+              </div>
+              <h2 style={{
+                fontFamily: "'Bungee', 'Impact', system-ui, sans-serif",
+                fontSize: 'clamp(1.8rem, 4.5vw, 2.6rem)',
+                color: '#0F172A',
+                margin: '0 0 0.6rem',
+                letterSpacing: '-0.005em',
+                lineHeight: 1.1,
+              }}>
+                Who's <span style={{ color: '#FF5252' }}>learning?</span>
+              </h2>
+              <p style={{
+                fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
+                fontSize: '0.98rem', color: '#475569',
+                marginBottom: '1.8rem',
+                maxWidth: 540, lineHeight: 1.55,
+              }}>
+                Pick the profile that fits the learner. MLAF adjusts hand-tolerance,
+                hold-time, and feedback automatically — so you don't have to think
+                about it again.
+              </p>
+            </div>
+
             <AccessibilityPanel
               currentProfile={profileType}
               onProfileChange={handleProfileChange}
             />
+
             <button
               onClick={handleProfileDone}
               style={{
                 marginTop: '2rem',
-                padding: '0.85rem 2.5rem',
-                fontSize: '1rem',
-                fontWeight: 700,
-                color: '#0f0f1a',
-                background: 'linear-gradient(135deg, #4ade80, #22d3ee)',
-                border: 'none',
-                borderRadius: '10px',
+                fontFamily: "'Bungee', 'Impact', system-ui, sans-serif",
+                fontSize: '1.05rem',
+                color: '#FFF6E6',
+                background: '#0F172A',
+                border: '2px solid #0F172A',
+                borderRadius: 12,
+                padding: '14px 36px',
                 cursor: 'pointer',
-                boxShadow: '0 4px 20px rgba(74, 222, 128, 0.2)',
+                letterSpacing: '0.03em',
+                boxShadow: '5px 5px 0 0 #FF5252',
+                position: 'relative', zIndex: 1,
               }}
             >
-              Continue
+              Continue →
             </button>
           </div>
         )}

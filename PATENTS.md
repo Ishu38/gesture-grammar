@@ -57,7 +57,7 @@ law for permitted descriptive use.
 
 ## How to obtain a commercial patent licence
 
-Read `COMMERCIAL.md` and email **roychinu45@gmail.com** with:
+Read `COMMERCIAL.md` and email **neilshankarray@vaaani.in** with:
 
 1. Your organisation name, country, and registration number.
 2. Intended use case (hospital, school, OEM integration, etc.).

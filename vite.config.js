@@ -19,7 +19,12 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
-        registerType: 'prompt',
+        // 2026-05-27: switched from 'prompt' to 'autoUpdate' so bug fixes
+        // and content updates reach users without requiring them to tap a
+        // dialog. The previous 'prompt' mode left phones stuck on stale
+        // bundles for weeks, including a tremor-tolerance fix that users
+        // were reporting as still broken even after deploy.
+        registerType: 'autoUpdate',
         injectRegister: false, // We register manually via workbox-window in main.jsx
         workbox: {
           globPatterns: [
@@ -28,15 +33,23 @@ export default defineConfig(({ mode }) => {
           maximumFileSizeToCacheInBytes: 30 * 1024 * 1024, // 30 MB (hand_landmarker.task is ~7.5 MB)
         },
         manifest: {
-          name: 'MLAF — Multimodal Language Acquisition Framework',
+          name: 'MLAF — Talk With Your Hands',
           short_name: 'MLAF',
-          description: 'Grammar acquisition through gesture-based multimodal learning',
-          theme_color: '#0f172a',
-          background_color: '#0f0f1a',
+          description: 'Turn hand gestures into spoken English sentences. Free, browser-based, camera-only — built for people with motor impairment and the families who refuse to wait.',
+          theme_color: '#FF5252',
+          background_color: '#FFF6E6',
           display: 'standalone',
+          orientation: 'portrait',
+          lang: 'en-IN',
+          categories: ['education', 'accessibility', 'medical'],
           icons: [
-            { src: 'pwa-192x192.svg', sizes: '192x192', type: 'image/svg+xml' },
-            { src: 'pwa-512x512.svg', sizes: '512x512', type: 'image/svg+xml' },
+            { src: 'pwa-192x192.svg',     sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
+            { src: 'pwa-512x512.svg',     sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
+            { src: 'pwa-maskable.svg',    sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+          ],
+          shortcuts: [
+            { name: 'Start session',    short_name: 'Start',  url: '/' },
+            { name: 'Read the guide',   short_name: 'Guide',  url: '/guide.pdf' },
           ],
         },
       }),

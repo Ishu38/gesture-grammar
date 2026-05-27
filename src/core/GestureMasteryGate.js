@@ -208,9 +208,16 @@ export class GestureMasteryGate {
    * @returns {boolean}
    */
   isGestureUnlocked(gestureId) {
-    const gestureStage = GESTURE_STAGE_MAP[gestureId];
-    if (gestureStage === undefined) return true; // not gated
-    return gestureStage <= this.getCurrentStage();
+    // 2026-05-27: clinical/therapist mode — all 10 gestures unlocked from
+    // first session. The curriculum sequence is preserved internally for
+    // mastery analytics (a therapist still sees which stage a learner is
+    // working through in reports), but the system no longer hides later-
+    // stage gestures from the active vocabulary. Rationale: speech-language
+    // pathologists asked for the full vocabulary on day one so they can
+    // adapt the session to whichever construct each individual child
+    // engages with first, rather than enforcing a linear progression.
+    void gestureId;
+    return true;
   }
 
   /**

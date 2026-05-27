@@ -71,7 +71,7 @@ they are deliverables, not flag flips.
 
 ## Process
 
-1. Email **roychinu45@gmail.com** with:
+1. Email **neilshankarray@vaaani.in** with:
    - Organisation name, country, registration number.
    - Use case in 3-5 sentences.
    - Estimated number of end-users and seats.

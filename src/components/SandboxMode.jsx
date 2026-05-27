@@ -259,6 +259,11 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     gestureDFARef.current = new GestureLifecycleDFA({
       confirmationFrames: accessibilityProfile?.getConfidenceThreshold() || 30,
       cooldownMs: 1500,
+      // Tremor tolerance: absorbs brief mis-classifications mid-hold so users
+      // with hand tremor don't lose their accumulated count to a single bad
+      // frame. Derived from the profile's tolerance multiplier — 0 for
+      // Standard, ~10 for motor-impaired, ~18 for cp-spastic.
+      sustainedGracePeriod: accessibilityProfile?.getSustainedGracePeriod?.() || 0,
       onStateChange: (newState) => setDfaState(newState),
     });
     return () => gestureDFARef.current?.reset();

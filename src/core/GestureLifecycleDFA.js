@@ -170,6 +170,13 @@ export class GestureLifecycleDFA {
     this._peakWindowCount = 0;     // total frames since peak tracking started
     this._peakAccumulatedHits = 0; // total confirmed frames (non-consecutive)
 
+    // Sustained-hold tremor tolerance — tolerates brief mis-classifications
+    // (jitter from hand tremor) mid-hold without resetting the confirmation
+    // counter. Set per-profile by AccessibilityProfile.getSustainedGracePeriod().
+    // 0 = strict (default for Standard); higher for motor/CP profiles.
+    this._sustainedGracePeriod = config.sustainedGracePeriod || 0;
+    this._sustainedDropoutCount = 0; // consecutive bad frames currently tolerated
+
     // DFA state (q)
     this._state = DFA_STATES.IDLE;
 
@@ -263,14 +270,33 @@ export class GestureLifecycleDFA {
       // ═══════════════════════════════════════════════════════════════════
       // SUSTAINED-HOLD MODE (default)
       // Requires N consecutive frames of the same gesture.
+      // Tremor-tolerant: brief mis-classifications (jitter) are absorbed
+      // for up to _sustainedGracePeriod consecutive frames before the
+      // counter resets. This is the fix for the "lock never fills with
+      // tremor" symptom reported by motor-impaired users.
       // ═══════════════════════════════════════════════════════════════════
-      if (
-        (this._state === DFA_STATES.DETECTING || this._state === DFA_STATES.CONFIRMING) &&
-        input === DFA_INPUTS.GESTURE_SAME
-      ) {
-        this._confirmationCount++;
-        if (this._confirmationCount >= this._confirmationFrames) {
-          effectiveInput = DFA_INPUTS.LOCK_THRESHOLD;
+      if (this._state === DFA_STATES.DETECTING || this._state === DFA_STATES.CONFIRMING) {
+        if (input === DFA_INPUTS.GESTURE_SAME) {
+          // Clean frame — count it and clear any pending dropout
+          this._confirmationCount++;
+          this._sustainedDropoutCount = 0;
+          if (this._confirmationCount >= this._confirmationFrames) {
+            effectiveInput = DFA_INPUTS.LOCK_THRESHOLD;
+          }
+        } else if (
+          this._sustainedGracePeriod > 0 &&
+          (input === DFA_INPUTS.GESTURE_NEW || input === DFA_INPUTS.GESTURE_NONE)
+        ) {
+          // Possible tremor flicker — tolerate up to grace_period frames
+          this._sustainedDropoutCount++;
+          if (this._sustainedDropoutCount <= this._sustainedGracePeriod) {
+            // Hide the flicker from the DFA transition table — treat as same
+            effectiveInput = DFA_INPUTS.GESTURE_SAME;
+            // Do NOT increment confirmation count for dropout frames
+          } else {
+            // Sustained loss — let the natural transition reset the counter
+            this._sustainedDropoutCount = 0;
+          }
         }
       }
     }
@@ -469,6 +495,7 @@ export class GestureLifecycleDFA {
       case DFA_STATES.IDLE:
         this._currentGestureId = null;
         this._confirmationCount = 0;
+        this._sustainedDropoutCount = 0;
         this._clearCooldownTimer();
         break;
 

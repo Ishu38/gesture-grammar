@@ -170,7 +170,12 @@ export const ACCESSIBILITY_PROFILES = {
     feedbackModes: ['visual', 'audio'],
     outputMode: 'text',
     gestureSubset: 'simplified',
-    confidenceFrames: 60,
+    // 2026-05-27: reduced from 60 → 30 (1.0s @ 30fps instead of 2.0s).
+    // The grace-period mechanism now absorbs tremor flickers, so we no
+    // longer need the long sustain to "smooth out" jitter — it just made
+    // every word feel like a 2-3 second wait. Real demonstrations need
+    // sub-second locks to feel responsive.
+    confidenceFrames: 30,
     toleranceMultiplier: 2.0,
     dfaMode: DFA_MODES.SUSTAINED_HOLD,
     peakCaptureFrames: null,
@@ -201,7 +206,9 @@ export const ACCESSIBILITY_PROFILES = {
     feedbackModes: ['visual', 'audio', 'haptic'],
     outputMode: 'text-to-speech',
     gestureSubset: 'simplified',
-    confidenceFrames: 50,
+    // 2026-05-27: reduced from 50 → 28 (~0.93s @ 30fps). Grace-period now
+    // handles jitter without inflating the hold time.
+    confidenceFrames: 28,
     toleranceMultiplier: 3.0,
     dfaMode: DFA_MODES.SUSTAINED_HOLD,
     peakCaptureFrames: null,
@@ -253,9 +260,11 @@ export const ACCESSIBILITY_PROFILES = {
     label: 'CP — Ataxic',
     description: 'For ataxic CP: zone-latching prevents spatial drift from changing grammar role',
     feedbackModes: ['visual', 'audio', 'haptic'],
+    // 2026-05-27: confidenceFrames reduced (was 45 below) — grace period
+    // handles drift, no need to sustain for 1.5s.
     outputMode: 'text-to-speech',
     gestureSubset: 'simplified',
-    confidenceFrames: 45,
+    confidenceFrames: 25,
     toleranceMultiplier: 2.5,
     dfaMode: DFA_MODES.SUSTAINED_HOLD,
     peakCaptureFrames: null,
@@ -619,6 +628,23 @@ export class AccessibilityProfile {
    */
   getPeakCaptureFrames() {
     return this.profile.peakCaptureFrames || null;
+  }
+
+  /**
+   * Frames of micro-jitter to absorb mid-hold WITHOUT resetting the
+   * confirmation counter in sustained-hold DFA mode. Derived from the
+   * tolerance multiplier so motor/CP profiles get tremor-tolerant locks
+   * without per-profile hand-tuning. Standard (1.0×) → 0 frames (strict);
+   * motor-impaired (2.0×) → 10 frames (~333ms at 30fps); cp-spastic (3.0×)
+   * → 18 frames. Caps at 25 frames to prevent a stuck wrong-gesture lock.
+   * Only consulted when dfaMode === SUSTAINED_HOLD.
+   * @returns {number}
+   */
+  getSustainedGracePeriod() {
+    if (this.getDfaMode() !== DFA_MODES.SUSTAINED_HOLD) return 0;
+    const t = this.profile.toleranceMultiplier || 1.0;
+    if (t <= 1.0) return 0;
+    return Math.min(25, Math.round((t - 1.0) * 10));
   }
 
   /**

@@ -93,8 +93,8 @@ const HAND_CONNECTIONS = [
 // Scoped to the Standard ('default') profile only; clinical/motor/CP profiles
 // keep their deliberately-calibrated thresholds (accessibility is not negotiable).
 // ─────────────────────────────────────────────────────────────────────────────
-const RAMP_ONBOARD_FRAMES = 15;   // brand-new gesture — sub-second, effortless lock
-const RAMP_MASTERED_FRAMES = 32;  // fully mastered — crisp, precise, deliberate lock
+const RAMP_ONBOARD_FRAMES = 12;   // brand-new gesture — fast, effortless lock (CONFIDENCE)
+const RAMP_MASTERED_FRAMES = 22;  // fully mastered — a bit more deliberate (TOLERANCE), never tedious
 
 function framesToLockForGesture(profile, masteryGate, gestureId) {
   const base = profile?.getConfidenceThreshold?.() ?? RAMP_ONBOARD_FRAMES;

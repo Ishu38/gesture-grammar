@@ -165,6 +165,7 @@ export default function WelcomeScreen({ onStart, onNavigate }) {
           <NavLink onClick={() => onNavigate && onNavigate('ABOUT')}>About</NavLink>
           <NavLink onClick={() => onNavigate && onNavigate('HANDOUT')}>Guide</NavLink>
           <NavLink onClick={() => onNavigate && onNavigate('BENGALI')}>বাংলা</NavLink>
+          <NavLink onClick={() => onNavigate && onNavigate('ACCESSIBILITY')}>Accessibility</NavLink>
           <NavLink onClick={() => onNavigate && onNavigate('CONTACT')}>Contact</NavLink>
         </div>
       </nav>

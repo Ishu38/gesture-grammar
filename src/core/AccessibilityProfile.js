@@ -486,7 +486,7 @@ export const ACCESSIBILITY_PROFILES = {
     // Onboarding delight > certainty: a sub-second first lock so the first
     // gesture feels effortless, not earned. (was 45 — ~2-4s of perfect hold on
     // CPU, which combined with zero grace let the indicator fill and collapse.)
-    confidenceFrames: 15,
+    confidenceFrames: 12,
     toleranceMultiplier: 1.0,
     dfaMode: DFA_MODES.SUSTAINED_HOLD,
     peakCaptureFrames: null,
@@ -641,14 +641,14 @@ export class AccessibilityProfile {
    * trap. The tolerance multiplier adds more on top for motor/CP profiles.
    * This only absorbs flicker; it does NOT lower the frames-to-lock, so the
    * certainty bar for clinical profiles is unchanged.
-   * Standard (1.0×) → 3 frames; motor-impaired (2.0×) → 13; cp-spastic (3.0×)
-   * → 23. Caps at 25 frames to prevent a stuck wrong-gesture lock.
+   * Standard (1.0×) → 6 frames; motor-impaired (2.0×) → 16; cp-spastic (3.0×)
+   * → 25 (capped). Caps at 25 frames to prevent a stuck wrong-gesture lock.
    * Only consulted when dfaMode === SUSTAINED_HOLD.
    * @returns {number}
    */
   getSustainedGracePeriod() {
     if (this.getDfaMode() !== DFA_MODES.SUSTAINED_HOLD) return 0;
-    const BASELINE_GRACE = 3; // jitter tolerance for all profiles (was 0 for Standard)
+    const BASELINE_GRACE = 6; // jitter tolerance for all profiles — stops the bar collapsing at ~70%
     const t = this.profile.toleranceMultiplier || 1.0;
     if (t <= 1.0) return BASELINE_GRACE;
     return Math.min(25, BASELINE_GRACE + Math.round((t - 1.0) * 10));

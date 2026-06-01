@@ -99,6 +99,7 @@ function App() {
       case 'CONTACT': setScreen(SCREENS.CONTACT); break;
       case 'HANDOUT': setScreen(SCREENS.HANDOUT); break;
       case 'BENGALI': setScreen(SCREENS.BENGALI_HANDOUT); break;
+      case 'ACCESSIBILITY': setScreen(SCREENS.PROFILE); break;
       default:        setScreen(SCREENS.WELCOME);
     }
   }, []);
@@ -140,7 +141,7 @@ function App() {
         {/* ============== WELCOME ============== */}
         {screen === SCREENS.WELCOME && (
           <WelcomeScreen
-            onStart={() => setScreen(SCREENS.PROFILE)}
+            onStart={() => setScreen(SCREENS.GUIDED)}
             onNavigate={handleNavigate}
           />
         )}
@@ -175,7 +176,7 @@ function App() {
                 marginBottom: '1.2rem',
                 boxShadow: '3px 3px 0 0 #0F172A',
               }}>
-                Step 1 of 3
+                Optional
               </div>
               <h2 style={{
                 fontFamily: "'Bungee', 'Impact', system-ui, sans-serif",
@@ -185,7 +186,7 @@ function App() {
                 letterSpacing: '-0.005em',
                 lineHeight: 1.1,
               }}>
-                Who's <span style={{ color: '#FF5252' }}>learning?</span>
+                Make it <span style={{ color: '#FF5252' }}>yours</span>
               </h2>
               <p style={{
                 fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif",
@@ -193,9 +194,9 @@ function App() {
                 marginBottom: '1.8rem',
                 maxWidth: 540, lineHeight: 1.55,
               }}>
-                Pick the profile that fits the learner. MLAF adjusts hand-tolerance,
-                hold-time, and feedback automatically — so you don't have to think
-                about it again.
+                Most people can skip this and just start. But if the learner has
+                specific motor, vision, hearing, or sensory needs, pick a profile
+                and MLAF adjusts hand-tolerance, hold-time, and feedback to suit.
               </p>
             </div>
 

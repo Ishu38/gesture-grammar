@@ -106,6 +106,20 @@ function framesToLockForGesture(profile, masteryGate, gestureId) {
   return Math.round(RAMP_ONBOARD_FRAMES + (RAMP_MASTERED_FRAMES - RAMP_ONBOARD_FRAMES) * progress);
 }
 
+// Turn a gesture id like "object_apple" into a readable fallback word ("apple").
+function prettifyId(id) {
+  return String(id).replace(/^(subject|object|verb|adj|adv|det|aux|prep)_/i, '').replace(/_/g, ' ');
+}
+
+// Lightweight speak — used by the mentor's "hear it" button. Offline, no deps.
+function speakText(text) {
+  try {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !text) return;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  } catch { /* TTS unavailable — silent */ }
+}
+
 function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSession }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -213,6 +227,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   // === Grammar Engine (Prolog X-bar) ===
   const [grammarEngineAvailable, setGrammarEngineAvailable] = useState(false);
   const [grammarValidation, setGrammarValidation] = useState(null);
+  const [mentorSentence, setMentorSentence] = useState(null); // { text, changed } — engine's corrected sentence
   const [grammarNextCategories, setGrammarNextCategories] = useState(null);
 
   // ISL Feature state
@@ -420,16 +435,39 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
           .then(res => res.ok ? res.json() : null)
           .then(data => { if (!signal.aborted && data) setGrammarValidation(data); })
           .catch(err => { if (err.name !== 'AbortError') setGrammarValidation(null); });
+
+        // Mentor: ask the engine to reorder the gestures into a correct English
+        // sentence, shown ALONGSIDE the learner's own (a scaffold, never a silent
+        // replacement — respects the AAC line).
+        fetch('/grammar/transform/isl-to-english', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gestures: gestureIds }),
+          signal,
+        })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (signal.aborted || !data || !Array.isArray(data.english_order)) return;
+            const wordById = {};
+            sentence.forEach(w => { if (w.grammar_id) wordById[String(w.grammar_id).toLowerCase()] = w.word; });
+            const words = data.english_order.map(id => wordById[String(id).toLowerCase()] || prettifyId(id));
+            const raw = words.join(' ').trim();
+            const text = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) + '.' : '';
+            setMentorSentence(text ? { text, changed: !!(data.transform && data.transform !== 'none') } : null);
+          })
+          .catch(err => { if (err.name !== 'AbortError') setMentorSentence(null); });
       } else {
         const report = islDetectorRef.current.analyze(sentence);
         setIslInterference(report.hasInterference ? report : null);
         if (report.hasInterference) {
           sessionLoggerRef.current.logISLInterference(report);
         }
+        setMentorSentence(null);
       }
     } else {
       setIslInterference(null);
       setGrammarValidation(null);
+      setMentorSentence(null);
     }
 
     return () => abortCtrl.abort();
@@ -511,8 +549,11 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       });
       if (sentenceAch.newlyUnlocked.length > 0) {
         setAchievementToast(sentenceAch.newlyUnlocked[0]);
-        setAchievementReport(achievementRef.current.getAchievementReport());
       }
+      // Streak is EARNED here — by completing a real sentence — not by merely
+      // opening the camera. (recordDailyActivity is idempotent per day.)
+      achievementRef.current.recordDailyActivity();
+      setAchievementReport(achievementRef.current.getAchievementReport());
     }
     prevValidationCompleteRef.current = validation.isComplete;
   }, [validation.isComplete, sentence, islInterference]);
@@ -1055,8 +1096,6 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       streamRef.current = stream;
       automaticityTrackerRef.current.initSession();
       sessionLoggerRef.current.logSessionStart();
-      achievementRef.current.recordDailyActivity();
-      setAchievementReport(achievementRef.current.getAchievementReport());
 
       // Initialize UASAM (microphone) in parallel — non-blocking
       uasamRef.current.initialize().then(async (active) => {
@@ -1212,6 +1251,37 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
           isLocked={isLocked}
           lockProgress={lockProgress}
         />
+
+        {/* Mentor — the engine reorders the gestures into a correct English
+            sentence and shows it alongside the learner's own (scaffold, not
+            replacement). Only when there is something to teach (≥2 words). */}
+        {mentorSentence && sentence.length >= 2 && (
+          <div style={{
+            margin: '8px auto 0', maxWidth: 640,
+            background: 'rgba(74,222,128,0.10)', border: '1px solid rgba(74,222,128,0.5)',
+            borderRadius: 10, padding: '8px 12px',
+            display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+            fontFamily: "'Space Grotesk', system-ui, sans-serif",
+          }}>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              ✨ Clearer
+            </span>
+            <strong style={{ fontSize: '1rem', color: '#4ade80', flex: '1 1 auto' }}>
+              {mentorSentence.text}
+            </strong>
+            <button
+              onClick={() => speakText(mentorSentence.text)}
+              aria-label="Hear the sentence"
+              style={{
+                background: '#4ade80', color: '#0f172a', border: 'none',
+                borderRadius: 8, padding: '6px 12px', cursor: 'pointer',
+                fontWeight: 700, fontSize: '0.85rem',
+              }}
+            >
+              🔊 Hear it
+            </button>
+          </div>
+        )}
 
         {/* Grammar validation panel */}
         <div className={`validation-panel ${validation.isComplete ? 'complete' : validation.error ? 'error' : 'building'}`}>

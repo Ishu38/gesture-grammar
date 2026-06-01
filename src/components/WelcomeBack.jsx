@@ -14,7 +14,7 @@
  *   SessionDataLogger history. Read-only — these constructors only load.
  */
 import { useMemo } from 'react';
-import { AchievementSystem, streakColor } from '../core/AchievementSystem';
+import { AchievementSystem } from '../core/AchievementSystem';
 import { GestureMasteryGate } from '../core/GestureMasteryGate';
 import { SpacedRepetitionScheduler } from '../core/SpacedRepetitionScheduler';
 import { SessionDataLogger } from '../core/SessionDataLogger';
@@ -93,9 +93,8 @@ export default function WelcomeBack({ onResume }) {
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', flex: '2 1 360px' }}>
-          {stats.streakDays > 0 && (
-            <Chip icon="🔥" value={`${stats.streakDays}d`} label="streak" color={streakColor(stats.streakDays)} />
-          )}
+          {/* Streak intentionally NOT shown here — it's earned through practice
+              and lives in the in-app achievements, not flashed on arrival. */}
           {stats.totalMastered > 0 && (
             <Chip icon="✅" value={stats.totalMastered} label="mastered" color={C.teal} />
           )}

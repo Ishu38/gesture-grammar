@@ -59,7 +59,103 @@ function LessonSelector({ onSelectLesson, masteryStage, completedLessons }) {
 // CHALLENGE VIEW
 // =============================================================================
 
-function ChallengeView({ challenge, challengeIndex, totalChallenges, sentence, onSubmit, onClear, onGetHint, hintText, feedback }) {
+// ─── Step coach (guided) ─────────────────────────────────────────────────────
+const SVO_ROLES = [
+  { role: 'Subject', ask: 'Who?' },
+  { role: 'Verb',    ask: 'Does what?' },
+  { role: 'Object',  ask: 'What?' },
+];
+
+// Pull the target words out of a prompt like  Build: 'I grab apple'  → [I, grab, apple]
+function _targetWords(prompt) {
+  const m = /['"‘’“”]([^'"‘’“”]+)/.exec(prompt || '');
+  return m ? m[1].trim().replace(/[.?!]+$/, '').split(/\s+/) : [];
+}
+
+function _roleFor(id, index) {
+  const up = String(id || '').toUpperCase();
+  if (up.startsWith('SUBJECT') || up.startsWith('PRONOUN')) return SVO_ROLES[0];
+  if (index === 1) return SVO_ROLES[1];
+  return SVO_ROLES[Math.min(index, SVO_ROLES.length - 1)];
+}
+
+/**
+ * Lucid one-step-at-a-time coach. Tells the learner exactly which word to sign
+ * next (Subject → "Who?", Verb → "Does what?", Object → "What?"). A gentle
+ * 5-second pace bar encourages flow but NEVER fails the learner, and it's off
+ * entirely for accessibility profiles (paced=false) — they get all the time
+ * they need. Works for every guided sentence, driven by required_sequence.
+ */
+function StepCoach({ challenge, sentence, paced }) {
+  const seq = challenge?.required_sequence || [];
+  const words = _targetWords(challenge?.prompt_display);
+  const total = seq.length || words.length;
+  const step = Math.min(sentence.length, total);
+  const done = total > 0 && sentence.length >= total;
+
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    setSlow(false);
+    if (!paced || done || total === 0) return undefined;
+    const t = setTimeout(() => setSlow(true), 5000);
+    return () => clearTimeout(t);
+  }, [step, paced, done, total]);
+
+  if (total === 0) return null;
+
+  if (done) {
+    return (
+      <div style={{
+        background: 'rgba(74,222,128,0.12)', border: '1px solid #4ade80',
+        borderRadius: 10, padding: 14, marginBottom: 12, textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 22 }}>🎉</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: '#4ade80' }}>
+          Done! “{words.join(' ')}”
+        </div>
+      </div>
+    );
+  }
+
+  const { role, ask } = _roleFor(seq[step], step);
+  const targetWord = words[step] || String(seq[step] || '').replace(/^[A-Z]+_/, '').toLowerCase();
+
+  return (
+    <div style={{
+      background: '#11182a', border: '1px solid #3a3a5e', borderRadius: 10,
+      padding: 14, marginBottom: 12, textAlign: 'center', transition: 'all 0.25s ease',
+    }}>
+      <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: 1 }}>
+        Step {step + 1} of {total} · {role}
+      </div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: '#60a5fa', margin: '6px 0 2px' }}>
+        {ask}
+      </div>
+      <div style={{ fontSize: 14, color: '#e2e8f0' }}>
+        Show the sign for <strong style={{ color: '#4ade80', fontSize: '1.1em' }}>“{targetWord}”</strong>
+      </div>
+      {paced && (
+        <>
+          <style>{`@keyframes mlafPace{from{width:100%}to{width:0%}}`}</style>
+          <div style={{ marginTop: 12, height: 5, background: '#2a2a3e', borderRadius: 3, overflow: 'hidden' }}>
+            <div key={step} style={{
+              height: '100%', borderRadius: 3,
+              background: slow ? '#facc15' : '#4ade80',
+              animation: 'mlafPace 5s linear forwards',
+            }} />
+          </div>
+          {slow && (
+            <div style={{ fontSize: 11, color: '#facc15', marginTop: 6 }}>
+              No rush — take your time, then try to flow it 🙂
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ChallengeView({ challenge, challengeIndex, totalChallenges, sentence, onSubmit, onClear, onGetHint, hintText, feedback, paced }) {
   return (
     <div style={{ padding: 16 }}>
       {/* Progress bar */}
@@ -95,6 +191,9 @@ function ChallengeView({ challenge, challengeIndex, totalChallenges, sentence, o
           </div>
         )}
       </div>
+
+      {/* One-step-at-a-time coach: Who? → Does what? → What? */}
+      <StepCoach challenge={challenge} sentence={sentence} paced={paced} />
 
       {/* Visual slots showing target */}
       <VisualSentenceSlots sentence={sentence} />
@@ -197,7 +296,7 @@ function LessonSummary({ summary, onNextLesson, onBackToLessons }) {
 // MAIN PANEL
 // =============================================================================
 
-export default function GuidedPracticePanel({ sentence, onClearSentence, onExitPractice, masteryReport }) {
+export default function GuidedPracticePanel({ sentence, onClearSentence, onExitPractice, masteryReport, paced = false }) {
   const [lessonManager] = useState(() => new LessonManager());
   const [activeLesson, setActiveLesson] = useState(null);
   const [currentChallenge, setCurrentChallenge] = useState(null);
@@ -339,6 +438,7 @@ export default function GuidedPracticePanel({ sentence, onClearSentence, onExitP
           onGetHint={handleGetHint}
           hintText={hintText}
           feedback={feedback}
+          paced={paced}
         />
       ) : (
         <LessonSelector

@@ -2141,6 +2141,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
             onClearSentence={clearSentence}
             onExitPractice={() => setGuidedMode(false)}
             masteryReport={masteryReport}
+            paced={accessibilityProfile?.type === 'default'}
           />
         )}
 

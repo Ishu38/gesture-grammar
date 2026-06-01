@@ -84,6 +84,28 @@ const HAND_CONNECTIONS = [
   [5, 9], [9, 13], [13, 17]
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Adaptive lock ramp — "confidence first, then tolerance building".
+// A brand-new gesture locks fast (onboarding delight: instant "I got it!"); as
+// the learner masters it, the lock demands a cleaner, longer hold. Mastery is
+// per-gesture and persists across sessions via GestureMasteryGate (localStorage),
+// so the bar rises over days/weeks of real practice — not the calendar.
+// Scoped to the Standard ('default') profile only; clinical/motor/CP profiles
+// keep their deliberately-calibrated thresholds (accessibility is not negotiable).
+// ─────────────────────────────────────────────────────────────────────────────
+const RAMP_ONBOARD_FRAMES = 15;   // brand-new gesture — sub-second, effortless lock
+const RAMP_MASTERED_FRAMES = 32;  // fully mastered — crisp, precise, deliberate lock
+
+function framesToLockForGesture(profile, masteryGate, gestureId) {
+  const base = profile?.getConfidenceThreshold?.() ?? RAMP_ONBOARD_FRAMES;
+  // Only the Standard onboarding profile ramps; everyone else keeps their base.
+  if (profile?.type !== 'default' || !gestureId) return base;
+  const threshold = masteryGate?.threshold || 5;
+  const count = masteryGate?.getProductionCount?.(gestureId) || 0;
+  const progress = Math.min(1, count / threshold); // 0 (new) → 1 (mastered)
+  return Math.round(RAMP_ONBOARD_FRAMES + (RAMP_MASTERED_FRAMES - RAMP_ONBOARD_FRAMES) * progress);
+}
+
 function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSession }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -113,6 +135,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const intentDetectorRef = useRef(new IntentionalityDetector({}));
   const spatialMapperRef = useRef(new SpatialGrammarMapper());
   const gestureDFARef = useRef(null); // initialized after sentence builder hook
+  const lastRampGestureRef = useRef(null); // last gesture we synced the UI threshold for
   const semanticTypeSystem = useRef(getSemanticTypeSystem());
   const umceRef = useRef(new UMCE());
   const cnnClassifierRef = useRef(new GestureClassifierCNN());
@@ -665,8 +688,20 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       setGestureConfidence(null);
     }
 
-    // DFA: Process gesture through formal finite automaton
+    // DFA: Process gesture through formal finite automaton.
+    // Apply the per-gesture adaptive lock ramp before processing: a freshly-seen
+    // gesture locks fast (onboarding delight); a mastered one demands a cleaner
+    // hold. Updates the DFA threshold every frame (cheap, no re-render) and
+    // syncs the UI threshold only when the candidate gesture changes.
     if (gestureDFARef.current) {
+      if (gesture) {
+        const ramped = framesToLockForGesture(accessibilityProfile, masteryGateRef.current, gesture);
+        gestureDFARef.current.setConfirmationFrames(ramped);
+        if (lastRampGestureRef.current !== gesture) {
+          lastRampGestureRef.current = gesture;
+          setConfidenceThreshold(ramped);
+        }
+      }
       gestureDFARef.current.process({
         handPresent: true,
         intentState: intentResult?.intent || 'GESTURE_ACTIVE',

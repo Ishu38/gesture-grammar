@@ -7,6 +7,7 @@
  * (see src/data/GestureLexicon.json for the 10 gestures, AccessibilityProfile.js
  * for the 8 profiles).
  */
+import WelcomeBack from './WelcomeBack';
 
 const C = {
   cream:    '#FFF6E6',
@@ -167,6 +168,9 @@ export default function WelcomeScreen({ onStart, onNavigate }) {
           <NavLink onClick={() => onNavigate && onNavigate('CONTACT')}>Contact</NavLink>
         </div>
       </nav>
+
+      {/* ─────────────────  WELCOME-BACK (returning users only)  ───────────────── */}
+      <WelcomeBack onResume={onStart} />
 
       {/* ─────────────────  HERO  ───────────────── */}
       <section style={{

@@ -484,6 +484,34 @@ export class SessionDataLogger {
       elapsed_ms: Date.now() - this.startTime,
       ...data,
     });
+    this._forwardToGA(type, data);
+  }
+
+  /**
+   * Mirror an internal event to Google Analytics 4 (gtag.js) if it is loaded.
+   * GA4 only accepts scalar param values, so arrays/objects are dropped and
+   * strings are truncated to GA4's 100-char limit. No-ops silently when gtag
+   * is absent (local dev, ad-blockers) and never throws into the app.
+   *
+   * Event names are lowercased and prefixed `mlaf_` to avoid collisions with
+   * GA4's reserved auto-events (e.g. session_start, first_visit).
+   *
+   * @param {string} type — internal event type (e.g. 'SENTENCE_COMPLETE')
+   * @param {object} data — event payload
+   */
+  _forwardToGA(type, data) {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+    const params = { session_id: this.sessionId };
+    let n = 0;
+    for (const [k, v] of Object.entries(data || {})) {
+      if (n >= 20) break; // stay under GA4's 25-param-per-event cap
+      if (typeof v === 'string') { params[k] = v.slice(0, 100); n++; }
+      else if (typeof v === 'number' || typeof v === 'boolean') { params[k] = v; n++; }
+      // non-scalar fields (arrays/objects) are skipped — GA4 rejects them
+    }
+    try {
+      window.gtag('event', `mlaf_${String(type).toLowerCase()}`, params);
+    } catch (e) { /* analytics must never break the session */ }
   }
 
   _generateSessionId() {

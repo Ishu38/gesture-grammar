@@ -100,10 +100,10 @@ A typical 10-minute MLAF session proceeds as follows:
    - Sentence can be saved to the Phrase Bank, copied to clipboard, shared via WhatsApp, or exported as Open Board Format (.obf)
 
 5. **Session Management** — For ASD profiles:
-   - Session timer tracks attention windows (8–12 minutes)
+   - Session timer tracks attention windows (8–12 minutes, advisory)
    - Micro-break prompts appear at configurable intervals
-   - Perseveration detector monitors for script loops
    - Low-stimulus mode suppresses all animations
+   - The system never filters, blocks, or redirects communicative output. Repetition, exploration ("babbling"), and stimming-via-AAC are first-class uses of the device.
 
 6. **Session Report** — At session end:
    - Automaticity scores per gesture (latency trends across sessions)
@@ -122,7 +122,7 @@ A typical 10-minute MLAF session proceeds as follows:
 | CP — Athetoid | `cp-athetoid` | Peak-capture DFA (accumulates hits over window, tolerates dropout frames) |
 | CP — Ataxic | `cp-ataxic` | Zone-latching (freezes spatial zone at gesture onset), 10% zone widening |
 | CP — Mixed | `cp-mixed` | All CP adaptations combined |
-| ASD — Low Stimulus | `asd-low-stimulus` | No animations, predictable fixed-position feedback, perseveration detection, 10-min sessions with 5-min micro-breaks |
+| ASD — Low Stimulus | `asd-low-stimulus` | No animations, predictable fixed-position feedback, 10-min advisory sessions with 5-min micro-breaks. No input filtering — repetition/stimming/babbling are honoured as communication. |
 | ASD — Structured | `asd-structured` | 8-min sessions, 4-min micro-breaks, 45-sec break duration |
 | Deaf / HoH | `hearing-impaired` | ISL interference detection, sign language bridge, visual-only feedback, high contrast |
 | Low Vision | `low-vision` | TTS correction relay (spoken error instructions), haptic vibration patterns, screen reader optimized |
@@ -422,8 +422,7 @@ Additionally, the **fatigue detection** system monitors a rolling 5-minute error
 │  AccessibilityProfile (13 profiles, 25+ auto-configured params)  │
 │  CognitiveLoadAdapter (jitter → load → threshold adjustment)     │
 │  Fatigue Detection (5-min window, RELAXES on decline)            │
-│  PerseverationDetector (script loop detection for ASD)           │
-│  SessionTimer (attention windows + micro-breaks for ADHD)        │
+│  SessionTimer (advisory attention windows + micro-breaks)        │
 ├──────────────────────────────────────────────────────────────────┤
 │                     CURRICULUM LAYER                              │
 │  GestureMasteryGate (5-stage cumulative sequencing)              │
@@ -459,7 +458,7 @@ Additionally, the **fatigue detection** system monitors a rolling 5-minute error
 | Compositional generalization | N/A | N/A | ~70-85% (SCAN) | 100% by construction |
 | Eye-gaze input mode | Some devices | No | No | GazeDwellSelector (dwell-click) |
 | AAC export (OBF) | Native (proprietary) | No | No | Open Board Format |
-| ASD session management | No | Some | No | Timer + micro-breaks + perseveration detection |
+| ASD session management | No | Some | No | Advisory attention windows + micro-breaks; no input filtering (stimming/babbling honoured) |
 | On-device privacy | Varies | Varies | Usually cloud | 100% on-device, zero network calls |
 | Cost | $3,000–$15,000 device | $50–$500/year subscription | Research prototype | Free. Browser. Any device with a camera. |
 

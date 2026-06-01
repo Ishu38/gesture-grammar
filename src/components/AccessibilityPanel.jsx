@@ -83,7 +83,6 @@ function getActiveDescription(profileId) {
   if (profile.noiseFloorCalibration) details.push('Noise-adaptive');
   if (profile.signLanguageBridge) details.push('ISL bridge');
   if (profile.lowStimulus) details.push('Low stimulus');
-  if (profile.perseverationDetection) details.push('Perseveration guard');
 
   return details.join(' | ');
 }

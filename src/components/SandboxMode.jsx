@@ -93,8 +93,8 @@ const HAND_CONNECTIONS = [
 // Scoped to the Standard ('default') profile only; clinical/motor/CP profiles
 // keep their deliberately-calibrated thresholds (accessibility is not negotiable).
 // ─────────────────────────────────────────────────────────────────────────────
-const RAMP_ONBOARD_FRAMES = 12;   // brand-new gesture — fast, effortless lock (CONFIDENCE)
-const RAMP_MASTERED_FRAMES = 22;  // fully mastered — a bit more deliberate (TOLERANCE), never tedious
+const RAMP_ONBOARD_FRAMES = 6;    // brand-new gesture — locks fast on ~half-effort hold (CONFIDENCE)
+const RAMP_MASTERED_FRAMES = 12;  // fully mastered — slightly more deliberate (TOLERANCE), still snappy
 
 function framesToLockForGesture(profile, masteryGate, gestureId) {
   const base = profile?.getConfidenceThreshold?.() ?? RAMP_ONBOARD_FRAMES;
@@ -1322,28 +1322,21 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
             {currentGesture && (
               <div className="gesture-overlay">
                 <div className="gesture-name">{getGestureDisplay(currentGesture)}</div>
-                {gestureConfidence && (
-                  <div style={{
-                    fontSize: '0.65rem',
-                    color: gestureConfidence.confidence > 0.7 ? '#4ade80'
-                         : gestureConfidence.confidence > 0.5 ? '#facc15'
-                         : '#f87171',
-                    marginTop: '2px',
-                    textAlign: 'center',
-                  }}>
-                    {Math.round(gestureConfidence.confidence * 100)}% {gestureConfidence.isRF ? 'ML' : 'rule'}
-                  </div>
-                )}
+                {/* Green "go" signal — no numbers to chase. The ring fills green
+                    as the held gesture builds, then shows ✓ the instant it locks
+                    and the word drops into the sentence. */}
                 <div className="gesture-progress">
                   <svg viewBox="0 0 100 100">
                     <circle className="progress-bg" cx="50" cy="50" r="45" />
                     <circle
                       className="progress-fill"
                       cx="50" cy="50" r="45"
-                      style={{ strokeDasharray: `${lockProgress * 283} 283` }}
+                      style={{ strokeDasharray: `${lockProgress * 283} 283`, stroke: '#4ade80', transition: 'stroke-dasharray 0.08s linear' }}
                     />
                   </svg>
-                  <span className="progress-percent">{Math.round(lockProgress * 100)}%</span>
+                  <span className="progress-percent" style={{ color: '#4ade80', fontSize: '1.4rem', fontWeight: 800 }}>
+                    {lockProgress >= 0.99 ? '✓' : ''}
+                  </span>
                 </div>
               </div>
             )}

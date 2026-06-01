@@ -486,7 +486,7 @@ export const ACCESSIBILITY_PROFILES = {
     // Onboarding delight > certainty: a sub-second first lock so the first
     // gesture feels effortless, not earned. (was 45 — ~2-4s of perfect hold on
     // CPU, which combined with zero grace let the indicator fill and collapse.)
-    confidenceFrames: 12,
+    confidenceFrames: 6,
     toleranceMultiplier: 1.0,
     dfaMode: DFA_MODES.SUSTAINED_HOLD,
     peakCaptureFrames: null,

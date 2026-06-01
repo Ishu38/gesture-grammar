@@ -450,11 +450,21 @@ export class GestureLifecycleDFA {
       return DFA_INPUTS.NO_HAND;
     }
 
-    if (intentState === 'RESTING') {
+    // Static-hold fix: gestures are HELD handshapes, not waves. Once we're
+    // mid-confirmation, holding the hand still drops displacement below the
+    // motion threshold and IntentionalityDetector flips to RESTING — which
+    // previously stalled the lock bar (the "fills to ~70% then freezes" bug).
+    // So once DETECTING/CONFIRMING with a recognized gesture, keep counting
+    // even if intent reads RESTING. Entry from IDLE still needs real motion
+    // (RESTING below blocks it), preserving intentional onset.
+    const confirming =
+      this._state === DFA_STATES.DETECTING || this._state === DFA_STATES.CONFIRMING;
+
+    if (intentState === 'RESTING' && !(confirming && gestureId)) {
       return DFA_INPUTS.HAND_RESTING;
     }
 
-    // Hand is active (GESTURE_ACTIVE)
+    // No gesture recognized this frame.
     if (!gestureId) {
       return DFA_INPUTS.GESTURE_NONE;
     }

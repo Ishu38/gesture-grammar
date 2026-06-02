@@ -288,6 +288,29 @@ function getAverageThumbToFingerDistance(landmarks) {
 }
 
 /**
+ * Conservative input-quality gate for the perception base (Reliability #3).
+ * Returns false ONLY for clearly-unreliable input: missing/non-finite points, a
+ * hand too small (too far from camera to read finger geometry), or a hand mostly
+ * clipped outside the frame. A normal in-frame hand always passes. This stops the
+ * classifier from emitting confident garbage on broken input (garbage-in →
+ * garbage-out was a real source of wrong gestures in poor lighting / edge cases).
+ */
+export function isLandmarkQualityOk(landmarks) {
+  if (!landmarks || landmarks.length < 21) return false;
+  let minX = 1, maxX = 0, minY = 1, maxY = 0, clipped = 0;
+  for (const p of landmarks) {
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return false;
+    if (p.x <= 0.01 || p.x >= 0.99 || p.y <= 0.01 || p.y >= 0.99) clipped++;
+    if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+  }
+  const handSize = Math.max(maxX - minX, maxY - minY);
+  if (handSize < 0.08) return false; // hand too small/far to read reliably
+  if (clipped > 6) return false;     // >6 of 21 points off-frame → unreliable
+  return true;
+}
+
+/**
  * Max pairwise distance among the four fingertips. Tiny for a tight fist
  * (SUBJECT_I — tips tucked together), large for a cupped/splayed curl
  * (BALL — fingers curved but spread wide). This is the catalog discriminator
@@ -879,6 +902,8 @@ export function resetTenseState() {
  */
 export function detectGestureRaw(landmarks) {
   if (!landmarks || landmarks.length < 21) return null;
+  // Reliability #3 — perception base: never classify on clearly-broken input.
+  if (!isLandmarkQualityOk(landmarks)) return null;
 
   const thumbTip = landmarks[LANDMARKS.THUMB_TIP];
   const indexTip = landmarks[LANDMARKS.INDEX_TIP];

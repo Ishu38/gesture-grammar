@@ -5,6 +5,7 @@
  */
 
 import { angleBetweenPoints3D, normalizeToWrist } from './vectorGeometry';
+import { GESTURE_CATALOG } from '../data/gestureCatalog.js';
 
 // MediaPipe hand landmark indices
 // Thumb:  1(CMC) 2(MCP) 3(IP) 4(TIP)
@@ -81,31 +82,14 @@ export function analyzeFingerStatesDetailed(landmarks) {
 // =============================================================================
 
 /**
- * Gesture finger patterns matching GestureLexicon.json definitions.
- * 'e' = extended (open), 'c' = curled (closed).
- * This is the single geometric authority for gesture shape recognition.
+ * Gesture finger patterns — DERIVED from the single source of truth
+ * (src/data/gestureCatalog.js), not hand-copied. Editing a gesture's shape in
+ * the catalog automatically updates the matcher. 'e' = extended, 'c' = curled.
+ * The gesture-integrity test fails the build if this ever drifts from the catalog.
  */
-const GESTURE_FINGER_PATTERNS = {
-  SUBJECT_I:    { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  SUBJECT_YOU:  { thumb: 'c', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
-  SUBJECT_HE:   { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
-  SUBJECT_SHE:  { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
-  SUBJECT_WE:   { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
-  SUBJECT_THEY: { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
-  GRAB:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  DRINK:        { thumb: 'e', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
-  STOP:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
-  EAT:          { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  WANT:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  SEE:          { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
-  GO:           { thumb: 'c', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
-  APPLE:        { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
-  BALL:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  WATER:        { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
-  FOOD:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
-  BOOK:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
-  HOUSE:        { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
-};
+export const GESTURE_FINGER_PATTERNS = Object.fromEntries(
+  Object.entries(GESTURE_CATALOG).map(([id, entry]) => [id, entry.fingers]),
+);
 
 /**
  * Check if the current finger states match a gesture's documented pattern,

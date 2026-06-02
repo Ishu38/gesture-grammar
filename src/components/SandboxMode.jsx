@@ -792,8 +792,12 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       setFingerspellDetection(fsResult);
     }
 
-    // Use UMCE fused classification instead of raw deterministic output
-    let gesture = umceRef.current.getClassification(fusionResult) || rawGesture;
+    // Geometry is authoritative. detectGestureRaw (rawGesture) is the guide-aligned
+    // single source of truth — it disambiguates I/GRAB/BALL by priority + thumb-index
+    // distance + orientation. UMCE's probabilistic sub-modality argmax was overriding
+    // the correct geometric answer with "BALL"; it is now only a FALLBACK for when
+    // the geometric detector returns nothing. (CNN already weighted 0 in UMCE.)
+    let gesture = rawGesture || umceRef.current.getClassification(fusionResult);
 
     // Profile-aware tolerance: CP/motor-impaired profiles with alternative
     // gesture maps get extra forgiving tolerance (all-but-two fingers).

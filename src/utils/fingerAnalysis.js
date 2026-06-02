@@ -99,10 +99,10 @@ const GESTURE_FINGER_PATTERNS = {
   WANT:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
   SEE:          { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
   GO:           { thumb: 'c', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
-  APPLE:        { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  APPLE:        { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
   BALL:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
   WATER:        { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
-  FOOD:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
+  FOOD:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
   BOOK:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
   HOUSE:        { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
 };

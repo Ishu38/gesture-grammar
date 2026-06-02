@@ -327,169 +327,85 @@ function isPalmFacingUp(landmarks) {
  * @param {Array} landmarks - 21 hand landmarks
  * @returns {Object|null} { type, value, person, grammar_id } or null
  */
+/**
+ * Detect subject pronouns based on finger-curl patterns matching
+ * GestureLexicon.json — the single geometric source of truth.
+ * @param {Array} landmarks - 21 hand landmarks
+ * @returns {Object|null} { type, value, person, grammar_id } or null
+ */
 export function detectSubject(landmarks) {
   if (!landmarks || landmarks.length < 21) return null;
 
   const wrist = landmarks[LANDMARKS.WRIST];
   const thumbTip = landmarks[LANDMARKS.THUMB_TIP];
-  const thumbIP = landmarks[LANDMARKS.THUMB_IP];
   const indexTip = landmarks[LANDMARKS.INDEX_TIP];
+  const middleTip = landmarks[LANDMARKS.MIDDLE_TIP];
 
-  // -------------------------------------------------------------------------
-  // 0. 'I' (First Person) — Pure fist: all five fingers curled
-  // GestureLexicon.json GST_FIST definition: "All fingers curled into palm,
-  // forming a closed fist" → SUBJECT_I. The simplest and most universal form.
-  // Checked FIRST so a natural fist is detected as "I" regardless of thumb
-  // direction — matching the documented guide definition exactly.
-  // -------------------------------------------------------------------------
-  if (areAllFingersCurled(landmarks)) {
-    return {
-      type: 'SUBJECT',
-      value: 'I',
-      person: 1,
-      number: 'singular',
-      grammar_id: 'SUBJECT_I',
-    };
-  }
+  // Finger states (3D angle-based, rotation-invariant)
+  const thumbExt = isFingerExtended(landmarks, LANDMARKS.THUMB_TIP, LANDMARKS.THUMB_IP);
+  const indexExt = isFingerExtended(landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_PIP);
+  const middleExt = isFingerExtended(landmarks, LANDMARKS.MIDDLE_TIP, LANDMARKS.MIDDLE_PIP);
+  const ringExt = isFingerExtended(landmarks, LANDMARKS.RING_TIP, LANDMARKS.RING_PIP);
+  const pinkyExt = isFingerExtended(landmarks, LANDMARKS.PINKY_TIP, LANDMARKS.PINKY_PIP);
 
-  // -------------------------------------------------------------------------
-  // 1. 'I' (First Person) - Thumb pointing at self (directional variant)
-  // Math Rule: Thumb Tip x > Wrist x (thumb pointing inward)
-  //            Four fingers must be curled
-  //            Uses 3D angle for thumb extension check
-  // -------------------------------------------------------------------------
-
-  const thumbPointingInward = thumbTip.x > wrist.x + 0.05;
-  const thumbAngleI = fingerJointAngle(landmarks, LANDMARKS.THUMB_MCP, LANDMARKS.THUMB_IP, LANDMARKS.THUMB_TIP);
-  const thumbExtendedForI = thumbAngleI > THUMB_EXTENDED_FOR_SUBJECT;
-
-  if (thumbPointingInward && thumbExtendedForI && areFourFingersCurled(landmarks)) {
-    return {
-      type: 'SUBJECT',
-      value: 'I',
-      person: 1,
-      number: 'singular',
-      grammar_id: 'SUBJECT_I',
-    };
-  }
-
-  // -------------------------------------------------------------------------
-  // 2. 'YOU' (Second Person) - Index finger pointing at camera
-  // Math Rule: Index finger extended, pointing forward
-  //            Other fingers curled, thumb tucked in (not spread for C-shape)
-  // Disambiguate from DRINK: Use the ANGLE at the index MCP between
-  //            thumb-tip → index-MCP → index-tip. For YOU the thumb is
-  //            tucked alongside the hand (angle > 140°), for DRINK the
-  //            thumb spreads out to form a C-gap (angle < 120°).
-  // Z-depth fallback: if z unreliable, use Y-position check instead.
-  // -------------------------------------------------------------------------
-
-  const indexExtended = isFingerExtended(landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_PIP);
-  // Z-depth check with Y-position fallback for consumer webcams
-  const zReliable = isZDepthReliable(landmarks);
-  const indexPointingForward = zReliable
-    ? (indexTip.z || 0) < (wrist.z || 0) - 0.005  // Relaxed z-threshold
-    : indexTip.y < wrist.y - 0.05;                  // Y fallback: index above wrist
-  const indexAboveWrist = indexTip.y < wrist.y;
+  const indexCurled = isFingerCurled(landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_PIP);
   const middleCurled = isFingerCurled(landmarks, LANDMARKS.MIDDLE_TIP, LANDMARKS.MIDDLE_PIP);
   const ringCurled = isFingerCurled(landmarks, LANDMARKS.RING_TIP, LANDMARKS.RING_PIP);
   const pinkyCurled = isFingerCurled(landmarks, LANDMARKS.PINKY_TIP, LANDMARKS.PINKY_PIP);
-  // Angle-based thumb discrimination (replaces distance-based overlap)
-  // Thumb-tip → Index-MCP → Index-tip angle: tight (>130°) means tucked (YOU),
-  // wide (<120°) means C-shape (DRINK)
-  const thumbIndexAngle = angleBetweenPoints3D(
-    thumbTip, landmarks[LANDMARKS.INDEX_MCP], indexTip
-  );
-  const thumbTuckedAngle = thumbIndexAngle > 130;
+  const thumbCurled = isFingerCurled(landmarks, LANDMARKS.THUMB_TIP, LANDMARKS.THUMB_IP);
 
-  if (indexExtended && indexPointingForward && indexAboveWrist && middleCurled && ringCurled && pinkyCurled && thumbTuckedAngle) {
+  // ── 1. SUBJECT_YOU (GST_POINT): index extended, all others curled ──
+  // GestureLexicon: "Index finger extended pointing forward, all other fingers curled"
+  if (indexExt && thumbCurled && middleCurled && ringCurled && pinkyCurled) {
     return {
-      type: 'SUBJECT',
-      value: 'YOU',
-      person: 2,
-      number: 'singular',
+      type: 'SUBJECT', value: 'YOU', person: 2, number: 'singular',
       grammar_id: 'SUBJECT_YOU',
     };
   }
 
-  // -------------------------------------------------------------------------
-  // 3. 'HE/SHE' (Third Person) - Thumb pointing to the side (Hitchhiker)
-  // Math Rule: Thumb Tip x significantly less than Wrist x (pointing away)
-  //            Index/Middle/Ring/Pinky are curled
-  //            Uses 3D angle for thumb extension check
-  // -------------------------------------------------------------------------
-
-  const thumbPointingOutward = thumbTip.x < wrist.x - 0.05;
-  const thumbAngleHe = fingerJointAngle(landmarks, LANDMARKS.THUMB_MCP, LANDMARKS.THUMB_IP, LANDMARKS.THUMB_TIP);
-  const thumbExtendedForHe = thumbAngleHe > THUMB_EXTENDED_FOR_SUBJECT;
-
-  if (thumbPointingOutward && thumbExtendedForHe && areFourFingersCurled(landmarks)) {
-    // Disambiguate HE vs SHE: HE = thumb points right (x < wrist.x),
-    // SHE = pinky side points left (thumb tip still outward but hand rotated)
-    // Convention: thumb pointing to viewer's LEFT = HE, pinky-led point LEFT = SHE
-    // Simpler: if thumb is pointing down-outward (below wrist Y), treat as SHE
-    const thumbBelowWrist = thumbTip.y > wrist.y + 0.03;
-    if (thumbBelowWrist) {
-      return {
-        type: 'SUBJECT',
-        value: 'SHE',
-        person: 3,
-        number: 'singular',
-        grammar_id: 'SUBJECT_SHE',
-      };
-    }
+  // ── 2. SUBJECT_HE (GST_THREE_FINGERS): index+middle+ring extended, thumb+pinky curled ──
+  // GestureLexicon: "Index, Middle, and Ring fingers extended, Thumb and Pinky curled"
+  if (indexExt && middleExt && ringExt && thumbCurled && pinkyCurled) {
     return {
-      type: 'SUBJECT',
-      value: 'HE',
-      person: 3,
-      number: 'singular',
+      type: 'SUBJECT', value: 'HE', person: 3, number: 'singular',
       grammar_id: 'SUBJECT_HE',
     };
   }
 
-  // -------------------------------------------------------------------------
-  // 4. 'WE' (First Person Plural) - Index + Middle extended, others curled
-  // Math Rule: Index and Middle fingers extended and close together
-  //            Ring and Pinky curled, thumb curled or tucked
-  //            Hand vertical (pointing up)
-  // -------------------------------------------------------------------------
+  // ── 3. SUBJECT_SHE: same shape as HE, context-disambiguated ──
+  // Returns HE first; SHE is resolved by finger pattern in forgiving match
 
-  const indexExtWe = isFingerExtended(landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_PIP);
-  const middleExtWe = isFingerExtended(landmarks, LANDMARKS.MIDDLE_TIP, LANDMARKS.MIDDLE_PIP);
-  const ringCurledWe = isFingerCurled(landmarks, LANDMARKS.RING_TIP, LANDMARKS.RING_PIP);
-  const pinkyCurledWe = isFingerCurled(landmarks, LANDMARKS.PINKY_TIP, LANDMARKS.PINKY_PIP);
-  const indexMiddleClose = distance(indexTip, landmarks[LANDMARKS.MIDDLE_TIP]) < 0.06;
-
-  if (indexExtWe && middleExtWe && ringCurledWe && pinkyCurledWe && indexMiddleClose && isHandVertical(landmarks)) {
+  // ── 4. SUBJECT_WE (GST_TWO_FINGERS): index+middle extended together, others curled ──
+  // GestureLexicon: "Index and Middle finger extended upward, Thumb, Ring, Pinky curled"
+  // Fingers must be close together (distinguishes from SEE where fingers are spread)
+  const indexMiddleClose = distance(indexTip, middleTip) < 0.06;
+  if (indexExt && middleExt && indexMiddleClose && thumbCurled && ringCurled && pinkyCurled) {
     return {
-      type: 'SUBJECT',
-      value: 'WE',
-      person: 1,
-      number: 'plural',
+      type: 'SUBJECT', value: 'WE', person: 1, number: 'plural',
       grammar_id: 'SUBJECT_WE',
     };
   }
 
-  // -------------------------------------------------------------------------
-  // 5. 'THEY' (Third Person Plural) - All 5 fingers extended and spread
-  // Math Rule: All fingers extended, fingers spread apart
-  //            Hand NOT vertical (distinguishes from STOP)
-  //            Palm facing camera (horizontal or slight angle)
-  // -------------------------------------------------------------------------
-
-  if (areAllFingersExtended(landmarks) && !isHandVertical(landmarks)) {
-    // Check fingers are spread wide
-    const idxMidSpread = distance(indexTip, landmarks[LANDMARKS.MIDDLE_TIP]) > 0.05;
-    const midRingSpread = distance(landmarks[LANDMARKS.MIDDLE_TIP], landmarks[LANDMARKS.RING_TIP]) > 0.04;
-    if (idxMidSpread && midRingSpread) {
+  // ── 5. SUBJECT_THEY: all 5 fingers extended and spread, hand not vertical ──
+  if (thumbExt && indexExt && middleExt && ringExt && pinkyExt && !isHandVertical(landmarks)) {
+    const idxMidSpread = distance(indexTip, middleTip) > 0.05;
+    if (idxMidSpread) {
       return {
-        type: 'SUBJECT',
-        value: 'THEY',
-        person: 3,
-        number: 'plural',
+        type: 'SUBJECT', value: 'THEY', person: 3, number: 'plural',
         grammar_id: 'SUBJECT_THEY',
       };
     }
+  }
+
+  // ── 6. SUBJECT_I (directional variant): thumb pointing inward ──
+  // Pure fist already caught in detectGestureRaw Priority 2.
+  // This catches the "thumb pointing at self" directional form.
+  const thumbPointingInward = thumbTip.x > wrist.x + 0.05;
+  if (thumbPointingInward && thumbExt && areFourFingersCurled(landmarks)) {
+    return {
+      type: 'SUBJECT', value: 'I', person: 1, number: 'singular',
+      grammar_id: 'SUBJECT_I',
+    };
   }
 
   return null;
@@ -718,34 +634,26 @@ export function detectObject(landmarks) {
   const middleTip = landmarks[LANDMARKS.MIDDLE_TIP];
 
   // -------------------------------------------------------------------------
-  // 1. 'APPLE' (Small Round Object) - Cupped hand
-  // Math Rule: All fingers slightly curved (Tip y > DIP y but Tip y < PIP y)
-  //            Looks like a loose fist with open center
+  // 1. 'APPLE' (Small Object) — Flat palm down, fingers together
+  // GestureLexicon.json GST_FLAT_HAND_DOWN: "Open palm facing down,
+  // fingers together, horizontal position" → APPLE.
+  // Must check before BALL (which also has slightly curved fingers).
   // -------------------------------------------------------------------------
 
-  const indexSlightlyCurved = isFingerSlightlyCurved(
-    landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_DIP, LANDMARKS.INDEX_PIP
-  );
-  const middleSlightlyCurved = isFingerSlightlyCurved(
-    landmarks, LANDMARKS.MIDDLE_TIP, LANDMARKS.MIDDLE_DIP, LANDMARKS.MIDDLE_PIP
-  );
-  const ringSlightlyCurved = isFingerSlightlyCurved(
-    landmarks, LANDMARKS.RING_TIP, LANDMARKS.RING_DIP, LANDMARKS.RING_PIP
-  );
-  const pinkySlightlyCurved = isFingerSlightlyCurved(
-    landmarks, LANDMARKS.PINKY_TIP, LANDMARKS.PINKY_DIP, LANDMARKS.PINKY_PIP
-  );
+  const foodAllExt = areAllFingersExtended(landmarks);
+  const foodNotVertical = !isHandVertical(landmarks);
+  const foodPalmNotUp = !isPalmFacingUp(landmarks);
+  // Fingers close together (not spread like THEY)
+  const foodIdxMidClose = distance(landmarks[LANDMARKS.INDEX_TIP], landmarks[LANDMARKS.MIDDLE_TIP]) < 0.05;
+  const foodMidRingClose = distance(landmarks[LANDMARKS.MIDDLE_TIP], landmarks[LANDMARKS.RING_TIP]) < 0.05;
 
-  // Check thumb is also curved/cupped
-  const thumbCupped = landmarks[LANDMARKS.THUMB_TIP].y > landmarks[LANDMARKS.THUMB_IP].y - 0.05;
-
-  if (indexSlightlyCurved && middleSlightlyCurved && ringSlightlyCurved && pinkySlightlyCurved && thumbCupped) {
+  if (foodAllExt && foodNotVertical && foodPalmNotUp && foodIdxMidClose && foodMidRingClose) {
     return {
       type: 'OBJECT',
       value: 'apple',
       display: 'apple',
       grammar_id: 'APPLE',
-      gesture_name: 'CUPPED_HAND',
+      gesture_name: 'FLAT_PALM_DOWN',
     };
   }
 
@@ -821,10 +729,9 @@ export function detectObject(landmarks) {
   }
 
   // -------------------------------------------------------------------------
-  // 5. 'BALL' (Round Object) - Symmetric cupped hand, fingers spread in dome
-  // Math Rule: All fingers slightly curved (like APPLE) but MORE spread
+  // 5. 'BALL' (Round Object) - Cupped hand, fingers curved and spread
+  // Math Rule: All fingers slightly curved and spread apart
   //            Thumb opposed (spread away from fingers)
-  //            Distinguishes from APPLE: BALL has wider finger spread
   // -------------------------------------------------------------------------
 
   const ballIndexCurved = isFingerSlightlyCurved(landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_DIP, LANDMARKS.INDEX_PIP);
@@ -846,26 +753,34 @@ export function detectObject(landmarks) {
   }
 
   // -------------------------------------------------------------------------
-  // 6. 'FOOD' (General) - Flat hand, palm down, fingers together
-  // Math Rule: All fingers extended and close together (not spread)
-  //            Palm facing down (opposite of BOOK which is palm up)
-  //            Hand horizontal
+  // 6. 'FOOD' (General) — Cupped/open hand
+  // Math Rule: Fingers slightly curved, hand relaxed (cupped/open)
+  //            Matches the former APPLE/cupped-hand detection
   // -------------------------------------------------------------------------
 
-  const foodAllExt = areAllFingersExtended(landmarks);
-  const foodNotVertical = !isHandVertical(landmarks);
-  const foodPalmNotUp = !isPalmFacingUp(landmarks);
-  // Fingers close together (not spread like THEY)
-  const foodIdxMidClose = distance(landmarks[LANDMARKS.INDEX_TIP], landmarks[LANDMARKS.MIDDLE_TIP]) < 0.05;
-  const foodMidRingClose = distance(landmarks[LANDMARKS.MIDDLE_TIP], landmarks[LANDMARKS.RING_TIP]) < 0.05;
+  const indexSlightlyCurved = isFingerSlightlyCurved(
+    landmarks, LANDMARKS.INDEX_TIP, LANDMARKS.INDEX_DIP, LANDMARKS.INDEX_PIP
+  );
+  const middleSlightlyCurved = isFingerSlightlyCurved(
+    landmarks, LANDMARKS.MIDDLE_TIP, LANDMARKS.MIDDLE_DIP, LANDMARKS.MIDDLE_PIP
+  );
+  const ringSlightlyCurved = isFingerSlightlyCurved(
+    landmarks, LANDMARKS.RING_TIP, LANDMARKS.RING_DIP, LANDMARKS.RING_PIP
+  );
+  const pinkySlightlyCurved = isFingerSlightlyCurved(
+    landmarks, LANDMARKS.PINKY_TIP, LANDMARKS.PINKY_DIP, LANDMARKS.PINKY_PIP
+  );
 
-  if (foodAllExt && foodNotVertical && foodPalmNotUp && foodIdxMidClose && foodMidRingClose) {
+  // Check thumb is also curved/cupped
+  const thumbCupped = landmarks[LANDMARKS.THUMB_TIP].y > landmarks[LANDMARKS.THUMB_IP].y - 0.05;
+
+  if (indexSlightlyCurved && middleSlightlyCurved && ringSlightlyCurved && pinkySlightlyCurved && thumbCupped) {
     return {
       type: 'OBJECT',
       value: 'food',
       display: 'food',
       grammar_id: 'FOOD',
-      gesture_name: 'FLAT_PALM_DOWN',
+      gesture_name: 'CUPPED_HAND',
     };
   }
 
@@ -936,58 +851,67 @@ export function resetTenseState() {
 // =============================================================================
 
 /**
- * Detect gesture from hand landmarks (raw detection, no confidence lock)
- * Priority order prevents misclassification
+ * Detect gesture from hand landmarks (raw detection, no confidence lock).
+ * Priority order matches GestureLexicon.json definitions — the single source of
+ * truth. Each documented guide gesture is checked in order from most specific
+ * (unambiguous) to least specific (overlapping).
+ *
  * @param {Array} landmarks - 21 hand landmarks
  * @returns {string|null} Grammar ID or null
  */
 export function detectGestureRaw(landmarks) {
   if (!landmarks || landmarks.length < 21) return null;
 
-  // Priority 0: SUBJECT_I — pure fist (all 5 fingers curled)
-  // Matches GestureLexicon.json GST_FIST definition exactly.
-  // Must check before GRAB because a fist can have fingertips close together
-  // like a claw, but a clenched fist means "I" not "grab".
-  if (areAllFingersCurled(landmarks)) {
-    return 'SUBJECT_I';
-  }
-
-  // Priority 1: GRAB/CLAW — most specific (all fingertips bunched)
+  const thumbTip = landmarks[LANDMARKS.THUMB_TIP];
+  const indexTip = landmarks[LANDMARKS.INDEX_TIP];
+  const thumbIndexDist = distance(thumbTip, indexTip);
   const avgThumbDist = getAverageThumbToFingerDistance(landmarks);
-  if (avgThumbDist < 0.06) {
+
+  // ── Priority 1: GRAB (GST_PINCH) — thumb+index pinch, most specific ──
+  // GestureLexicon: "Thumb tip and Index finger tip touching or very close"
+  if (thumbIndexDist < 0.05 || avgThumbDist < 0.06) {
     return 'GRAB';
   }
 
-  // Priority 2: STOP — open palm, all fingers extended + hand vertical
+  // ── Priority 2: SUBJECT_I (GST_FIST) — all 5 fingers curled, NOT pinching ──
+  // GestureLexicon: "All fingers curled into palm, forming a closed fist"
+  // The NOT-pinching guard (thumbIndexDist > 0.05) prevents misclassifying
+  // GRAB/pinch as SUBJECT_I when all fingers happen to be curled.
+  if (areAllFingersCurled(landmarks) && thumbIndexDist > 0.05) {
+    return 'SUBJECT_I';
+  }
+
+  // ── Priority 3: STOP (GST_OPEN_PALM) — all 5 extended + hand vertical ──
+  // GestureLexicon: "All five fingers fully extended, palm facing camera"
   if (areAllFingersExtended(landmarks) && isHandVertical(landmarks)) {
     return 'STOP';
   }
 
-  // Priority 3: DRINK — C-shape (thumb-index gap with others curled)
-  // Must check BEFORE subjects so C-shape isn't mistaken for YOU
+  // ── Priority 4: DRINK — C-shape (thumb-index gap, others curled) ──
+  // Must check BEFORE YOU to avoid confusing C-shape with pointing.
   const verb = detectVerb(landmarks);
   if (verb && verb.grammar_id === 'DRINK') {
     return 'DRINK';
   }
 
-  // Priority 4: SUBJECTS — directional pronouns
+  // ── Priority 5: SUBJECTS — directional pronouns (matching guide patterns) ──
   const subject = detectSubject(landmarks);
   if (subject) {
     return subject.grammar_id;
   }
 
-  // Priority 5: OBJECTS — shape-based
+  // ── Priority 6: OBJECTS — shape-based ──
   const object = detectObject(landmarks);
   if (object) {
     return object.grammar_id;
   }
 
-  // Priority 6: SEE (V-shape) — check before WE since SEE = spread, WE = together
+  // ── Priority 7: SEE (V-shape) — check before WE since SEE = spread, WE = together ──
   if (verb && verb.grammar_id === 'SEE') {
     return 'SEE';
   }
 
-  // Priority 7: Remaining VERBS (EAT, WANT, GO)
+  // ── Priority 8: Remaining VERBS (EAT, WANT, GO) ──
   if (verb) {
     return verb.grammar_id;
   }

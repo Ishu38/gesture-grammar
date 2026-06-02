@@ -208,7 +208,7 @@ export class GestureMasteryGate {
    * @returns {boolean}
    */
   isGestureUnlocked(gestureId) {
-    // 2026-05-27: clinical/therapist mode — all 10 gestures unlocked from
+    // clinical/therapist mode — all gestures unlocked from first session.
     // first session. The curriculum sequence is preserved internally for
     // mastery analytics (a therapist still sees which stage a learner is
     // working through in reports), but the system no longer hides later-

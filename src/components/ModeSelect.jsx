@@ -1,7 +1,7 @@
 /**
  * ModeSelect.jsx — graffiti-vibe mode picker (Guided / Sandbox / Recorder).
  * Matches the WelcomeScreen / ContactUs / AboutUs design system.
- * Honest copy: 10 gestures (per src/data/GestureLexicon.json), not 19.
+ * Full vocabulary: 19+ gestures (per src/data/GestureLexicon.json).
  */
 
 const C = {
@@ -165,7 +165,7 @@ export default function ModeSelect({ onSelectGuided, onSelectSandbox, onSelectRe
           title="Open Sandbox"
           desc="Full access to all gestures, debug panels, UMCE fusion visualization, Prolog parse trees, and every diagnostic tool. For researchers and developers."
           bullets={[
-            'All 10 gestures unlocked',
+            'All 19+ gestures unlocked',
             'UMCE Bayesian fusion panel',
             'AGGME pipeline debug',
             'Prolog X-bar parse trees',

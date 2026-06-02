@@ -465,6 +465,539 @@
       },
       "priority": 4,
       "notes": "Flat surface represents placing/presenting an object"
+    },
+
+    {
+      "gesture_id": "GST_C_SHAPE",
+      "human_description": "Thumb and Index finger spread apart forming a 'C' gap, Middle/Ring/Pinky curled",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_index_apart": {
+            "landmark_a": "thumb_tip",
+            "operator": "distance >",
+            "landmark_b": "index_tip",
+            "threshold": 0.05
+          },
+          "middle_curled": {
+            "landmark_a": "middle_tip_y",
+            "operator": ">",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "DRINK",
+        "concept": "CONSUMPTION",
+        "type": "VERB",
+        "english_gloss": "Drink / Sip",
+        "usage_context": "Transitive verb — holding a cup",
+        "grammatical_properties": {
+          "transitivity": "transitive",
+          "requires_object": true
+        }
+      },
+      "priority": 2,
+      "notes": "C-shape mimics holding a cup or glass"
+    },
+
+    {
+      "gesture_id": "GST_CLAW_OPEN",
+      "human_description": "All fingers partially curled (half-closed claw), hand vertical — like reaching to grab",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_partially_curled": {
+            "landmark_a": "index_tip_y",
+            "operator": "between",
+            "landmark_b": "index_dip_y..index_pip_y"
+          },
+          "hand_vertical": {
+            "landmark_a": "wrist_y",
+            "operator": ">",
+            "landmark_b": "middle_tip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "WANT",
+        "concept": "DESIRE",
+        "type": "VERB",
+        "english_gloss": "Want / Desire",
+        "usage_context": "Transitive verb — wanting something",
+        "grammatical_properties": {
+          "transitivity": "transitive",
+          "requires_object": true
+        }
+      },
+      "priority": 3,
+      "notes": "Open claw reaching out represents desire — 'I want that'"
+    },
+
+    {
+      "gesture_id": "GST_BUNCHED",
+      "human_description": "All fingertips bunched together near face level (upper portion of frame), like bringing food to mouth",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_bunched": {
+            "landmark_a": "thumb_tip",
+            "operator": "distance <",
+            "landmark_b": "index_tip",
+            "threshold": 0.12
+          },
+          "near_face": {
+            "landmark_a": "wrist_y",
+            "operator": "<",
+            "landmark_b": "threshold",
+            "threshold": 0.35
+          },
+          "fingers_curled": {
+            "landmark_a": "index_tip_y",
+            "operator": ">",
+            "landmark_b": "index_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "EAT",
+        "concept": "CONSUMPTION",
+        "type": "VERB",
+        "english_gloss": "Eat / Consume",
+        "usage_context": "Transitive verb — eating something",
+        "grammatical_properties": {
+          "transitivity": "transitive",
+          "requires_object": true
+        }
+      },
+      "priority": 3,
+      "notes": "Bunching fingers near mouth mimics the universal eating gesture"
+    },
+
+    {
+      "gesture_id": "GST_V_SHAPE",
+      "human_description": "Index and Middle fingers extended and spread apart (V-sign spread), Ring and Pinky curled — like pointing at eyes",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "fingers_spread": {
+            "landmark_a": "index_tip",
+            "operator": "distance >",
+            "landmark_b": "middle_tip",
+            "threshold": 0.06
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SEE",
+        "concept": "PERCEPTION",
+        "type": "VERB",
+        "english_gloss": "See / Look / Watch",
+        "usage_context": "Transitive perception verb",
+        "grammatical_properties": {
+          "transitivity": "transitive",
+          "requires_object": true
+        }
+      },
+      "priority": 3,
+      "notes": "V-shape near eyes mimics looking/seeing — 'I see that'"
+    },
+
+    {
+      "gesture_id": "GST_INDEX_RELAXED",
+      "human_description": "Index finger extended pointing forward, other fingers curled with relaxed thumb (not tightly tucked), hand not vertical",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_curled": {
+            "landmark_a": "middle_tip_y",
+            "operator": ">",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "GO",
+        "concept": "MOTION",
+        "type": "VERB",
+        "english_gloss": "Go / Move / Travel",
+        "usage_context": "Intransitive motion verb",
+        "grammatical_properties": {
+          "transitivity": "intransitive",
+          "requires_object": false
+        }
+      },
+      "priority": 4,
+      "notes": "Extended index forward represents direction/movement — 'I go there'"
+    },
+
+    {
+      "gesture_id": "GST_CUPPED_HAND",
+      "human_description": "All fingers slightly curved forming a loose cup, thumb curled inward — like holding a bowl",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_slightly_curved": {
+            "landmark_a": "index_tip_y",
+            "operator": "between",
+            "landmark_b": "index_dip_y..index_pip_y"
+          },
+          "thumb_cupped": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "FOOD",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "Food / Meal / Edible item",
+        "usage_context": "Represents food in general",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": false
+        }
+      },
+      "priority": 4,
+      "notes": "Cupped hand represents holding or presenting food"
+    },
+
+    {
+      "gesture_id": "GST_CUPPED_SPREAD",
+      "human_description": "All fingers curved and spread wide apart, thumb opposed — forming a large round dome shape",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_curved": {
+            "landmark_a": "index_tip_y",
+            "operator": "between",
+            "landmark_b": "index_dip_y..index_pip_y"
+          },
+          "wide_spread": {
+            "landmark_a": "index_tip",
+            "operator": "distance >",
+            "landmark_b": "pinky_tip",
+            "threshold": 0.08
+          },
+          "thumb_opposed": {
+            "landmark_a": "thumb_tip",
+            "operator": "distance >",
+            "landmark_b": "index_tip",
+            "threshold": 0.10
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "BALL",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "Ball / Sphere / Round toy",
+        "usage_context": "Represents a round object",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": true
+        }
+      },
+      "priority": 4,
+      "notes": "Spread cupped hand outlines a large round shape — 'a ball'"
+    },
+
+    {
+      "gesture_id": "GST_W_SHAPE",
+      "human_description": "Index, Middle, and Ring fingers extended and spread, Thumb and Pinky curled — forming a 'W' shape",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_extended": {
+            "landmark_a": "ring_tip_y",
+            "operator": "<",
+            "landmark_b": "ring_pip_y"
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_x",
+            "operator": ">",
+            "landmark_b": "wrist_x"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "WATER",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "Water / Liquid / Drink",
+        "usage_context": "Represents water or liquids",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": false
+        }
+      },
+      "priority": 4,
+      "notes": "W-shape with three fingers represents the 'W' in 'Water'"
+    },
+
+    {
+      "gesture_id": "GST_FLAT_PALM_UP",
+      "human_description": "All fingers extended and flat, palm facing upward, hand horizontal — like holding a book",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "fingers_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "palm_up": {
+            "landmark_a": "middle_mcp_z",
+            "operator": ">",
+            "landmark_b": "wrist_z"
+          },
+          "hand_horizontal": {
+            "landmark_a": "wrist_y",
+            "operator": "~=",
+            "landmark_b": "middle_tip_y",
+            "tolerance": 0.12
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "BOOK",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "Book / Reading material",
+        "usage_context": "Represents a book or reading object",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": true
+        }
+      },
+      "priority": 4,
+      "notes": "Flat palm facing up mimics an open book held in the hand"
+    },
+
+    {
+      "gesture_id": "GST_ROOF",
+      "human_description": "Index and Middle fingers extended with tips touching (inverted V / roof shape), Ring and Pinky curled",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "tips_touching": {
+            "landmark_a": "index_tip",
+            "operator": "distance <",
+            "landmark_b": "middle_tip",
+            "threshold": 0.04
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "HOUSE",
+        "concept": "CONCRETE_NOUN",
+        "type": "OBJECT",
+        "english_gloss": "House / Building / Structure",
+        "usage_context": "Represents a building or dwelling",
+        "grammatical_properties": {
+          "noun_type": "concrete",
+          "countable": true
+        }
+      },
+      "priority": 4,
+      "notes": "Inverted V with touching fingertips forms a roof peak — 'a house'"
+    },
+
+    {
+      "gesture_id": "GST_ALL_SPREAD",
+      "human_description": "All five fingers fully extended and spread wide apart, hand not vertical — like waving or showing 'all of them'",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "thumb_extended": {
+            "landmark_a": "thumb_tip_y",
+            "operator": "<",
+            "landmark_b": "thumb_ip_y"
+          },
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_extended": {
+            "landmark_a": "ring_tip_y",
+            "operator": "<",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_extended": {
+            "landmark_a": "pinky_tip_y",
+            "operator": "<",
+            "landmark_b": "pinky_pip_y"
+          },
+          "fingers_spread": {
+            "landmark_a": "index_tip",
+            "operator": "distance >",
+            "landmark_b": "middle_tip",
+            "threshold": 0.05
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_THEY",
+        "concept": "THIRD_PERSON_PLURAL",
+        "type": "SUBJECT",
+        "english_gloss": "They / Them / Those people",
+        "usage_context": "Third person plural pronoun",
+        "grammatical_properties": {
+          "person": 3,
+          "number": "plural"
+        }
+      },
+      "priority": 3,
+      "notes": "All fingers spread wide represents 'everyone / all of them / they'"
+    },
+
+    {
+      "gesture_id": "GST_SHE_VARIANT",
+      "human_description": "Same as HE — index, middle, ring extended, thumb and pinky curled. Context distinguishes HE from SHE.",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "ring_extended": {
+            "landmark_a": "ring_tip_y",
+            "operator": "<",
+            "landmark_b": "ring_pip_y"
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_SHE",
+        "concept": "THIRD_PERSON_SINGULAR_FEMALE",
+        "type": "SUBJECT",
+        "english_gloss": "She / Her",
+        "usage_context": "Third person singular female pronoun — shares shape with HE, context-disambiguated",
+        "grammatical_properties": {
+          "person": 3,
+          "number": "singular",
+          "gender": "female"
+        }
+      },
+      "priority": 4,
+      "notes": "Same three-finger gesture as HE — the system disambiguates by sentence context"
     }
   ],
 

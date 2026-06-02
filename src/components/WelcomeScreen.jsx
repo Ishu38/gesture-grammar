@@ -4,7 +4,7 @@
  * Design intent: warm cream background, spray-paint accents, bold display
  * type. Should feel like a community zine, not a hospital intake form.
  * Honest copy only — every number/claim matches what's actually shipped
- * (see src/data/GestureLexicon.json for the 10 gestures, AccessibilityProfile.js
+ * (see src/data/GestureLexicon.json for the full gesture vocabulary, AccessibilityProfile.js
  * for the 8 profiles).
  */
 import WelcomeBack from './WelcomeBack';

@@ -7,101 +7,140 @@ import { useMemo } from 'react';
 
 // Gesture definitions — kept STRICTLY in sync with src/data/GestureLexicon.json.
 // Every entry below corresponds to a real semantic_mapping.grammar_id the
-// classifier can actually recognize. The "shape" field must describe the
-// SAME handshape the classifier expects (i.e. the lexicon's human_description),
-// otherwise users mimic what the guide shows and the system stays at 0%.
-// Previous DRINK / BOOK / HOUSE / WATER cards were aspirational stubs and are
-// removed — they were never wired into the recognizer and caused users to
-// chase shapes the system could not lock.
+// detector (gestureDetection.js) can actually recognize. The "shape" field
+// describes the SAME handshape the geometric detector checks, so users mimic
+// the guide and the system locks. All 19 gestures are now documented.
+
 const GESTURE_CARDS = [
-  // Subjects
+  // =========================================================================
+  // SUBJECTS — Who is doing the action
+  // =========================================================================
   {
-    id: 'SUBJECT_I',
-    category: 'SUBJECT',
-    icon: '✊',
-    label: 'I',
+    id: 'SUBJECT_I', category: 'SUBJECT', icon: '\u270A', label: 'I',
     description: 'Closed fist',
-    shape: 'All fingers curled into palm',
+    shape: 'All fingers curled into palm \u2014 every tip tucked in',
   },
   {
-    id: 'SUBJECT_YOU',
-    category: 'SUBJECT',
-    icon: '☝️',
-    label: 'YOU',
-    description: 'Point with index finger',
-    shape: 'Index extended, others curled',
+    id: 'SUBJECT_YOU', category: 'SUBJECT', icon: '\u261D', label: 'YOU',
+    description: 'Point forward',
+    shape: 'Index finger extended, all other fingers curled',
   },
   {
-    id: 'SUBJECT_HE',
-    category: 'SUBJECT',
-    icon: '🤟',
-    label: 'HE / SHE',
+    id: 'SUBJECT_HE', category: 'SUBJECT', icon: '\uD83E\uDD1F', label: 'HE',
     description: 'Three fingers up',
-    shape: 'Index + Middle + Ring extended, Pinky curled, Thumb tucked',
+    shape: 'Index + Middle + Ring extended, Thumb + Pinky curled',
+  },
+  {
+    id: 'SUBJECT_SHE', category: 'SUBJECT', icon: '\uD83E\uDD1F', label: 'SHE',
+    description: 'Three fingers up (same as HE)',
+    shape: 'Same shape as HE \u2014 context tells them apart',
+  },
+  {
+    id: 'SUBJECT_WE', category: 'SUBJECT', icon: '\u270C', label: 'WE',
+    description: 'Two fingers together',
+    shape: 'Index + Middle extended and close together, others curled',
+  },
+  {
+    id: 'SUBJECT_THEY', category: 'SUBJECT', icon: '\uD83D\uDD90', label: 'THEY',
+    description: 'All fingers spread wide',
+    shape: 'All five fingers extended and spread apart',
   },
 
-  // Verbs
+  // =========================================================================
+  // VERBS — What action is happening
+  // =========================================================================
   {
-    id: 'GRAB',
-    category: 'VERB',
-    icon: '🤏',
-    label: 'GRAB',
+    id: 'GRAB', category: 'VERB', icon: '\uD83E\uDD0F', label: 'GRAB',
     description: 'Pinch shape',
-    shape: 'Thumb tip + Index tip touching, others relaxed',
+    shape: 'Thumb tip touches Index tip \u2014 others relaxed / curled',
   },
   {
-    id: 'STOP',
-    category: 'VERB',
-    icon: '✋',
-    label: 'STOP',
-    description: 'Open palm',
-    shape: 'All five fingers spread, palm facing camera',
+    id: 'DRINK', category: 'VERB', icon: '\uD83E\uDECF', label: 'DRINK',
+    description: 'C-shape (holding a cup)',
+    shape: 'Thumb + Index spread apart forming a C-gap, Middle/Ring/Pinky curled',
+  },
+  {
+    id: 'EAT', category: 'VERB', icon: '\uD83C\uDF4E', label: 'EAT',
+    description: 'Bunched near mouth',
+    shape: 'Fingertips bunched together, hand near face level (upper frame)',
+  },
+  {
+    id: 'WANT', category: 'VERB', icon: '\uD83E\uDD1A', label: 'WANT',
+    description: 'Open claw reaching',
+    shape: 'Fingers partially curled (half-closed), reaching outward',
+  },
+  {
+    id: 'SEE', category: 'VERB', icon: '\uD83D\uDC41', label: 'SEE',
+    description: 'V-shape near eyes',
+    shape: 'Index + Middle extended and spread (V-sign apart), others curled',
+  },
+  {
+    id: 'GO', category: 'VERB', icon: '\u27A1', label: 'GO',
+    description: 'Point forward relaxed',
+    shape: 'Index extended, others curled with relaxed thumb \u2014 hand not vertical',
+  },
+  {
+    id: 'STOP', category: 'VERB', icon: '\u270B', label: 'STOP',
+    description: 'Open palm facing out',
+    shape: 'All five fingers extended, palm facing camera, hand vertical',
   },
 
-  // Object
+  // =========================================================================
+  // OBJECTS — What is being acted on
+  // =========================================================================
   {
-    id: 'APPLE',
-    category: 'OBJECT',
-    icon: '🤚',
-    label: 'APPLE',
+    id: 'APPLE', category: 'OBJECT', icon: '\uD83E\uDD1A', label: 'APPLE',
     description: 'Flat hand, palm down',
-    shape: 'Hand horizontal, palm facing the floor',
+    shape: 'Hand horizontal, all fingers extended together, palm facing floor',
+  },
+  {
+    id: 'BALL', category: 'OBJECT', icon: '\u26BD', label: 'BALL',
+    description: 'Cupped spread hand',
+    shape: 'Fingers curved wide apart like holding a large ball',
+  },
+  {
+    id: 'WATER', category: 'OBJECT', icon: '\uD83D\uDCA7', label: 'WATER',
+    description: 'W-shape (three fingers)',
+    shape: 'Index + Middle + Ring extended and spread, Thumb + Pinky curled',
+  },
+  {
+    id: 'FOOD', category: 'OBJECT', icon: '\uD83C\uDF5E', label: 'FOOD',
+    description: 'Cupped hand (bowl shape)',
+    shape: 'All fingers slightly curved, thumb curled in \u2014 like holding a bowl',
+  },
+  {
+    id: 'BOOK', category: 'OBJECT', icon: '\uD83D\uDCD6', label: 'BOOK',
+    description: 'Flat palm facing up',
+    shape: 'All fingers extended flat, palm up, hand horizontal \u2014 like open book',
+  },
+  {
+    id: 'HOUSE', category: 'OBJECT', icon: '\uD83C\uDFE0', label: 'HOUSE',
+    description: 'Roof shape (inverted V)',
+    shape: 'Index + Middle extended with tips touching (\u039B), others curled',
   },
 
-  // Modifiers
+  // =========================================================================
+  // MODIFIERS
+  // =========================================================================
   {
-    id: 'PLURAL',
-    category: 'MODIFIER',
-    icon: '✌️',
-    label: 'PLURAL',
+    id: 'PLURAL', category: 'MODIFIER', icon: '\u270C', label: 'PLURAL',
     description: 'Two fingers up (peace sign)',
-    shape: 'Index + Middle extended, Thumb / Ring / Pinky curled',
+    shape: 'Index + Middle extended upward, Thumb / Ring / Pinky curled',
   },
   {
-    id: 'AFFIRMATIVE',
-    category: 'MODIFIER',
-    icon: '👍',
-    label: 'YES',
+    id: 'AFFIRMATIVE', category: 'MODIFIER', icon: '\uD83D\uDC4D', label: 'YES',
     description: 'Thumbs up',
-    shape: 'Thumb extended upward, other fingers curled',
+    shape: 'Thumb extended upward, other fingers curled into palm',
   },
-
-  // Voice markers (dynamic — motion gestures, not static handshape)
   {
-    id: 'ACTIVE_VOICE',
-    category: 'MODIFIER',
-    icon: '➡️',
-    label: 'ACTIVE',
+    id: 'ACTIVE_VOICE', category: 'MODIFIER', icon: '\u27A1', label: 'ACTIVE',
     description: 'Swipe right',
-    shape: 'Open hand moves left → right across the frame',
+    shape: 'Open hand moves left \u2192 right across the frame',
   },
   {
-    id: 'PASSIVE_VOICE',
-    category: 'MODIFIER',
-    icon: '⬅️',
-    label: 'PASSIVE',
+    id: 'PASSIVE_VOICE', category: 'MODIFIER', icon: '\u2B05', label: 'PASSIVE',
     description: 'Swipe left',
-    shape: 'Open hand moves right → left across the frame',
+    shape: 'Open hand moves right \u2192 left across the frame',
   },
 ];
 

@@ -288,6 +288,24 @@ function getAverageThumbToFingerDistance(landmarks) {
 }
 
 /**
+ * Max pairwise distance among the four fingertips. Tiny for a tight fist
+ * (SUBJECT_I — tips tucked together), large for a cupped/splayed curl
+ * (BALL — fingers curved but spread wide). This is the catalog discriminator
+ * `fist` vs `spread_wide` for the all-curled collision group.
+ */
+function fingertipSpread(landmarks) {
+  const tips = [LANDMARKS.INDEX_TIP, LANDMARKS.MIDDLE_TIP, LANDMARKS.RING_TIP, LANDMARKS.PINKY_TIP]
+    .map((i) => landmarks[i]);
+  let max = 0;
+  for (let i = 0; i < tips.length; i++) {
+    for (let j = i + 1; j < tips.length; j++) {
+      max = Math.max(max, distance(tips[i], tips[j]));
+    }
+  }
+  return max;
+}
+
+/**
  * Check if hand is vertical (wrist below finger tips)
  */
 function isHandVertical(landmarks) {
@@ -873,12 +891,19 @@ export function detectGestureRaw(landmarks) {
     return 'GRAB';
   }
 
-  // ── Priority 2: SUBJECT_I (GST_FIST) — all 5 fingers curled, NOT pinching ──
-  // GestureLexicon: "All fingers curled into palm, forming a closed fist"
-  // The NOT-pinching guard (thumbIndexDist > 0.05) prevents misclassifying
-  // GRAB/pinch as SUBJECT_I when all fingers happen to be curled.
+  // ── Priority 2: SUBJECT_I (GST_FIST) — TIGHT fist: curled, not pinching, tips bunched ──
+  // GestureLexicon: "All fingers curled into palm, forming a closed fist".
+  // Discriminators (gestureCatalog): I=`fist` (tips tucked together). The NOT-pinch
+  // guard keeps GRAB out; the tips-bunched guard keeps BALL (`spread_wide`, a cupped
+  // splayed curl) out — a splayed curl falls through to detectObject → BALL.
+  // FIST_TIP_SPREAD_MAX is generous so a normal fist still passes; only a clearly
+  // cupped/spread hand is diverted. Tune from telemetry if needed.
+  const FIST_TIP_SPREAD_MAX = 0.13;
   if (areAllFingersCurled(landmarks) && thumbIndexDist > 0.05) {
-    return 'SUBJECT_I';
+    if (fingertipSpread(landmarks) < FIST_TIP_SPREAD_MAX) {
+      return 'SUBJECT_I';
+    }
+    // splayed/cupped curl → not a fist; let detectObject classify it (BALL)
   }
 
   // ── Priority 3: STOP (GST_OPEN_PALM) — all 5 extended + hand vertical ──

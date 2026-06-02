@@ -240,11 +240,8 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const [mentorSentence, setMentorSentence] = useState(null); // { text, changed } — engine's corrected sentence
 
   // ── OBSERVABILITY (audit) — every frame's decision is recorded with a reason ──
-  const [showTelemetry, setShowTelemetry] = useState(false);
-  const [liveTrace, setLiveTrace] = useState(null); // most recent frame trace (live panel)
   const frameCountRef = useRef(0);
-  const telemetryRef = useRef([]);                   // ring buffer of recent traces (replay)
-  const [statsSnapshot, setStatsSnapshot] = useState(null); // tallied bottleneck breakdown
+  const telemetryRef = useRef([]); // always-on ring buffer — behind the scenes, never on the surface
   const [grammarNextCategories, setGrammarNextCategories] = useState(null);
 
   // ISL Feature state
@@ -598,38 +595,43 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   // EVERY exit/decision below calls this with an explicit, human-readable reason
   // so there are no hidden state transitions or silent rejections.
   const pushTrace = useCallback((rec) => {
-    const t = { ts: Math.round(performance.now()), frame: frameCountRef.current, ...rec };
+    // Always-on, behind-the-scenes recorder. NO UI and NO per-frame React
+    // re-render — it only appends to the in-memory ring buffer.
     const buf = telemetryRef.current;
-    buf.push(t);
+    buf.push({ ts: Math.round(performance.now()), frame: frameCountRef.current, ...rec });
     if (buf.length > 900) buf.shift(); // ~30s @ 30fps
-    setLiveTrace(t);
   }, []);
 
-  // Tally the ring buffer into a ranked bottleneck breakdown — frames are the
-  // denominator, so each decision's share is a real, measured statistic.
-  const tallyTelemetry = useCallback(() => {
-    const buf = telemetryRef.current;
-    const total = buf.length;
-    if (!total) { setStatsSnapshot({ total: 0 }); return; }
-    const byDecision = {};
-    const byReason = {};
-    let withHand = 0, locks = 0, restSuppressed = 0;
-    for (const t of buf) {
-      byDecision[t.decision] = (byDecision[t.decision] || 0) + 1;
-      const r = (t.reason || '').slice(0, 60);
-      byReason[r] = (byReason[r] || 0) + 1;
-      if (t.handPresent) withHand++;
-      if (t.decision === 'LOCKED') locks++;
-      if (t.decision === 'DETECTION_SUPPRESSED') restSuppressed++;
-    }
-    const rank = (obj) => Object.entries(obj)
-      .sort((a, b) => b[1] - a[1])
-      .map(([k, v]) => ({ k, v, pct: Math.round((v / total) * 100) }));
-    setStatsSnapshot({
-      total, withHand, locks, restSuppressed,
-      decisions: rank(byDecision).slice(0, 6),
-      reasons: rank(byReason).slice(0, 5),
-    });
+  // Behind-the-scenes data access — never shown to users. From the browser console:
+  //   __mlafDownloadTelemetry()  → save the replay log JSON
+  //   __mlafStats()              → print the ranked decision breakdown
+  //   __mlafTelemetry()          → read the raw frame buffer
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    window.__mlafTelemetry = () => telemetryRef.current;
+    window.__mlafDownloadTelemetry = () => {
+      const blob = new Blob([JSON.stringify(telemetryRef.current, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `mlaf-telemetry-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+    window.__mlafStats = () => {
+      const buf = telemetryRef.current;
+      const total = buf.length;
+      if (!total) { console.log('[MLAF] no frames captured yet'); return; }
+      const byDecision = {};
+      for (const t of buf) byDecision[t.decision] = (byDecision[t.decision] || 0) + 1;
+      console.table(Object.entries(byDecision)
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => ({ decision: k, frames: v, pct: `${Math.round((v / total) * 100)}%` })));
+    };
+    return () => {
+      delete window.__mlafTelemetry;
+      delete window.__mlafDownloadTelemetry;
+      delete window.__mlafStats;
+    };
   }, []);
 
   // Process landmarks — AGGME Pipeline: Raw → Calibrate → Smooth → Intent → Spatial → Detect
@@ -1408,70 +1410,6 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
           lockProgress={lockProgress}
         />
 
-        {/* ── Live decision panel: answers "what is MLAF doing right now?" ── */}
-        {showTelemetry && (
-          <div style={{
-            position: 'fixed', bottom: 8, right: 8, width: 330, maxHeight: '48vh', overflowY: 'auto',
-            background: 'rgba(8,12,24,0.95)', color: '#cbd5e1', border: '1px solid #334155',
-            borderRadius: 10, padding: '10px 12px', fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-            fontSize: 11, lineHeight: 1.55, zIndex: 9999, boxShadow: '0 6px 24px rgba(0,0,0,0.55)',
-          }}>
-            <div style={{ fontWeight: 800, color: '#60a5fa', marginBottom: 6, letterSpacing: 0.5 }}>
-              ◉ WHAT MLAF IS DOING NOW
-            </div>
-            {!liveTrace ? <div style={{ color: '#64748b' }}>Waiting for frames…</div> : (() => {
-              const t = liveTrace;
-              const dcolor = t.decision === 'LOCKED' ? '#4ade80'
-                : t.decision === 'CONFIRMING' ? '#facc15'
-                : (String(t.decision).startsWith('BLOCKED') || t.decision === 'DETECTION_SUPPRESSED') ? '#f87171'
-                : '#94a3b8';
-              const Row = ({ k, v }) => (<div><span style={{ color: '#64748b' }}>{k}: </span><span>{v}</span></div>);
-              return (
-                <>
-                  <Row k="frame" v={t.frame} />
-                  <Row k="stage" v={t.stage} />
-                  <div style={{ margin: '4px 0', padding: '5px 7px', background: 'rgba(255,255,255,0.04)', borderRadius: 6 }}>
-                    <div><span style={{ color: '#64748b' }}>decision: </span><strong style={{ color: dcolor }}>{t.decision}</strong></div>
-                    <div style={{ color: '#e2e8f0', marginTop: 2 }}>{t.reason}</div>
-                  </div>
-                  {t.intent !== undefined && <Row k="intent" v={t.intent} />}
-                  {t.gesture !== undefined && <Row k="gesture" v={`${t.gesture || '—'}${t.rawGesture && t.rawGesture !== t.gesture ? ` (raw ${t.rawGesture})` : ''}`} />}
-                  {t.confidence != null && <Row k="confidence" v={`${Math.round(t.confidence * 100)}%`} />}
-                  {t.expected && <Row k="coach needs" v={t.expected} />}
-                  {t.dfaState && <Row k="DFA" v={`${t.dfaState} · ${t.confirmationCount ?? 0}/${t.threshold ?? '?'} (${Math.round((t.dfaProgress || 0) * 100)}%)`} />}
-                  {t.isLocked && <div style={{ color: '#4ade80', fontWeight: 700 }}>✓ LOCKED</div>}
-                  {t.transition && <Row k="transition" v={t.transition} />}
-                  {t.sentenceBuffer && <Row k="sentence" v={t.sentenceBuffer.join(' ') || '(empty)'} />}
-                  <div style={{ marginTop: 6, color: '#475569' }}>{telemetryRef.current.length} frames in replay buffer</div>
-                </>
-              );
-            })()}
-            {statsSnapshot && (
-              <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid #334155' }}>
-                <div style={{ fontWeight: 800, color: '#60a5fa', marginBottom: 4 }}>
-                  📊 BOTTLENECKS · {statsSnapshot.total} frames
-                </div>
-                {statsSnapshot.total === 0 ? (
-                  <div style={{ color: '#64748b' }}>No frames captured — make some gestures first.</div>
-                ) : (
-                  <>
-                    <div style={{ color: '#94a3b8', marginBottom: 4 }}>
-                      locks: {statsSnapshot.locks} · RESTING-suppressed: {statsSnapshot.restSuppressed}
-                      {' '}({Math.round((statsSnapshot.restSuppressed / statsSnapshot.total) * 100)}%)
-                    </div>
-                    {statsSnapshot.decisions.map((d) => (
-                      <div key={d.k} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ color: d.k === 'LOCKED' ? '#4ade80' : d.k === 'DETECTION_SUPPRESSED' ? '#f87171' : '#cbd5e1' }}>{d.k}</span>
-                        <span style={{ color: '#64748b' }}>{d.pct}% ({d.v})</span>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Mentor — the engine reorders the gestures into a correct English
             sentence and shows it alongside the learner's own (scaffold, not
             replacement). Only when there is something to teach (≥2 words). */}
@@ -1661,39 +1599,8 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
             >
               {showDebug ? 'Hide Debug' : 'Debug'}
             </button>
-            <button
-              className={`debug-toggle ${showTelemetry ? 'active' : ''}`}
-              onClick={() => setShowTelemetry(!showTelemetry)}
-              style={showTelemetry ? { background: 'rgba(96,165,250,0.2)', borderColor: 'rgba(96,165,250,0.5)', color: '#60a5fa' } : {}}
-              title="Live frame-by-frame decision trace (audit)"
-            >
-              {showTelemetry ? 'Telemetry: ON' : 'Telemetry'}
-            </button>
-            {showTelemetry && (
-              <button
-                className="debug-toggle"
-                onClick={() => {
-                  const blob = new Blob([JSON.stringify(telemetryRef.current, null, 2)], { type: 'application/json' });
-                  const a = document.createElement('a');
-                  a.href = URL.createObjectURL(blob);
-                  a.download = `mlaf-telemetry-${Date.now()}.json`;
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                }}
-                title="Download the last ~30s of frame traces for deterministic replay"
-              >
-                ⬇ Replay log
-              </button>
-            )}
-            {showTelemetry && (
-              <button
-                className="debug-toggle"
-                onClick={tallyTelemetry}
-                title="Tally the captured frames into a ranked bottleneck breakdown"
-              >
-                📊 Stats
-              </button>
-            )}
+            {/* Telemetry is always-on behind the scenes (no UI). Pull data from the
+                browser console: __mlafDownloadTelemetry() / __mlafStats(). */}
             <button
               className={`debug-toggle ${showErrorOverlay ? 'active' : ''}`}
               onClick={() => setShowErrorOverlay(!showErrorOverlay)}

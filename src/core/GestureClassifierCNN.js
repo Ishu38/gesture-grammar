@@ -105,6 +105,13 @@ export class GestureClassifierCNN {
     this._ort = null;          // cached onnxruntime-web module
     this._inputName = 'landmarks';
     this._outputName = 'logits';
+
+    // Drift detection — tracks the last N class indices to detect single-class
+    // collapse (when the model always predicts the same class regardless of input).
+    this._classHistory = [];
+    this._driftWindow = 50;
+    this._driftRatio = 0.90;
+    this._isCollapsed = false;
   }
 
   /**
@@ -231,7 +238,7 @@ export class GestureClassifierCNN {
     const idMap = this._idxToFrontendId || IDX_TO_FRONTEND_ID;
     const frontendId = idMap[bestIdx];
 
-    return {
+    const result = {
       id: frontendId,
       label: GESTURE_LABELS[frontendId],
       category: GESTURE_CATEGORIES[frontendId],
@@ -240,5 +247,57 @@ export class GestureClassifierCNN {
       gestureId: (bestIdx < GESTURE_IDS.length) ? GESTURE_IDS[bestIdx] : frontendId,
       probabilities: new Float64Array(probabilities),
     };
+
+    this._trackDrift(result);
+    return result;
+  }
+
+  /**
+   * Track the class prediction for drift detection.
+   * Call after classify() with the result to maintain the history window.
+   * @param {Object} result — from classify()
+   */
+  _trackDrift(result) {
+    if (!result || this._isCollapsed) return;
+    this._classHistory.push(result.classIndex);
+    if (this._classHistory.length > this._driftWindow) {
+      this._classHistory.shift();
+    }
+    if (this._classHistory.length >= this._driftWindow) {
+      const counts = {};
+      for (const idx of this._classHistory) {
+        counts[idx] = (counts[idx] || 0) + 1;
+      }
+      const maxCount = Math.max(...Object.values(counts));
+      const ratio = maxCount / this._classHistory.length;
+      if (ratio >= this._driftRatio) {
+        this._isCollapsed = true;
+        console.warn(
+          '[GestureClassifierCNN] Model collapse detected: ' +
+          (ratio * 100).toFixed(1) +
+          '% single-class predictions over ' +
+          this._driftWindow +
+          ' frames. CNN should be excluded from fusion.'
+        );
+      }
+    }
+  }
+
+  /**
+   * Whether the CNN has collapsed to a single output class.
+   * When true, the model's predictions are unreliable and should not
+   * contribute to fusion decisions.
+   * @returns {boolean}
+   */
+  isCollapsed() {
+    return this._isCollapsed;
+  }
+
+  /**
+   * Reset drift tracking (e.g., on model reload or session reset).
+   */
+  resetDrift() {
+    this._classHistory = [];
+    this._isCollapsed = false;
   }
 }

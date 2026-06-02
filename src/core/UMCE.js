@@ -132,7 +132,7 @@
  */
 
 import { LEXICON } from '../utils/GrammarEngine';
-import { detectSubject, detectVerb, detectObject } from '../utils/gestureDetection';
+import { detectGestureRaw } from '../utils/gestureDetection';
 
 // =============================================================================
 // CONSTANTS
@@ -148,14 +148,16 @@ const DEFAULT_VISUAL_WEIGHTS = {
 };
 
 /** When CNN classifier is active, redistribute visual weights to include it.
- *  CNN acts as a 5th visual sub-modality with high weight since it's
- *  trained on supervised data. */
+ *  CNN weight set to 0 — the geometric detector (detectGestureRaw) is the
+ *  authoritative source. CNN probabilities are logged for research only.
+ *  If CNN self-reports as collapsed (single-class domination), it is
+ *  automatically excluded via the entropy guard in fuse(). */
 const CNN_ACTIVE_VISUAL_WEIGHTS = {
-  shape:    0.25,
-  spatial:  0.20,
+  shape:    0.55,
+  spatial:  0.25,
   intent:   0.10,
   temporal: 0.10,
-  cnn:      0.35,
+  cnn:      0.00,
 };
 
 /** Trimodal channel weights for the top-level Bayesian product.
@@ -734,6 +736,16 @@ export class UMCE {
     this._lastAcousticLikelihoods = {};
     this._lastGazeLikelihoods = {};
     this._lastPriors = {};
+
+    // CNN drift detection — if CNN collapses to a single class for many frames,
+    // it is permanently disabled for this session to prevent corrupting fusion.
+    this._cnnHistory = [];
+    this._cnnDriftWindow = 50;
+    this._cnnDriftRatio = 0.90;
+    this._cnnDrifted = false;
+
+    // Raw gesture detection cache — updated every frame in fuse()
+    this._lastRawGesture = null;
   }
 
   // ===========================================================================
@@ -803,7 +815,32 @@ export class UMCE {
     // CNN probabilities are indexed by class (matching GESTURE_IDS order in config.py):
     //   0=SUBJECT_I, 1=SUBJECT_YOU, ..., 6=WANT, 7=EAT, ..., 18=HOUSE
     // We map these to UMCE gesture IDs via the CNN_IDX_TO_FRONTEND_ID lookup.
-    const isCnnActive = cnnResult && cnnResult.probabilities && cnnResult.probabilities.length > 0;
+    //
+    // CNN drift guard: if CNN produces >90% single-class predictions over a
+    // 50-frame window, it is marked as collapsed/drifted and permanently
+    // excluded from the fusion pipeline for this session.
+    let isCnnActive = cnnResult && cnnResult.probabilities && cnnResult.probabilities.length > 0;
+    if (isCnnActive && this._cnnDrifted) {
+      isCnnActive = false;
+    }
+    if (isCnnActive && !this._cnnDrifted) {
+      this._cnnHistory.push(cnnResult.classIndex ?? cnnResult.probabilities.indexOf(Math.max(...cnnResult.probabilities)));
+      if (this._cnnHistory.length > this._cnnDriftWindow) {
+        this._cnnHistory.shift();
+      }
+      if (this._cnnHistory.length >= this._cnnDriftWindow) {
+        const classCounts = {};
+        for (const idx of this._cnnHistory) {
+          classCounts[idx] = (classCounts[idx] || 0) + 1;
+        }
+        const maxCount = Math.max(...Object.values(classCounts));
+        const ratio = maxCount / this._cnnHistory.length;
+        if (ratio >= this._cnnDriftRatio) {
+          this._cnnDrifted = true;
+          console.warn('[UMCE] CNN single-class collapse detected (ratio=' + (ratio * 100).toFixed(1) + '%). Disabling CNN for this session.');
+        }
+      }
+    }
     const cnnLikelihoods = {};
     if (isCnnActive) {
       const CNN_IDX_MAP = [
@@ -1061,14 +1098,24 @@ export class UMCE {
 
   /**
    * Get the effective gesture ID to pass to the ConfidenceLock / processGestureInput.
-   * Returns the top-1 gesture if decision quality is not REJECT, otherwise null.
+   *
+   * If CNN has drifted (single-class collapse), returns the raw geometric
+   * detection result as primary. Otherwise returns the fusion top-1.
+   *
+   * Falls back to rawGesture when fusion quality is LOW or REJECT.
    *
    * @param {UMCEResult} result — from fuse()
    * @returns {string|null} gesture_id or null
    */
   getClassification(result) {
     if (!result || !result.top1 || result.decision_quality === 'REJECT') {
-      return null;
+      return this._lastRawGesture || null;
+    }
+    if (this._cnnDrifted && this._lastRawGesture) {
+      return this._lastRawGesture;
+    }
+    if (result.decision_quality === 'LOW' && this._lastRawGesture) {
+      return this._lastRawGesture;
     }
     return result.top1.gesture_id;
   }
@@ -1127,7 +1174,16 @@ export class UMCE {
   }
 
   /**
-   * Reset all state.
+   * Whether the CNN classifier has been detected as collapsed/drifted.
+   * When true, CNN probabilities are excluded from fusion.
+   * @returns {boolean}
+   */
+  isCnnDrifted() {
+    return this._cnnDrifted;
+  }
+
+  /**
+   * Reset all state (including CNN drift tracking).
    */
   reset() {
     this._temporalBuffer = [];
@@ -1139,6 +1195,9 @@ export class UMCE {
     this._lastVisualLikelihoods = {};
     this._lastAcousticLikelihoods = {};
     this._lastPriors = {};
+    this._cnnHistory = [];
+    this._cnnDrifted = false;
+    this._lastRawGesture = null;
   }
 
   /**
@@ -1197,39 +1256,28 @@ export class UMCE {
   // ===========================================================================
 
   /**
-   * M1: Shape Classifier — compute soft likelihood for each gesture.
+   * M1: Shape Classifier — delegates to the single geometric authority.
    *
-   * For each gesture g, evaluate its geometric constraint set against the
-   * current landmarks. The likelihood is the weighted sum of individual
-   * constraint satisfaction scores.
+   * The documented guide definitions in GestureLexicon.json are the
+   * single source of truth. detectGestureRaw() implements those definitions
+   * deterministically (finger-curl patterns for subjects, pinch distance for
+   * GRAB, palm orientation for APPLE, etc.). This method produces a
+   * likelihood distribution that peaks at the detected gesture.
+   *
+   * When no gesture is detected, returns uniform likelihoods (non-informative).
    *
    * @param {Array} landmarks — 21 smoothed landmarks
    * @returns {Object} Map<gesture_id, likelihood ∈ [0, 1]>
    */
   _computeShapeLikelihoods(landmarks) {
     const likelihoods = {};
+    const detected = detectGestureRaw(landmarks);
+    this._lastRawGesture = detected;
 
     for (const gId of this._gestureIds) {
-      const spec = GESTURE_SHAPE_SPECS[gId];
-      if (!spec) {
-        likelihoods[gId] = PROBABILITY_FLOOR;
-        continue;
-      }
-
-      try {
-        const constraints = spec.constraints(landmarks);
-        let totalScore = 0;
-        let totalWeight = 0;
-
-        for (const c of constraints) {
-          totalScore += c.score * c.weight;
-          totalWeight += c.weight;
-        }
-
-        likelihoods[gId] = totalWeight > 0
-          ? Math.max(PROBABILITY_FLOOR, totalScore / totalWeight)
-          : PROBABILITY_FLOOR;
-      } catch {
+      if (detected && gId === detected) {
+        likelihoods[gId] = 0.95;
+      } else {
         likelihoods[gId] = PROBABILITY_FLOOR;
       }
     }

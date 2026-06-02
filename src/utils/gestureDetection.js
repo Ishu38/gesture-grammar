@@ -336,7 +336,24 @@ export function detectSubject(landmarks) {
   const indexTip = landmarks[LANDMARKS.INDEX_TIP];
 
   // -------------------------------------------------------------------------
-  // 1. 'I' (First Person) - Thumb pointing at self
+  // 0. 'I' (First Person) — Pure fist: all five fingers curled
+  // GestureLexicon.json GST_FIST definition: "All fingers curled into palm,
+  // forming a closed fist" → SUBJECT_I. The simplest and most universal form.
+  // Checked FIRST so a natural fist is detected as "I" regardless of thumb
+  // direction — matching the documented guide definition exactly.
+  // -------------------------------------------------------------------------
+  if (areAllFingersCurled(landmarks)) {
+    return {
+      type: 'SUBJECT',
+      value: 'I',
+      person: 1,
+      number: 'singular',
+      grammar_id: 'SUBJECT_I',
+    };
+  }
+
+  // -------------------------------------------------------------------------
+  // 1. 'I' (First Person) - Thumb pointing at self (directional variant)
   // Math Rule: Thumb Tip x > Wrist x (thumb pointing inward)
   //            Four fingers must be curled
   //            Uses 3D angle for thumb extension check
@@ -927,6 +944,14 @@ export function resetTenseState() {
 export function detectGestureRaw(landmarks) {
   if (!landmarks || landmarks.length < 21) return null;
 
+  // Priority 0: SUBJECT_I — pure fist (all 5 fingers curled)
+  // Matches GestureLexicon.json GST_FIST definition exactly.
+  // Must check before GRAB because a fist can have fingertips close together
+  // like a claw, but a clenched fist means "I" not "grab".
+  if (areAllFingersCurled(landmarks)) {
+    return 'SUBJECT_I';
+  }
+
   // Priority 1: GRAB/CLAW — most specific (all fingertips bunched)
   const avgThumbDist = getAverageThumbToFingerDistance(landmarks);
   if (avgThumbDist < 0.06) {
@@ -967,9 +992,6 @@ export function detectGestureRaw(landmarks) {
     return verb.grammar_id;
   }
 
-  // No gesture detected — return null rather than guessing.
-  // A closed fist is ambiguous (resting hand, transition state) and
-  // should not be interpreted as SUBJECT_I to avoid false positives.
   return null;
 }
 

@@ -75,3 +75,86 @@ export function analyzeFingerStatesDetailed(landmarks) {
 
   return { angles, states };
 }
+
+// =============================================================================
+// UNIFIED GESTURE PATTERN MATCHER
+// =============================================================================
+
+/**
+ * Gesture finger patterns matching GestureLexicon.json definitions.
+ * 'e' = extended (open), 'c' = curled (closed).
+ * This is the single geometric authority for gesture shape recognition.
+ */
+const GESTURE_FINGER_PATTERNS = {
+  SUBJECT_I:    { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  SUBJECT_YOU:  { thumb: 'c', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
+  SUBJECT_HE:   { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
+  SUBJECT_SHE:  { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
+  SUBJECT_WE:   { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
+  SUBJECT_THEY: { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
+  GRAB:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  DRINK:        { thumb: 'e', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
+  STOP:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
+  EAT:          { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  WANT:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  SEE:          { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
+  GO:           { thumb: 'c', index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
+  APPLE:        { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  BALL:         { thumb: 'c', index: 'c', middle: 'c', ring: 'c', pinky: 'c' },
+  WATER:        { thumb: 'c', index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
+  FOOD:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
+  BOOK:         { thumb: 'e', index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
+  HOUSE:        { thumb: 'c', index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
+};
+
+/**
+ * Check if the current finger states match a gesture's documented pattern,
+ * tolerating up to `tolerance` disagreeing fingers (default=1).
+ * This is the "forgiving match" that makes imperfect hands recognizable.
+ *
+ * @param {{ thumb:boolean, index:boolean, middle:boolean, ring:boolean, pinky:boolean }} states
+ * @param {string} gestureId — e.g. 'SUBJECT_I', 'GRAB', 'APPLE'
+ * @param {number} [tolerance=1] — how many fingers can disagree (0-5)
+ * @returns {boolean}
+ */
+export function fingerStateMatchesGesture(states, gestureId, tolerance = 1) {
+  const pat = GESTURE_FINGER_PATTERNS[gestureId];
+  if (!pat || !states) return false;
+
+  let matchCount = 0;
+  for (const f of Object.keys(pat)) {
+    const isOpen = states[f] === true;
+    if (isOpen === (pat[f] === 'e')) matchCount++;
+  }
+  return matchCount >= (5 - tolerance);
+}
+
+/**
+ * Get the best-matching gesture given finger states, using forgiving tolerance.
+ * Returns the first gesture that matches within tolerance, or null.
+ *
+ * @param {{ thumb:boolean, index:boolean, middle:boolean, ring:boolean, pinky:boolean }} states
+ * @param {number} [tolerance=1]
+ * @returns {string|null} gesture ID or null
+ */
+export function bestMatchingGesture(states, tolerance = 1) {
+  for (const gId of Object.keys(GESTURE_FINGER_PATTERNS)) {
+    if (fingerStateMatchesGesture(states, gId, tolerance)) {
+      return gId;
+    }
+  }
+  return null;
+}
+
+/**
+ * Map finger states to a display-friendly grammar token.
+ * @param {{ thumb:boolean, index:boolean, middle:boolean, ring:boolean, pinky:boolean }} states
+ * @returns {string}
+ */
+export function grammarTokenFromStates(states) {
+  const match = bestMatchingGesture(states, 1);
+  if (match) {
+    return match.replace('SUBJECT_', '').replace(/_/g, ' ');
+  }
+  return 'UNKNOWN';
+}

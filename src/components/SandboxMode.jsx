@@ -10,8 +10,7 @@ import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { HandLandmarker, FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 import { detectGestureRaw, getHandDebugInfo, resetTenseState } from '../utils/gestureDetection';
 import { validateSentence, LEXICON } from '../utils/GrammarEngine';
-import { analyzeFingerStatesDetailed } from '../utils/fingerAnalysis';
-import { classifyFingerState } from '../utils/grammarClassifier';
+import { analyzeFingerStatesDetailed, fingerStateMatchesGesture, grammarTokenFromStates, bestMatchingGesture } from '../utils/fingerAnalysis';
 import { useSentenceBuilder } from '../hooks/useSentenceBuilder';
 import { ErrorVectorEngine } from '../core/ErrorVectorEngine';
 import { recognize, loadGestureClassifier, getModelLoadStatus } from '../core/SyntacticGesture';
@@ -120,28 +119,9 @@ function speakText(text) {
   } catch { /* TTS unavailable — silent */ }
 }
 
-// Forgiving Guided match: a child (or anyone) cannot make a PERFECT fist. In
-// Guided mode we already know the target gesture, so rather than trust the noisy
-// 30-class classifier (which mislabels imperfect fists as "BALL"), we check the
-// held hand against the target's finger pattern and ACCEPT it if all-but-one
-// finger agrees. states[f] === true means the finger is extended; false = curled.
-const GUIDED_FINGER_PATTERNS = {
-  SUBJECT_I:   { index: 'c', middle: 'c', ring: 'c', pinky: 'c' }, // a fist
-  SUBJECT_YOU: { index: 'e', middle: 'c', ring: 'c', pinky: 'c' },
-  SUBJECT_HE:  { index: 'e', middle: 'e', ring: 'e', pinky: 'c' },
-  STOP:        { index: 'e', middle: 'e', ring: 'e', pinky: 'e' },
-  PLURAL:      { index: 'e', middle: 'e', ring: 'c', pinky: 'c' },
-};
-function matchesGuidedTarget(states, gestureId) {
-  const pat = GUIDED_FINGER_PATTERNS[gestureId];
-  if (!pat || !states) return false;
-  let ok = 0;
-  for (const f of ['index', 'middle', 'ring', 'pinky']) {
-    const isOpen = states[f] === true;
-    if (isOpen === (pat[f] === 'e')) ok++;
-  }
-  return ok >= 3; // tolerate ONE disagreeing finger — no perfect hand required
-}
+// Gesture finger patterns are imported from fingerAnalysis.js (single source of truth).
+// The universal forgiving match (all-but-one finger tolerance) is applied in the
+// detection loop below.
 
 function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSession }) {
   const videoRef = useRef(null);
@@ -731,7 +711,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     // Angle-based finger analysis
     const detailed = analyzeFingerStatesDetailed(handLandmarks);
     setFingerStates(detailed);
-    setGrammarToken(classifyFingerState(detailed.states));
+    setGrammarToken(detailed.states ? grammarTokenFromStates(detailed.states) : 'UNKNOWN');
 
     // =========================================================================
     // UASAM: Acoustic analysis — P(A | S)
@@ -790,12 +770,17 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     // Use UMCE fused classification instead of raw deterministic output
     let gesture = umceRef.current.getClassification(fusionResult) || rawGesture;
 
-    // Guided forgiving override: if the coach asked for a specific gesture and the
-    // held hand matches that gesture's finger pattern (all-but-one finger), accept
-    // it as the target — bypassing the classifier that labels imperfect fists as
-    // "BALL". This is what lets a real, imperfect "I" actually register and lock.
-    if (guidedMode && expectedGestureRef.current && matchesGuidedTarget(detailed.states, expectedGestureRef.current)) {
-      gesture = expectedGestureRef.current;
+    // Universal forgiving match: if the held hand matches a gesture's finger
+    // pattern (all-but-one finger), accept it — bypassing any classifier noise.
+    // This is the same tolerance used in Guided mode, now applied everywhere.
+    if (gesture && detailed.states && fingerStateMatchesGesture(detailed.states, gesture)) {
+      // gesture already correct — no change needed, but we confirm the match
+    } else if (rawGesture && detailed.states && fingerStateMatchesGesture(detailed.states, rawGesture)) {
+      gesture = rawGesture;
+    } else if (detailed.states) {
+      // Try all gesture patterns to find the best forgiving match
+      const bestMatch = bestMatchingGesture(detailed.states, 1);
+      if (bestMatch) gesture = bestMatch;
     }
 
     // Track gesture confidence for UI display
@@ -816,13 +801,11 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     // hold. Updates the DFA threshold every frame (cheap, no re-render) and
     // syncs the UI threshold only when the candidate gesture changes.
     if (gestureDFARef.current) {
-      // Guided mode: ONLY the gesture the coach is asking for may progress the
-      // lock. A well-formed but WRONG gesture must not fill the ring (that was
-      // the "great form for the wrong sign" bug). The detected gesture still
-      // shows in the overlay, so the learner sees the mismatch and can adjust.
+      // In Guided mode, ONLY the gesture the coach is asking for may progress
+      // the lock. In Sandbox mode, any detected gesture may lock.
       const expected = guidedMode ? expectedGestureRef.current : null;
       const gestureForLock =
-        (expected && gesture && String(gesture).toLowerCase() !== String(expected).toLowerCase())
+        (guidedMode && expected && gesture && String(gesture).toLowerCase() !== String(expected).toLowerCase())
           ? null
           : gesture;
       if (gestureForLock) {

@@ -150,7 +150,10 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const calibratorRef = useRef(new RestingBoundaryCalibrator());
   const smootherRef = useRef(new LandmarkSmoother());
   const intentDetectorRef = useRef(new IntentionalityDetector({}));
-  const spatialMapperRef = useRef(new SpatialGrammarMapper());
+  const spatialMapperRef = useRef(new SpatialGrammarMapper({
+    zoneStrategy: accessibilityProfile?.getZoneStrategy?.() || 'HARD_BOUNDARY',
+    zoneWidening: accessibilityProfile?.getZoneWidening?.() || 0,
+  }));
   const gestureDFARef = useRef(null); // initialized after sentence builder hook
   const lastRampGestureRef = useRef(null); // last gesture we synced the UI threshold for
   const expectedGestureRef = useRef(null); // in Guided mode: the gesture the coach is asking for
@@ -158,7 +161,10 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
   const umceRef = useRef(new UMCE());
   const cnnClassifierRef = useRef(new GestureClassifierCNN());
   const cnnResultRef = useRef(null); // cached CNN result for UMCE fusion
-  const uasamRef = useRef(new UASAM());
+  const acousticThresholds = accessibilityProfile?.getAcousticThresholds?.();
+  const uasamRef = useRef(new UASAM(acousticThresholds
+    ? { silenceThresholdDb: acousticThresholds.silenceDb, breathThresholdDb: acousticThresholds.breathDb }
+    : {}));
   const gazeTrackerRef = useRef(new EyeGazeTracker());
   const gazeFrameCounter = useRef(0);
   const visionFilesetRef = useRef(null);
@@ -305,9 +311,19 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
 
   // Initialize DFA (needs processGestureInput from the hook above)
   useEffect(() => {
+    const dfaMode = accessibilityProfile?.getDfaMode?.() || 'SUSTAINED_HOLD';
+    const isPeakCapture = dfaMode === 'PEAK_CAPTURE';
+    const profileConfFrames = accessibilityProfile?.getConfidenceThreshold() || 30;
+    const peakFrames = accessibilityProfile?.getPeakCaptureFrames?.();
+    
     gestureDFARef.current = new GestureLifecycleDFA({
-      confirmationFrames: accessibilityProfile?.getConfidenceThreshold() || 30,
+      confirmationFrames: isPeakCapture
+        ? (peakFrames || profileConfFrames)
+        : profileConfFrames,
       cooldownMs: 1500,
+      peakCaptureMode: isPeakCapture,
+      peakGracePeriod: 3,
+      peakWindow: 15,
       // Tremor tolerance: absorbs brief mis-classifications mid-hold so users
       // with hand tremor don't lose their accumulated count to a single bad
       // frame. Derived from the profile's tolerance multiplier — 0 for
@@ -316,6 +332,15 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
       onStateChange: (newState) => setDfaState(newState),
     });
     return () => gestureDFARef.current?.reset();
+  }, [accessibilityProfile]);
+
+  // Sync spatial mapper config when profile changes
+  useEffect(() => {
+    if (spatialMapperRef.current) {
+      spatialMapperRef.current._zoneStrategy = accessibilityProfile?.getZoneStrategy?.() || 'HARD_BOUNDARY';
+      spatialMapperRef.current._zoneWidening = Math.max(0, Math.min(0.15, accessibilityProfile?.getZoneWidening?.() || 0));
+      spatialMapperRef.current._effectiveZones = spatialMapperRef.current._computeEffectiveZones();
+    }
   }, [accessibilityProfile]);
 
   // Update type composition + Graph RAG context whenever the sentence changes
@@ -770,20 +795,34 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     // Use UMCE fused classification instead of raw deterministic output
     let gesture = umceRef.current.getClassification(fusionResult) || rawGesture;
 
+    // Profile-aware tolerance: CP/motor-impaired profiles with alternative
+    // gesture maps get extra forgiving tolerance (all-but-two fingers).
+    const hasAlternatives = !!(accessibilityProfile?.getAlternativeGestures?.());
+    const matchTolerance = hasAlternatives ? 2 : 1;
+
     // Universal forgiving match: finger patterns CONFIRM or RESCUE — never
     // override. The geometric detector has more information (thumb-index
     // distance, hand orientation, palm direction, spread) than the 5-bit
     // finger-curl pattern alone. Patterns only step in when the detector
     // produces nothing (null rescue) or to confirm a weak detection.
-    if (gesture && detailed.states && fingerStateMatchesGesture(detailed.states, gesture)) {
+    if (gesture && detailed.states && fingerStateMatchesGesture(detailed.states, gesture, matchTolerance)) {
       // gesture confirmed by finger pattern — no change, confidence boosted
-    } else if (!gesture && rawGesture && detailed.states && fingerStateMatchesGesture(detailed.states, rawGesture)) {
+    } else if (!gesture && rawGesture && detailed.states && fingerStateMatchesGesture(detailed.states, rawGesture, matchTolerance)) {
       // fusion returned null but geometric detector found something with matching pattern
       gesture = rawGesture;
     } else if (!gesture && detailed.states) {
       // nothing detected at all — try to find ANY matching gesture pattern as a rescue
-      const rescuer = bestMatchingGesture(detailed.states, 1);
+      const rescuer = bestMatchingGesture(detailed.states, matchTolerance);
       if (rescuer) gesture = rescuer;
+    }
+
+    // Simplified gesture subset: filter to only allowed gestures for
+    // motor-impaired and CP profiles that request a reduced vocabulary.
+    if (gesture) {
+      const subset = accessibilityProfile?.getGestureSubset?.();
+      if (subset && subset !== 'full' && Array.isArray(subset) && !subset.includes(gesture)) {
+        gesture = null;
+      }
     }
 
     // Track gesture confidence for UI display

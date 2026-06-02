@@ -407,7 +407,7 @@ export function useSentenceBuilder(options = {}) {
 
     // Dynamic threshold control (used by CognitiveLoadAdapter)
     setConfidenceThreshold: (frames) => {
-      lockThresholdRef.current = Math.max(10, Math.min(120, Math.round(frames)));
+      lockThresholdRef.current = Math.max(3, Math.min(120, Math.round(frames)));
     },
 
     // Utilities

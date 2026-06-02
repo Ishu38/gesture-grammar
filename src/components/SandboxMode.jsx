@@ -770,17 +770,20 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     // Use UMCE fused classification instead of raw deterministic output
     let gesture = umceRef.current.getClassification(fusionResult) || rawGesture;
 
-    // Universal forgiving match: if the held hand matches a gesture's finger
-    // pattern (all-but-one finger), accept it — bypassing any classifier noise.
-    // This is the same tolerance used in Guided mode, now applied everywhere.
+    // Universal forgiving match: finger patterns CONFIRM or RESCUE — never
+    // override. The geometric detector has more information (thumb-index
+    // distance, hand orientation, palm direction, spread) than the 5-bit
+    // finger-curl pattern alone. Patterns only step in when the detector
+    // produces nothing (null rescue) or to confirm a weak detection.
     if (gesture && detailed.states && fingerStateMatchesGesture(detailed.states, gesture)) {
-      // gesture already correct — no change needed, but we confirm the match
-    } else if (rawGesture && detailed.states && fingerStateMatchesGesture(detailed.states, rawGesture)) {
+      // gesture confirmed by finger pattern — no change, confidence boosted
+    } else if (!gesture && rawGesture && detailed.states && fingerStateMatchesGesture(detailed.states, rawGesture)) {
+      // fusion returned null but geometric detector found something with matching pattern
       gesture = rawGesture;
-    } else if (detailed.states) {
-      // Try all gesture patterns to find the best forgiving match
-      const bestMatch = bestMatchingGesture(detailed.states, 1);
-      if (bestMatch) gesture = bestMatch;
+    } else if (!gesture && detailed.states) {
+      // nothing detected at all — try to find ANY matching gesture pattern as a rescue
+      const rescuer = bestMatchingGesture(detailed.states, 1);
+      if (rescuer) gesture = rescuer;
     }
 
     // Track gesture confidence for UI display

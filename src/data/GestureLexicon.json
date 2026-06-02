@@ -167,6 +167,61 @@
     },
 
     {
+      "gesture_id": "GST_TWO_FINGERS_CLOSE",
+      "human_description": "Index and Middle finger extended upward held close together, Thumb/Ring/Pinky curled — the 'we/us' sign",
+      "landmark_constraints": {
+        "type": "STATIC",
+        "conditions": {
+          "index_extended": {
+            "landmark_a": "index_tip_y",
+            "operator": "<",
+            "landmark_b": "index_pip_y"
+          },
+          "middle_extended": {
+            "landmark_a": "middle_tip_y",
+            "operator": "<",
+            "landmark_b": "middle_pip_y"
+          },
+          "fingers_close": {
+            "landmark_a": "index_tip",
+            "operator": "distance <",
+            "landmark_b": "middle_tip",
+            "threshold": 0.06
+          },
+          "thumb_curled": {
+            "landmark_a": "thumb_tip_y",
+            "operator": ">",
+            "landmark_b": "thumb_ip_y"
+          },
+          "ring_curled": {
+            "landmark_a": "ring_tip_y",
+            "operator": ">",
+            "landmark_b": "ring_pip_y"
+          },
+          "pinky_curled": {
+            "landmark_a": "pinky_tip_y",
+            "operator": ">",
+            "landmark_b": "pinky_pip_y"
+          }
+        },
+        "logical_join": "AND"
+      },
+      "semantic_mapping": {
+        "grammar_id": "SUBJECT_WE",
+        "concept": "FIRST_PERSON_PLURAL",
+        "type": "SUBJECT",
+        "english_gloss": "We / Us / Our group",
+        "usage_context": "First person plural pronoun — I and others together",
+        "grammatical_properties": {
+          "person": 1,
+          "number": "plural"
+        }
+      },
+      "priority": 2,
+      "notes": "Two fingers held CLOSE together distinguishes WE from SEE (spread apart) and PLURAL (peace sign)"
+    },
+
+    {
       "gesture_id": "GST_PINCH",
       "human_description": "Thumb tip and Index finger tip touching or very close together, other fingers relaxed",
       "landmark_constraints": {

@@ -28,7 +28,8 @@ const GESTURE_LOCK_MULTIPLIER = {
   HOUSE: 0.6,         // Distinctive (roof shape)
   WATER: 0.65,        // Fairly distinctive (W shape)
   SUBJECT_I: 0.7,     // Fist + thumb — recognizable
-  SUBJECT_HE: 0.7,    // Hitchhiker thumb
+  SUBJECT_HE: 0.7,    // Three fingers up
+  SUBJECT_SHE: 0.7,   // Same gesture as HE — context-disambiguated
   SEE: 0.75,          // V-shape — fairly distinctive but can overlap with WE
   DRINK: 0.85,        // C-shape, can be confused with YOU
   SUBJECT_YOU: 0.85,  // Index point, can be confused with DRINK

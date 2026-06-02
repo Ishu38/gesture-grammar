@@ -26,14 +26,9 @@ const GESTURE_CARDS = [
     shape: 'Index finger extended, all other fingers curled',
   },
   {
-    id: 'SUBJECT_HE', category: 'SUBJECT', icon: '\uD83E\uDD1F', label: 'HE',
+    id: 'SUBJECT_HE', category: 'SUBJECT', icon: '\uD83E\uDD1F', label: 'HE / SHE',
     description: 'Three fingers up',
-    shape: 'Index + Middle + Ring extended, Thumb + Pinky curled',
-  },
-  {
-    id: 'SUBJECT_SHE', category: 'SUBJECT', icon: '\uD83E\uDD1F', label: 'SHE',
-    description: 'Three fingers up (same as HE)',
-    shape: 'Same shape as HE \u2014 context tells them apart',
+    shape: 'Index + Middle + Ring extended, Thumb + Pinky curled \u2014 context chooses HE or SHE',
   },
   {
     id: 'SUBJECT_WE', category: 'SUBJECT', icon: '\u270C', label: 'WE',
@@ -126,21 +121,25 @@ const GESTURE_CARDS = [
     id: 'PLURAL', category: 'MODIFIER', icon: '\u270C', label: 'PLURAL',
     description: 'Two fingers up (peace sign)',
     shape: 'Index + Middle extended upward, Thumb / Ring / Pinky curled',
+    planned: true,
   },
   {
     id: 'AFFIRMATIVE', category: 'MODIFIER', icon: '\uD83D\uDC4D', label: 'YES',
     description: 'Thumbs up',
     shape: 'Thumb extended upward, other fingers curled into palm',
+    planned: true,
   },
   {
     id: 'ACTIVE_VOICE', category: 'MODIFIER', icon: '\u27A1', label: 'ACTIVE',
     description: 'Swipe right',
     shape: 'Open hand moves left \u2192 right across the frame',
+    planned: true,
   },
   {
     id: 'PASSIVE_VOICE', category: 'MODIFIER', icon: '\u2B05', label: 'PASSIVE',
     description: 'Swipe left',
     shape: 'Open hand moves right \u2192 left across the frame',
+    planned: true,
   },
 ];
 
@@ -186,6 +185,7 @@ const CATEGORY_COLORS = {
 function GestureCard({ gesture, isActive, lockProgress }) {
   const colors = CATEGORY_COLORS[gesture.category];
   const isBuilding = isActive && lockProgress > 0 && lockProgress < 1;
+  const isPlanned = gesture.planned;
 
   return (
     <div
@@ -196,6 +196,7 @@ function GestureCard({ gesture, isActive, lockProgress }) {
         ${isActive ? colors.activeBg : ''}
         ${isActive ? 'scale-105 shadow-lg' : ''}
         ${isBuilding ? 'pulse-glow' : ''}
+        ${isPlanned ? 'opacity-50' : ''}
       `}
     >
       {/* Progress indicator when building */}
@@ -225,11 +226,11 @@ function GestureCard({ gesture, isActive, lockProgress }) {
 
       {/* Category badge */}
       <span className={`category-badge ${colors.badge}`}>
-        {gesture.category}
+        {isPlanned ? 'COMING' : gesture.category}
       </span>
 
       {/* Active indicator */}
-      {isActive && (
+      {isActive && !isPlanned && (
         <div className="active-indicator">
           <span className="active-dot" />
           <span className="active-text">DETECTED</span>

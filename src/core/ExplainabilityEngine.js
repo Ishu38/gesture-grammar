@@ -23,7 +23,6 @@
  * session's BKT states and error history.
  */
 
-import { KNOWLEDGE_GRAPH_ERROR_TYPE_MAP } from './GraphRAG.js';
 import { MASTERY_STAGES } from './KnowledgeTracer.js';
 
 // =============================================================================

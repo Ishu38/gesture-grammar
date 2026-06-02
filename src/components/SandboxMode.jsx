@@ -312,7 +312,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
         knowledgeTracerRef.current
       );
     } catch (err) {
-      console.error('[MLAF] GraphRAG initialization failed:', err);
+      if (import.meta.env.DEV) console.error('[MLAF] GraphRAG initialization failed:', err);
     }
   }, []);
 
@@ -966,8 +966,9 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
     }
 
     } catch (err) {
-      // Pipeline error in a single frame — log and continue, never kill the loop
-      console.warn('[MLAF] processLandmarks frame error:', err.message);
+      // Pipeline error in a single frame — continue, never kill the loop.
+      // Dev-only log; end users must never see console spam.
+      if (import.meta.env.DEV) console.warn('[MLAF] processLandmarks frame error:', err.message);
     }
   }, [processGestureInput, showDebug, showErrorOverlay, setConfidenceThreshold, sentence, fingerspellMode]);
 
@@ -1117,8 +1118,9 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
           }
         }
       } catch (err) {
-        // MediaPipe or pipeline error — log and keep the detection loop alive
-        console.warn('[MLAF] detectHands frame error:', err.message);
+        // MediaPipe or pipeline error — keep the detection loop alive.
+        // Dev-only log; never spam end users' console.
+        if (import.meta.env.DEV) console.warn('[MLAF] detectHands frame error:', err.message);
       }
     }
 
@@ -1173,7 +1175,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
 
         // Load CNN gesture classifier (non-blocking, ONNX Runtime Web)
         cnnClassifierRef.current.load('/models/gesture_cnn.onnx', '/models/gesture_cnn.json')
-          .then(() => { if (mounted) console.log('[MLAF] CNN gesture classifier loaded (ONNX)'); })
+          .then(() => { if (mounted && import.meta.env.DEV) console.log('[MLAF] CNN gesture classifier loaded (ONNX)'); })
           .catch((err) => { console.warn('[MLAF] CNN classifier not available:', err.message); });
 
         // Co-initialize FaceLandmarker for gaze tracking (non-blocking)
@@ -1229,7 +1231,7 @@ function SandboxMode({ accessibilityProfile, initialMode = 'sandbox', onEndSessi
         if (active && accessibilityProfile?.hasNoiseFloorCalibration?.()) {
           try {
             const calResult = await uasamRef.current.calibrateNoiseFloor(3000);
-            console.log('[UASAM] Noise floor calibrated:', calResult);
+            if (import.meta.env.DEV) console.log('[UASAM] Noise floor calibrated:', calResult);
           } catch (e) {
             console.warn('[UASAM] Noise floor calibration failed:', e.message);
           }

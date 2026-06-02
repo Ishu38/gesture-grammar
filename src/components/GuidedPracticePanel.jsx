@@ -296,7 +296,7 @@ function LessonSummary({ summary, onNextLesson, onBackToLessons }) {
 // MAIN PANEL
 // =============================================================================
 
-export default function GuidedPracticePanel({ sentence, onClearSentence, onExitPractice, masteryReport, paced = false }) {
+export default function GuidedPracticePanel({ sentence, onClearSentence, onExitPractice, masteryReport, paced = false, onExpectedGesture }) {
   const [lessonManager] = useState(() => new LessonManager());
   const [activeLesson, setActiveLesson] = useState(null);
   const [currentChallenge, setCurrentChallenge] = useState(null);
@@ -322,6 +322,14 @@ export default function GuidedPracticePanel({ sentence, onClearSentence, onExitP
   useEffect(() => {
     return () => { if (submitTimerRef.current) clearTimeout(submitTimerRef.current); };
   }, []);
+
+  // Tell the recognizer which gesture the coach is asking for right now, so it can
+  // forgivingly match the held hand against THAT target instead of the noisy
+  // 30-class classifier. seq[sentence.length] = the next gesture to perform.
+  useEffect(() => {
+    const seq = currentChallenge?.challenge?.required_sequence || [];
+    if (onExpectedGesture) onExpectedGesture(seq[sentence.length] || null);
+  }, [currentChallenge, sentence.length, onExpectedGesture]);
 
   const handleSelectLesson = useCallback(async (lessonMeta) => {
     try {

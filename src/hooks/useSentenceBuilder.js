@@ -175,6 +175,10 @@ function applyTenseToVerb(grammarId, tense) {
  * @param {object} options
  * @param {number} options.confidenceFrames — frames required to lock a gesture (from AccessibilityProfile)
  */
+// Flicker tolerance for the word-commit lock — mirrors the visual DFA grace so a
+// single misread frame at low FPS doesn't wipe out a gesture hold in progress.
+const COMMIT_GRACE_FRAMES = 6;
+
 export function useSentenceBuilder(options = {}) {
   // Stored in a ref so CognitiveLoadAdapter can update it without re-rendering
   const lockThresholdRef = useRef(options.confidenceFrames || DEFAULT_LOCK_THRESHOLD_FRAMES);
@@ -194,6 +198,7 @@ export function useSentenceBuilder(options = {}) {
   // Refs for tracking
   const confidenceCounterRef = useRef(0);
   const previousGestureRef = useRef(null);
+  const commitDropoutRef = useRef(0); // flicker frames absorbed in the current hold
   const debounceTimeoutRef = useRef(null);
   const neutralTimeoutRef = useRef(null);
   const lastWristYRef = useRef(0.5);
@@ -325,36 +330,43 @@ export function useSentenceBuilder(options = {}) {
       neutralTimeoutRef.current = null;
     }
 
-    // No gesture - reset confidence
-    if (!gesture) {
+    // ── Flicker-tolerant confidence accumulation ──
+    // Mirrors the visual DFA lock's grace: at the ~9fps measured on real
+    // devices, a single misread/null frame mid-hold must NOT wipe out the count
+    // (the proven cause of "37 locks, 0 words"). Absorb up to COMMIT_GRACE_FRAMES
+    // off-frames before giving up on the current gesture.
+    if (gesture && gesture === previousGestureRef.current) {
+      confidenceCounterRef.current++;
+      commitDropoutRef.current = 0;
+    } else if (confidenceCounterRef.current > 0 && commitDropoutRef.current < COMMIT_GRACE_FRAMES) {
+      // brief flicker (null or a different gesture) — keep the hold alive
+      commitDropoutRef.current++;
+    } else if (gesture) {
+      // sustained new gesture — start counting it
+      confidenceCounterRef.current = 1;
+      previousGestureRef.current = gesture;
+      commitDropoutRef.current = 0;
+    } else {
+      // sustained loss of hand — reset
       confidenceCounterRef.current = 0;
       previousGestureRef.current = null;
+      commitDropoutRef.current = 0;
       setLockProgress(0);
       return;
     }
 
-    // Same gesture as before - increment confidence
-    if (gesture === previousGestureRef.current) {
-      confidenceCounterRef.current++;
-    } else {
-      // Different gesture - reset
-      confidenceCounterRef.current = 1;
-      previousGestureRef.current = gesture;
-    }
+    // Threshold respects the profile's lock frames — NO hard floor of 10 — so the
+    // word-commit lock matches the lock the learner actually sees on screen.
+    const target = previousGestureRef.current;
+    const gestureMultiplier = GESTURE_LOCK_MULTIPLIER[target] || 1.0;
+    const effectiveThreshold = Math.max(3, Math.round(lockThresholdRef.current * gestureMultiplier));
 
-    // Adaptive threshold: distinctive gestures lock faster
-    const gestureMultiplier = GESTURE_LOCK_MULTIPLIER[gesture] || 1.0;
-    const effectiveThreshold = Math.max(10, Math.round(lockThresholdRef.current * gestureMultiplier));
-
-    // Update progress
     const progress = Math.min(confidenceCounterRef.current / effectiveThreshold, 1);
     setLockProgress(progress);
 
-    // Check if threshold reached
     if (confidenceCounterRef.current >= effectiveThreshold) {
-      // Determine tense for verbs
-      const tense = LEXICON[gesture]?.type === 'VERB' ? getTenseZone(wristY) : 'PRESENT';
-      addToSentence(gesture, tense);
+      const tense = LEXICON[target]?.type === 'VERB' ? getTenseZone(wristY) : 'PRESENT';
+      addToSentence(target, tense);
     }
   }, [addToSentence]);
 
